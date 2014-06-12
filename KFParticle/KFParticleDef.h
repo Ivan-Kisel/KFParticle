@@ -21,6 +21,8 @@
 
 #ifdef HLTCA_STANDALONE
 #include "RootTypesDef.h"
+#else
+#include "TObject.h"
 #endif
 
 #include <Vc/Vc>

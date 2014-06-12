@@ -20,7 +20,7 @@
 #define ALIKFPARTICLEBASE_H
 
 //#include "TObject.h"
-#include "RootTypesDef.h"
+#include "KFParticleDef.h"
 
 #include <vector>
 
