@@ -1711,7 +1711,7 @@ float_v KFParticleBaseSIMD::GetDStoPointBz( float_v B, const float_v xyz[] )
   s = KFPMath::Sin(bs), c = KFPMath::Cos(bs);
   
   float_v sB, cB;
-  const float_v kOvSqr6 = 1.f/sqrt(6.f);
+  const float_v kOvSqr6 = 1.f/sqrt(float_v(6.f));
 
   sB(LocalSmall < abs(bs)) = s/bq;
   sB(LocalSmall >= abs(bs)) = (1.f-bs*kOvSqr6)*(1.f+bs*kOvSqr6)*dS;
@@ -1809,7 +1809,7 @@ void KFParticleBaseSIMD::GetMaxDistanceToParticleBz(const float_v& B, const KFPa
 void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD &p, float_v &DS, float_v &DS1 ) const
 { 
   //* Get dS to another particle for Bz field
-  const float_v kOvSqr6 = 1.f/sqrt(6.f);
+  const float_v kOvSqr6 = 1.f/sqrt(float_v(6.f));
   const float_v kCLight = 0.000299792458f;
 
   //in XY plane
@@ -2153,7 +2153,7 @@ void KFParticleBaseSIMD::GetDStoParticleBy( float_v B, const KFParticleBaseSIMD 
     float_v sss = KFPMath::Sin(bs), c = KFPMath::Cos(bs);
 
     float_v cB(Vc::Zero), sB(Vc::Zero);
-    const float_v kOvSqr6 = 1.f/sqrt(6.f);
+    const float_v kOvSqr6 = 1.f/sqrt(float_v(6.f));
     sB(bq_big) = sss/bq;
     sB(!bq_big) = (1.f-bs*kOvSqr6)*(1.f+bs*kOvSqr6)*ss[i];
     cB(bq_big) = (1.f-c)/bq;
@@ -2556,7 +2556,7 @@ void KFParticleBaseSIMD::TransportBz( float_v b, float_v t,
 
   float_v sB, cB;
 
-  const float_v kOvSqr6 = 1.f/sqrt(6.f);
+  const float_v kOvSqr6 = 1.f/sqrt(float_v(6.f));
   const float_v LocalSmall = 1.e-10f;
 
   b(abs(bs) <= LocalSmall) = LocalSmall;
