@@ -12,8 +12,13 @@
 #ifndef KFPVEfficiencies_H
 #define KFPVEfficiencies_H
 
+#ifndef HLTCA_STANDALONE
 #include "TNamed.h"
-#include "Counters.h"
+#endif
+
+#include <map>
+#include <iomanip>
+#include "KFMCCounter.h"
 
 class KFPVEfficiencies: public TNamed
 {
@@ -64,7 +69,7 @@ class KFPVEfficiencies: public TNamed
   void CalcEff(){
     ratio_reco = reco/mc;
 
-    TTracksCatCounters<int> allReco = reco + ghost + bg;
+    KFMCCounter<int> allReco = reco + ghost + bg;
     ratio_ghost = ghost/allReco;
     ratio_bg  = bg/allReco;
     ratio_clone  = clone/allReco;
@@ -89,8 +94,8 @@ class KFPVEfficiencies: public TNamed
   };
 
   void PrintEff(){
-    std::cout.setf(ios::fixed);
-    std::cout.setf(ios::showpoint);
+    std::cout.setf(std::ios::fixed);
+    std::cout.setf(std::ios::showpoint);
     std::cout.precision(3);
     std::cout << "              : "
          << "   Eff "
@@ -106,15 +111,15 @@ class KFPVEfficiencies: public TNamed
     int NCounters = mc.NCounters;
     for (int iC = 0; iC < NCounters; iC++){
         std::cout << names[iC]
-             << "  : " << setw(6) << ratio_reco.counters[iC]              
-             << "  / " << setw(6) << ratio_ghost.counters[iC]  // particles w\o MCParticle
-             << "  / " << setw(6) << ratio_bg.counters[iC]     // particles with incorrect MCParticle
-             << "  / " << setw(6) << ratio_clone.counters[iC]     // particles with incorrect MCParticle
-             << "  / " << setw(6) << ghost.counters[iC]
-             << "  / " << setw(7) << bg.counters[iC]
-             << "  / " << setw(6) << reco.counters[iC]
-             << "  / " << setw(7) << clone.counters[iC]
-             << "  | " << setw(6) << mc.counters[iC]  << std::endl;
+             << "  : " << std::setw(6) << ratio_reco.counters[iC]              
+             << "  / " << std::setw(6) << ratio_ghost.counters[iC]  // particles w\o MCParticle
+             << "  / " << std::setw(6) << ratio_bg.counters[iC]     // particles with incorrect MCParticle
+             << "  / " << std::setw(6) << ratio_clone.counters[iC]     // particles with incorrect MCParticle
+             << "  / " << std::setw(6) << ghost.counters[iC]
+             << "  / " << std::setw(7) << bg.counters[iC]
+             << "  / " << std::setw(6) << reco.counters[iC]
+             << "  / " << std::setw(7) << clone.counters[iC]
+             << "  | " << std::setw(6) << mc.counters[iC]  << std::endl;
     }
   };
 
@@ -157,21 +162,21 @@ class KFPVEfficiencies: public TNamed
 //   ClassDef(KFPVEfficiencies,1);
 
  private:
-  vector<TString> names; // names counters indexed by index of counter
-  map<TString, int> indices; // indices of counters indexed by a counter shortname
+  std::vector<TString> names; // names counters indexed by index of counter
+  std::map<TString, int> indices; // indices of counters indexed by a counter shortname
 
-  TTracksCatCounters<double> ratio_reco;
+  KFMCCounter<double> ratio_reco;
 
-  TTracksCatCounters<int> mc;
-  TTracksCatCounters<int> reco;
+  KFMCCounter<int> mc;
+  KFMCCounter<int> reco;
 
-  TTracksCatCounters<double> ratio_ghost;
-  TTracksCatCounters<double> ratio_bg;
-  TTracksCatCounters<double> ratio_clone;
+  KFMCCounter<double> ratio_ghost;
+  KFMCCounter<double> ratio_bg;
+  KFMCCounter<double> ratio_clone;
 
-  TTracksCatCounters<int> ghost;
-  TTracksCatCounters<int> bg; // background
-  TTracksCatCounters<int> clone; // background
+  KFMCCounter<int> ghost;
+  KFMCCounter<int> bg; // background
+  KFMCCounter<int> clone; // background
 };
 
 #endif

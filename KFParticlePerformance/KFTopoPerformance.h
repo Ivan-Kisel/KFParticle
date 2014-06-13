@@ -11,14 +11,12 @@
 
 #ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
 
-#ifndef ALIHLTTPCTOPOPERFORMANCE_H
-#define ALIHLTTPCTOPOPERFORMANCE_H
+#ifndef KFTOPOPERFORMANCE_H
+#define KFTOPOPERFORMANCE_H
 
 
 #include "KFParticlePerformanceBase.h"
 
-
-#include "AliHLTTPCCAMCTrack.h"
 #include "KFMCVertex.h"
 #include "KFMCTrack.h"
 #include <fstream>
@@ -50,13 +48,13 @@ class KFTopoPerformance: public KFParticlePerformanceBase
   
   KFTopoPerformance();
   virtual ~KFTopoPerformance();
-
+#ifdef KFPWITHTRACKER
   virtual void SetNewEvent(
     const AliHLTTPCCAGBTracker * const Tracker,
     AliHLTResizableArray<AliHLTTPCCAHitLabel> *hitLabels,
     AliHLTResizableArray<AliHLTTPCCAMCTrack> *mcTracks,
     AliHLTResizableArray<AliHLTTPCCALocalMCPoint> *localMCPoints);
-  
+#endif  
   void SetTopoReconstructor( const KFParticleTopoReconstructor * const TopoReconstructor ); // use together with SetNewEvent !!!
     
     /// Efficiency

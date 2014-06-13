@@ -11,23 +11,7 @@
 
 #ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
 
-#include "AliHLTTPCCounters.h"
-
 #include "KFParticlePerformanceBase.h"
-#include "AliHLTTPCPerformanceBase.h"
-
-#include "AliHLTTPCCAGBHit.h"
-#include "AliHLTTPCCAMCTrack.h"
-#include "AliHLTTPCCAMCPoint.h"
-#include "AliHLTTPCCAOutTrack.h"
-#include "AliHLTTPCCAGBTrack.h"
-#include "AliHLTTPCCAGBTracker.h"
-#include "AliHLTTPCCATracker.h"
-#include "AliHLTTPCCATracklet.h"
-#include "AliHLTTPCCAParameters.h"
-
-#include "AliHLTTPCCADisplay.h"
-
 
 #include "TMath.h"
 #include "TROOT.h"

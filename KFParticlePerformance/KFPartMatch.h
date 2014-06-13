@@ -12,6 +12,8 @@
 #ifndef KFPartMatch_H
 #define KFPartMatch_H
 
+#include <vector>
+
 struct KFPartMatch // used for Reco to MC match as well as for MC to Reco
 {
   KFPartMatch():ids(),idsMI(){};
@@ -27,8 +29,8 @@ struct KFPartMatch // used for Reco to MC match as well as for MC to Reco
     if      (ids.size()   != 0) return ids[0];
     else return -1;
   };
-  vector<int> ids;
-  vector<int> idsMI; // matched but pdg is different - miss identification
+  std::vector<int> ids;
+  std::vector<int> idsMI; // matched but pdg is different - miss identification
 };
 
 #endif

@@ -662,7 +662,7 @@ void KFTopoPerformance::CalculateEfficiency()
         partEff.IncReco(isGhost, isBG, fParteff.partName[iPart].Data());
     
     // Calculate the gost level for V0
-    if(CAMath::Abs(pdg) == 310  /*||
+    if(abs(pdg) == 310  /*||
        CAMath::Abs(pdg) == 3122 ||
        CAMath::Abs(pdg) == 421  ||
        CAMath::Abs(pdg) == 22 */)
@@ -725,7 +725,7 @@ void KFTopoPerformance::CalculateEfficiency()
           
           TParticlePDG* particlePDG = TDatabasePDG::Instance()->GetParticle(mcTrack.PDG());
           Double_t massMC = (particlePDG) ? particlePDG->Mass() :0.13957;
-          Double_t E = CAMath::Sqrt(mcTrack.P()*mcTrack.P() + massMC*massMC);
+          Double_t E = sqrt(mcTrack.P()*mcTrack.P() + massMC*massMC);
           Double_t Y = 0.5*log((E + mcTrack.Pz())/(E - mcTrack.Pz()));
           
           Double_t R = -1, L=-1;
@@ -733,8 +733,8 @@ void KFTopoPerformance::CalculateEfficiency()
           {
             int mcDaughterId = part.GetDaughterIds()[0];
             KFMCTrack &mcDaughter = vMCTracks[mcDaughterId];
-            R = CAMath::Sqrt(mcDaughter.X()*mcDaughter.X() + mcDaughter.Y()*mcDaughter.Y());
-            L = CAMath::Sqrt(mcDaughter.X()*mcDaughter.X() + mcDaughter.Y()*mcDaughter.Y());
+            R = sqrt(mcDaughter.X()*mcDaughter.X() + mcDaughter.Y()*mcDaughter.Y());
+            L = sqrt(mcDaughter.X()*mcDaughter.X() + mcDaughter.Y()*mcDaughter.Y());
           }
           
           hPartEfficiency[iPart][iEff][0]->Fill( mcTrack.P(), isReco[iPType] );
@@ -918,7 +918,7 @@ void KFTopoPerformance::FillHistos()
     X = TempPart.GetX();
     Y = TempPart.GetY();
     Z = TempPart.GetZ();
-    R = CAMath::Sqrt(X*X+Y*Y);
+    R = sqrt(X*X+Y*Y);
 
     KFParticleSIMD tempSIMDPart(TempPart);
     float_v l,dl;
@@ -1224,14 +1224,14 @@ void KFTopoPerformance::FillHistos()
         if(iCurrMCPV != iCurrMCPV2) continue;
         KFParticle & vtx2 = fTopoReconstructor->GetPrimVertex(iPV2);
         
-        dzPV.push_back(CAMath::Abs(vtx.Z() - vtx2.Z())); 
+        dzPV.push_back(fabs(vtx.Z() - vtx2.Z())); 
       }
     }
     
     hPVParam[ 0]->Fill(vtx.X());
     hPVParam[ 1]->Fill(vtx.Y());
     hPVParam[ 2]->Fill(vtx.Z());
-    hPVParam[ 3]->Fill(CAMath::Sqrt(vtx.X()*vtx.X() + vtx.Y()*vtx.Y()));
+    hPVParam[ 3]->Fill(sqrt(vtx.X()*vtx.X() + vtx.Y()*vtx.Y()));
     hPVParam[ 4]->Fill(tracks.size());    
     hPVParam[ 5]->Fill(vtx.Chi2());
     hPVParam[ 6]->Fill(vtx.NDF());
@@ -1253,7 +1253,7 @@ void KFTopoPerformance::FillHistos()
         hPVParamGhost[ 0]->Fill(vtx.X());
         hPVParamGhost[ 1]->Fill(vtx.Y());
         hPVParamGhost[ 2]->Fill(vtx.Z());
-        hPVParamGhost[ 3]->Fill(CAMath::Sqrt(vtx.X()*vtx.X() + vtx.Y()*vtx.Y()));
+        hPVParamGhost[ 3]->Fill(sqrt(vtx.X()*vtx.X() + vtx.Y()*vtx.Y()));
         hPVParamGhost[ 4]->Fill(tracks.size());    
         hPVParamGhost[ 5]->Fill(vtx.Chi2());
         hPVParamGhost[ 6]->Fill(vtx.NDF());
@@ -1272,7 +1272,7 @@ void KFTopoPerformance::FillHistos()
         hPVParamBG[ 0]->Fill(vtx.X());
         hPVParamBG[ 1]->Fill(vtx.Y());
         hPVParamBG[ 2]->Fill(vtx.Z());
-        hPVParamBG[ 3]->Fill(CAMath::Sqrt(vtx.X()*vtx.X() + vtx.Y()*vtx.Y()));
+        hPVParamBG[ 3]->Fill(sqrt(vtx.X()*vtx.X() + vtx.Y()*vtx.Y()));
         hPVParamBG[ 4]->Fill(tracks.size());    
         hPVParamBG[ 5]->Fill(vtx.Chi2());
         hPVParamBG[ 6]->Fill(vtx.NDF());
@@ -1298,7 +1298,7 @@ void KFTopoPerformance::FillHistos()
       hPVParamSignal[ 0]->Fill(vtx.X());
       hPVParamSignal[ 1]->Fill(vtx.Y());
       hPVParamSignal[ 2]->Fill(vtx.Z());
-      hPVParamSignal[ 3]->Fill(CAMath::Sqrt(vtx.X()*vtx.X() + vtx.Y()*vtx.Y()));
+      hPVParamSignal[ 3]->Fill(sqrt(vtx.X()*vtx.X() + vtx.Y()*vtx.Y()));
       hPVParamSignal[ 4]->Fill(tracks.size());    
       hPVParamSignal[ 5]->Fill(vtx.Chi2());
       hPVParamSignal[ 6]->Fill(vtx.NDF());
@@ -1317,7 +1317,7 @@ void KFTopoPerformance::FillHistos()
       hPVParamPileup[ 0]->Fill(vtx.X());
       hPVParamPileup[ 1]->Fill(vtx.Y());
       hPVParamPileup[ 2]->Fill(vtx.Z());
-      hPVParamPileup[ 3]->Fill(CAMath::Sqrt(vtx.X()*vtx.X() + vtx.Y()*vtx.Y()));
+      hPVParamPileup[ 3]->Fill(sqrt(vtx.X()*vtx.X() + vtx.Y()*vtx.Y()));
       hPVParamPileup[ 4]->Fill(tracks.size());    
       hPVParamPileup[ 5]->Fill(vtx.Chi2());
       hPVParamPileup[ 6]->Fill(vtx.NDF());
@@ -1337,7 +1337,7 @@ void KFTopoPerformance::FillHistos()
 
     float errPV[3] = {vtx.CovarianceMatrix()[0], vtx.CovarianceMatrix()[2], vtx.CovarianceMatrix()[5]};
     for(int iErr=0; iErr<3; iErr++)
-      if(CAMath::Abs(errPV[iErr]) < 1.e-8f) errPV[iErr] = 1.e8;
+      if(fabs(errPV[iErr]) < 1.e-8f) errPV[iErr] = 1.e8;
         
     float dRPVr[3] = {vtx.X()-mcPVx[0],
                       vtx.Y()-mcPVx[1],

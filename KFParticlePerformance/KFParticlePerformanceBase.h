@@ -71,7 +71,7 @@ class KFParticlePerformanceBase
 
   //for KFParticleFinder
   
-  vector<KFParticle> *fParticles;
+  std::vector<KFParticle> *fParticles;
   KFParticle *fPV;
 // Arrays of points, tracks, etc
 
@@ -129,6 +129,12 @@ class KFParticlePerformanceBase
   
   static const int nPVefficiency = 6;
   TProfile* hPVefficiency[4][nPVefficiency];
+  
+#ifndef KFPWITHTRACKER
+  TDirectory *fHistoDir; //* ROOT directory with histogramm
+  bool fIsHistoCreated;
+  void SetHistoCreated(bool v = 1) { fIsHistoCreated = v; }
+#endif
 };
 
 #endif
