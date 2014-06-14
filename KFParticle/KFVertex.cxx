@@ -59,27 +59,27 @@ void KFVertex::SetBeamConstraintOff()
 }
 
 void KFVertex::ConstructPrimaryVertex( const KFParticle *vDaughters[], 
-					  int NDaughters, Bool_t vtxFlag[],
+					  int nDaughters, Bool_t vtxFlag[],
 					  float ChiCut  )
 {
   //* Primary vertex finder with simple rejection of outliers
 
-  if( NDaughters<2 ) return;
+  if( nDaughters<2 ) return;
   float constrP[3]={fP[0], fP[1], fP[2]};
   float constrC[6]={fC[0], fC[1], fC[2], fC[3], fC[4], fC[5]};
 
-  Construct( vDaughters, NDaughters, 0, -1, fIsConstrained );
+  Construct( vDaughters, nDaughters, 0, -1, fIsConstrained );
 
   SetVtxGuess( fVtxGuess[0], fVtxGuess[1], fVtxGuess[2] );
 
-  for( int i=0; i<NDaughters; i++ ) vtxFlag[i] = 1;
+  for( int i=0; i<nDaughters; i++ ) vtxFlag[i] = 1;
 
-  Int_t nRest = NDaughters;
+  Int_t nRest = nDaughters;
 //   while( nRest>2 )
 //   {    
 //     float worstChi = 0.;
 //     Int_t worstDaughter = 0;
-//     for( Int_t it=0; it<NDaughters; it++ ){
+//     for( Int_t it=0; it<nDaughters; it++ ){
 //       if( !vtxFlag[it] ) continue;	
 //       const KFParticle &p = *(vDaughters[it]);
 //       //KFVertex tmp = *this - p;
@@ -97,7 +97,7 @@ void KFVertex::ConstructPrimaryVertex( const KFParticle *vDaughters[],
 //     nRest--;
 //   } 
 
-  for( Int_t it=0; it<NDaughters; it++ ){
+  for( Int_t it=0; it<nDaughters; it++ ){
     const KFParticle &p = *(vDaughters[it]);
     float chi = p.GetDeviationFromVertex( *this );      
     if( chi >= ChiCut ){
@@ -115,8 +115,8 @@ void KFVertex::ConstructPrimaryVertex( const KFParticle *vDaughters[],
       for( int i=0; i<6; i++ ) fC[i] = constrC[i];
     }
     int nDaughtersNew=0;
-    const KFParticle **vDaughtersNew=new const KFParticle *[NDaughters];
-    for( int i=0; i<NDaughters; i++ ){
+    const KFParticle **vDaughtersNew=new const KFParticle *[nDaughters];
+    for( int i=0; i<nDaughters; i++ ){
       if( vtxFlag[i] )  vDaughtersNew[nDaughtersNew++] = vDaughters[i];
     }
     Construct( vDaughtersNew, nDaughtersNew, 0, -1, fIsConstrained );
@@ -124,7 +124,7 @@ void KFVertex::ConstructPrimaryVertex( const KFParticle *vDaughters[],
   }
 
   if( nRest<=2 && GetChi2() > ChiCut*ChiCut*GetNDF() ) {
-    for( int i=0; i<NDaughters; i++ ) vtxFlag[i] = 0;
+    for( int i=0; i<nDaughters; i++ ) vtxFlag[i] = 0;
     fNDF = -3;
     fChi2 = 0;
   }

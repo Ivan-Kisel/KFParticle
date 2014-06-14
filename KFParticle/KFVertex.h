@@ -73,7 +73,7 @@ class KFVertex : public KFParticle
 
   //* Construct vertex with selection of tracks (primary vertex)
 
-  void ConstructPrimaryVertex( const KFParticle *vDaughters[], int NDaughters,
+  void ConstructPrimaryVertex( const KFParticle *vDaughters[], int nDaughters,
 			       Bool_t vtxFlag[], float ChiCut=3.5  );
 
  protected:

@@ -237,6 +237,44 @@ void KFParticleTopoReconstructor::Init(vector<KFParticle> &particles, vector<int
 #endif /// USE_TIMERS
 }
 
+void KFParticleTopoReconstructor::Init(KFPTrackVector &tracks, vector<int>* pdg)
+{
+#ifdef USE_TIMERS
+  timer.Start();
+#endif // USE_TIMERS
+  
+  if(!fTracks) 
+    fTracks = new KFPTrackVector[4];
+  
+  fParticles.clear();
+  
+  int nTracks = tracks.Size();
+  fTracks[0].Resize(nTracks);
+  
+  for(int iTr=0; iTr<nTracks; iTr++)
+  {  
+    short trackPDG = -1;
+    if(pdg)
+      trackPDG = (*pdg)[iTr];
+    
+    for(int iP=0; iP<6; iP++)
+      fTracks[0].SetParameter(tracks.Parameter(iP)[iTr], iP, iTr);
+    for(int iC=0; iC<21; iC++)
+      fTracks[0].SetCovariance(tracks.Covariance(iC)[iTr], iC, iTr);
+    fTracks[0].SetId(iTr, iTr);
+    fTracks[0].SetPDG(trackPDG, iTr);
+    fTracks[0].SetQ(tracks.Q()[iTr], iTr);
+    fTracks[0].SetPVIndex(-1, iTr);
+  }
+  
+  fKFParticlePVReconstructor->Init( &fTracks[0], nTracks );
+  
+#ifdef USE_TIMERS
+  timer.Stop();
+  fStatTime[0] = timer.RealTime();
+#endif /// USE_TIMERS
+}
+
 void KFParticleTopoReconstructor::Init(const KFPTrackVector *particles, const vector<KFParticle>& pv, const std::vector<short int> clusterPV)
 {
 #ifdef USE_TIMERS

@@ -51,6 +51,7 @@ class KFParticleTopoReconstructor{
 #endif
   void Init(vector<KFParticle> &particles, vector<int>* pdg=0);
   void Init(const KFPTrackVector *particles, const std::vector<KFParticle>& pv, const std::vector<short int> clusterPV);
+  void Init(KFPTrackVector &tracks, vector<int>* pdg);
   
   void DeInit() { fTracks = 0; }
   
