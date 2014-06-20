@@ -74,6 +74,14 @@ class KFTopoPerformance: public KFParticlePerformanceBase
 
   void AddV0Histos();
   
+  void SetTrackMatch(const vector<int>& trackMatch) { fTrackMatch = trackMatch;}
+  void SetMCTracks(const vector<KFMCTrack>& mcTracks)
+  { 
+    
+    vMCTracks = mcTracks;
+  }
+  
+  void SetPrintEffFrequency(int n) { fPrintEffFrequency = n;}
  private:
 
   void GetMCParticles();
@@ -102,6 +110,8 @@ class KFTopoPerformance: public KFParticlePerformanceBase
 
   vector<KFPartMatch> MCtoRPVId; // array for match MC and reco PV
   vector<KFPartMatch> RtoMCPVId;
+  
+  int fPrintEffFrequency;
 };
 
 #endif

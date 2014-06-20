@@ -64,7 +64,10 @@ class KFParticlePerformanceBase
     
     /// Histograms
   virtual void CreateHistos(string histoDir = "", TFile* outFile = 0);
-
+#ifndef KFPWITHTRACKER
+  TDirectory* const GetHistosDirectory() { return fHistoDir; }
+#endif
+  
  protected:
 
   virtual void FillHistos();

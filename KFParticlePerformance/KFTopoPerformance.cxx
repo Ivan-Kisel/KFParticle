@@ -38,7 +38,7 @@
 #include <algorithm>
 using std::sort;
 
-KFTopoPerformance::KFTopoPerformance():fTopoReconstructor(0),fPrimVertices()
+KFTopoPerformance::KFTopoPerformance():fTopoReconstructor(0),fPrimVertices(),fPrintEffFrequency(1)
 {
 }
 
@@ -756,7 +756,7 @@ void KFTopoPerformance::CalculateEfficiency()
   fParteff.CalcEff();
 
     //   cout.precision(3);
-//   if(fNEvents%100 == 0)
+  if(fNEvents%fPrintEffFrequency == 0)
   {
     cout << " ---- KF Particle finder --- " << endl;
     // cout << "L1 STAT    : " << fNEvents << " EVENT "               << endl << endl;
@@ -866,7 +866,7 @@ void KFTopoPerformance::CalculatePVEfficiency()
   fPVeffMCReconstructable.CalcEff();
 
     //   cout.precision(3);
-  //if(fNEvents%100 == 0)
+  if(fNEvents%fPrintEffFrequency == 0)
   {
     cout << " ---- KF PV finder --- " << endl;
     // cout << "L1 STAT    : " << fNEvents << " EVENT "               << endl << endl;
