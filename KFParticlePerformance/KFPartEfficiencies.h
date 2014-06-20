@@ -41,19 +41,17 @@ class KFPartEfficiencies: public TNamed
     bg(),
     clone()
   {
-          // add total efficiency
-    // AddCounter("piPlus"  ,"PiPlus  efficiency");
-    // AddCounter("piMinus" ,"PiMinus efficiency");
-    int mPartPDG[nParticles] = {310,3122,-3122,3312,-3312,3334,-3334, //strange meson and hyperons
-                                313,-313,323,-323, //K* resonances
-                                3224,3114,-3114,-3224, //sigma resonances
+    int mPartPDG[nParticles] = {310,3122,-3122,3312,-3312,3322,-3322,3334,-3334,3212,-3212,3222,-3222, //strange meson and hyperons
+                                313,-313,323,-323, 100313, 100323, -100323,//K* resonances
+                                3224,3114,-3114,-3224, 3214, -3214,//sigma resonances
                                 3124,-3124, //Lambda resonances
-                                3324, -3324, 1003314, -1003314, //Xi resonances
-                                1003334, -100334, //Omega resonances
+                                3324, -3324, 1003314, -1003314, 3314, -3314, //Xi resonances
+                                1003334, -1003334, //Omega resonances
                                 3000, //exotics
                                 333,113, //vector mesons, hadron chanel
                                 100113, 200113, //light vector mesons
                                 22, //dielectrons
+                                111,221, //pi0, eta
                                 443,100443, // J/Psi
                                 421,-421,100421,-100421, //D0
                                 411,-411, //D+, D-
@@ -61,18 +59,20 @@ class KFPartEfficiencies: public TNamed
                                 4122,-4122, //Lambdac
                                 10421, -10421, 10411, -10411, 20411, -20411,
                                 3001, //H->Lambda p pi
+                                11, -11, 13, -13, 211,  -211, 321, -321, 2212, -2212, // stable particles
                                 123456789 //V0
                                };
-    TString mPartName[nParticles] = {"ks","lambda","lambdab","xi-","xi+","omega-","omega+",
-                                     "k*0","k*0b","k*+","k*-",
-                                     "sigma*+","sigma*-","sigma*+b","sigma*-b",
+    TString mPartName[nParticles] = {"ks","lambda","lambdab","xi-","xi+","xi0","xi0b","omega-","omega+","#Sigma^0","#Sigma^0b", "#Sigma^+", "#Sigma^+b",
+                                     "k*0","k*0b","k*+","k*-", "k*0_{K0,#pi0}", "k*+_{K+,#pi0}", "k*-_{K-,#pi0}",
+                                     "sigma*+","sigma*-","sigma*+b","sigma*-b","sigma*0","sigma*0b",
                                      "lambda*","lambda*b",
-                                     "xi*0", "xi*0b", "xi*-_{#Lambda,K}", "xi*+_{#Lambda,K}",
+                                     "xi*0", "xi*0b", "xi*-_{#Lambda,K}", "xi*+_{#Lambda,K}", "xi*-_{#xi-,#pi0}", "xi*+_{#xi+,#pi0}",
                                      "omega*-","omega*+",
                                      "Hdb",
                                      "phi_{KK}", "rho_{#pi#pi}",
                                      "rho_{ee}", "rho_{#mu#mu}",
                                      "gamma",
+                                     "#pi^{0}","eta",
                                      "J#Psi_ee","J#Psi_#mu#mu",
                                      "D0","D0b","D0_4","D0b_4",
                                      "D+","D-",
@@ -80,6 +80,7 @@ class KFPartEfficiencies: public TNamed
                                      "lambdac", "lambdacb",
                                      "D*0", "D*0b", "D*+", "D*-", "D*+_4", "D*-_4",
                                      "H0",
+                                     "e-", "e+", "mu-", "mu+", "pi+", "pi-", "K+", "K-", "p+", "p-",
                                      "V0"
                                     };
     TString mPartTitle[nParticles] = {"KShort   ", //0
@@ -87,62 +88,88 @@ class KFPartEfficiencies: public TNamed
                                       "Lambda b ", //2
                                       "Xi-      ", //3
                                       "Xi+      ", //4
-                                      "Omega-   ", //5
-                                      "Omega+   ", //6
-                                      "K*0      ", //7
-                                      "K*0 b    ", //8
-                                      "K*+      ", //9
-                                      "K*-      ", //10
-                                      "Sigma*+  ", //11
-                                      "Sigma*-  ", //12
-                                      "Sigma*+ b", //13
-                                      "Sigma*- b", //14
-                                      "Lambda*  ", //15
-                                      "Lambda* b", //16
-                                      "Xi*0     ", //17
-                                      "Xi*0 b   ", //18
-                                      "Xi*-_lk  ", //19
-                                      "Xi*+_lk  ", //20
-                                      "Omega*-  ", //21
-                                      "Omega*+  ", //22
-                                      "Hdb      ", //23
-                                      "phi_kk   ", //24
-                                      "rho_pipi ", //25
-                                      "rho_ee   ", //26
-                                      "rho_mm   ", //27
-                                      "gamma    ", //28
-                                      "JPsi_ee  ", //29
-                                      "JPsi_mm  ", //30
-                                      "D0       ", //31
-                                      "D0b      ", //32
-                                      "D0_4     ", //33
-                                      "D0b_4    ", //34
-                                      "D+       ", //35
-                                      "D-       ", //36
-                                      "Ds+      ", //37
-                                      "Ds-      ", //38
-                                      "Lambdac  ", //39
-                                      "Lambdac b", //40
-                                      "D*0      ", //41
-                                      "D*0 b    ", //42
-                                      "D*+      ", //43
-                                      "D*-      ", //44
-                                      "D*+_4    ", //45
-                                      "D*-_4    ", //46
-                                      "H0       ", //47
-                                      "V0       ", //48
+                                      "Xi0      ", //5
+                                      "Xi0 b    ", //6
+                                      "Omega-   ", //7
+                                      "Omega+   ", //8
+                                      "Sigma0   ", //9
+                                      "Sigma0 b ", //10
+                                      "Sigma+   ", //11
+                                      "Sigma+ b ", //12
+                                      "K*0      ", //13
+                                      "K*0 b    ", //14
+                                      "K*+      ", //15
+                                      "K*-      ", //16
+                                      "K*0_K0pi0", //17
+                                      "K*+_K+pi0", //18
+                                      "K*-_K-pi0", //19
+                                      "Sigma*+  ", //20
+                                      "Sigma*-  ", //21
+                                      "Sigma*+ b", //22
+                                      "Sigma*- b", //23
+                                      "Sigma*0  ", //24
+                                      "Sigma*0 b", //25
+                                      "Lambda*  ", //26
+                                      "Lambda* b", //27
+                                      "Xi*0     ", //28
+                                      "Xi*0 b   ", //29
+                                      "Xi*-_lk  ", //30
+                                      "Xi*+_lk  ", //31
+                                      "Xi*-_XiPi", //32
+                                      "Xi*+_XiPi", //33
+                                      "Omega*-  ", //34
+                                      "Omega*+  ", //35
+                                      "Hdb      ", //36
+                                      "phi_kk   ", //37
+                                      "rho_pipi ", //38
+                                      "rho_ee   ", //39
+                                      "rho_mm   ", //40
+                                      "gamma    ", //41
+                                      "Pi0      ", //42
+                                      "eta      ", //43
+                                      "JPsi_ee  ", //44
+                                      "JPsi_mm  ", //45
+                                      "D0       ", //46
+                                      "D0b      ", //47
+                                      "D0_4     ", //48
+                                      "D0b_4    ", //49
+                                      "D+       ", //50
+                                      "D-       ", //51
+                                      "Ds+      ", //52
+                                      "Ds-      ", //53
+                                      "Lambdac  ", //54
+                                      "Lambdac b", //55
+                                      "D*0      ", //56
+                                      "D*0 b    ", //57
+                                      "D*+      ", //58
+                                      "D*-      ", //59
+                                      "D*+_4    ", //60
+                                      "D*-_4    ", //61
+                                      "H0       ", //62
+                                      "e-       ", //63
+                                      "e+       ", //64
+                                      "mu-      ", //65
+                                      "mu+      ", //66
+                                      "pi+      ", //67
+                                      "pi-      ", //68
+                                      "K+       ", //69
+                                      "K-       ", //70
+                                      "p+       ", //71
+                                      "p-       ", //72
+                                      "V0       " //73
                                      };
 
-    float mPartMHistoMin[nParticles] = {0.3, 1., 1., 1., 1.,1.,1.,
-                                        0.6, 0.6, 0.6, 0.6,
-                                        1.,1.,1.,1.,
+    float mPartMHistoMin[nParticles] = {0.3, 1., 1., 1., 1., 1., 1.,1.,1.,1.,1.,1.,1.,
+                                        0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6,
+                                        1.,1.,1.,1.,1.,1.,
                                         1.4, 1.4,
-                                        1.4, 1.4, 1.4, 1.4,
+                                        1.4, 1.4, 1.4, 1.4, 1.4, 1.4,
                                         1.8,1.8,
                                         1.,
-                                        0.6, 0.1,
+                                        0.8, 0.1,
                                         0.1, 0.1,
                                         0.,
+                                        0.,0.,
                                         1.,1.,
                                         1.,1.,1.,1.,
                                         1.,1.,
@@ -150,17 +177,19 @@ class KFPartEfficiencies: public TNamed
                                         1.8,1.8,
                                         1.8,1.8,1.8,1.8,1.8,1.8,
                                         1.,
+                                        0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
                                         0.3 };
-    float mPartMHistoMax[nParticles] = {1.3, 2., 2., 3., 3., 3., 3.,
-                                        2.6, 2.6, 2.6, 2.6,
-                                        3., 3., 3., 3.,
+    float mPartMHistoMax[nParticles] = {1.3, 2., 2., 3., 3., 3., 3., 3., 3.,3.,3.,3.,3.,
+                                        2.6, 2.6, 2.6, 2.6, 2.6, 2.6, 2.6,
+                                        3., 3., 3., 3.,3.,3.,
                                         3.4, 3.4,
-                                        3.4, 3.4, 3.4, 3.4,
+                                        3.4, 3.4, 3.4, 3.4, 3.4, 3.4,
                                         3.8, 3.8,
                                         3.,
-                                        1.6, 2.1,
+                                        2.8, 2.1,
                                         2.1, 2.1,
                                         3.,
+                                        3.,3.,
                                         4.,4.,
                                         3.,3.,3.,3.,
                                         3.,3.,
@@ -168,167 +197,294 @@ class KFPartEfficiencies: public TNamed
                                         3.8,3.8,
                                         3.8,3.8,3.8,3.8,3.8,3.8,
                                         3.,
+                                        0.01, 0.01, 1., 1., 1., 1., 1., 1., 1.5, 1.5,
                                         1.3};
+                                        
+    int mPartMaxMult[nParticles];
+    for(int i=0; i<71; i++)
+      mPartMaxMult[i] = 20;
+    mPartMaxMult[63] = 20;
+    mPartMaxMult[64] = 20;
+    mPartMaxMult[65] = 20;
+    mPartMaxMult[66] = 20;
+    mPartMaxMult[67] = 500;
+    mPartMaxMult[68] = 500;
+    mPartMaxMult[69] = 50;
+    mPartMaxMult[70] = 50;
+    mPartMaxMult[71] = 500;
+    mPartMaxMult[72] = 20;
+        
     //set decay mode
     partDaughterPdg.resize(nParticles);
 
-    partDaughterPdg[ 0].push_back(  211); //K0s -> pi+ pi-
-    partDaughterPdg[ 0].push_back( -211);
-
-    partDaughterPdg[ 1].push_back( 2212); //Lambda -> p pi-
-    partDaughterPdg[ 1].push_back( -211);
-
-    partDaughterPdg[ 2].push_back(-2212); //Lambda_bar -> p- pi+
-    partDaughterPdg[ 2].push_back(  211);
-
-    partDaughterPdg[ 3].push_back( 3122); //Ksi- -> Lambda pi-
-    partDaughterPdg[ 3].push_back( -211);
-
-    partDaughterPdg[ 4].push_back(-3122); //Ksi+ -> Lambda_bar pi+
-    partDaughterPdg[ 4].push_back(  211);
-
-    partDaughterPdg[ 5].push_back( 3122); //Omega- -> Lambda K-
-    partDaughterPdg[ 5].push_back( -321);
-
-    partDaughterPdg[ 6].push_back(-3122); //Omega+ -> Lambda_bar K+
-    partDaughterPdg[ 6].push_back(  321);
-
-    partDaughterPdg[ 7].push_back(  321); //K*0 -> K+ pi-
-    partDaughterPdg[ 7].push_back( -211);
-
-    partDaughterPdg[ 8].push_back( -321); //K*0_bar -> K- pi+
-    partDaughterPdg[ 8].push_back(  211);
-
-    partDaughterPdg[ 9].push_back(  310); //K*+ -> K0s pi+
-    partDaughterPdg[ 9].push_back(  211);
-
-    partDaughterPdg[10].push_back(  310); //K*- -> K0s pi-
-    partDaughterPdg[10].push_back( -211);
-
-    partDaughterPdg[11].push_back( 3122); //Sigma+ -> Lambda pi+
-    partDaughterPdg[11].push_back(  211);
-
-    partDaughterPdg[12].push_back( 3122); //Sigma- -> Lambda pi-
-    partDaughterPdg[12].push_back( -211);
-
-    partDaughterPdg[13].push_back(-3122); //Sigma+_bar -> Lambda_bar pi+
-    partDaughterPdg[13].push_back(  211);
-
-    partDaughterPdg[14].push_back(-3122); //Sigma-_bar -> Lambda_bar pi-
-    partDaughterPdg[14].push_back( -211);
-
-    partDaughterPdg[15].push_back( 2212); //Lambda* -> p K-
-    partDaughterPdg[15].push_back( -321);
-
-    partDaughterPdg[16].push_back(-2212); //Lambda*_bar -> p- K+
-    partDaughterPdg[16].push_back(  321);
-
-    partDaughterPdg[17].push_back( 3312); //Xi*0 -> Xi- pi+
-    partDaughterPdg[17].push_back(  211);
-
-    partDaughterPdg[18].push_back(-3312); //Xi*0_bar -> Xi+ pi-
-    partDaughterPdg[18].push_back( -211);
-
-    partDaughterPdg[19].push_back( 3122); //Xi*- -> Lambda K-
-    partDaughterPdg[19].push_back( -321);
-
-    partDaughterPdg[20].push_back(-3122); //Xi*+ -> Lambda_bar K+
-    partDaughterPdg[20].push_back(  321);
-
-    partDaughterPdg[21].push_back( 3312); //Omega*- -> Xi- pi+ K-
-    partDaughterPdg[21].push_back(  211);
-    partDaughterPdg[21].push_back( -321);
-
-    partDaughterPdg[22].push_back(-3312); //Omega*- -> Xi+ pi- K+
-    partDaughterPdg[22].push_back( -211);
-    partDaughterPdg[22].push_back(  321);
-
-    partDaughterPdg[23].push_back( 3122); //H-dibar -> Lambda Lambda
-    partDaughterPdg[23].push_back( 3122);
-
-    partDaughterPdg[24].push_back(  321); //phi -> K+ K-
-    partDaughterPdg[24].push_back( -321);
-
-    partDaughterPdg[25].push_back(  211); //rho, omega, phi -> pi+ pi-
-    partDaughterPdg[25].push_back( -211);
-
-    partDaughterPdg[26].push_back(   11); //rho, omega, phi -> e+ e-
-    partDaughterPdg[26].push_back(  -11);
-
-    partDaughterPdg[27].push_back(   13); //rho, omega, phi -> mu+ mu-
-    partDaughterPdg[27].push_back(  -13);
-
-    partDaughterPdg[28].push_back(   11); //gamma -> e+ e-
-    partDaughterPdg[28].push_back(  -11);
-
-    partDaughterPdg[29].push_back(   11); //JPsi -> e+ e-
-    partDaughterPdg[29].push_back(  -11);
-
-    partDaughterPdg[30].push_back(   13); //JPsi -> mu+ mu-
-    partDaughterPdg[30].push_back(  -13);
-
-    partDaughterPdg[31].push_back(  211); //D0 -> pi+ K-
-    partDaughterPdg[31].push_back( -321);
-
-    partDaughterPdg[32].push_back( -211); //D0_bar -> K+ pi-
-    partDaughterPdg[32].push_back(  321);
-
-    partDaughterPdg[33].push_back(  211); //D0 -> pi+ pi+ pi- K-
-    partDaughterPdg[33].push_back(  211);
-    partDaughterPdg[33].push_back( -211);
-    partDaughterPdg[33].push_back( -321);
-
-    partDaughterPdg[34].push_back( -211); //D0_bar -> pi- pi- pi+ K+
-    partDaughterPdg[34].push_back( -211);
-    partDaughterPdg[34].push_back(  211);
-    partDaughterPdg[34].push_back(  321);
-
-    partDaughterPdg[35].push_back( -321); //D+ -> K- pi+ pi+
-    partDaughterPdg[35].push_back(  211);
-    partDaughterPdg[35].push_back(  211);
-
-    partDaughterPdg[36].push_back(  321); //D- -> K+ pi- pi-
-    partDaughterPdg[36].push_back( -211);
-    partDaughterPdg[36].push_back( -211);
-
-    partDaughterPdg[37].push_back( -321); //Ds+ -> K- K+ pi+
-    partDaughterPdg[37].push_back(  321);
-    partDaughterPdg[37].push_back(  211);
-
-    partDaughterPdg[38].push_back(  321); //Ds- -> K+ K- pi-
-    partDaughterPdg[38].push_back( -321);
-    partDaughterPdg[38].push_back( -211);
-
-    partDaughterPdg[39].push_back(  211); //Lambdac -> pi+ K- p
-    partDaughterPdg[39].push_back( -321);
-    partDaughterPdg[39].push_back( 2212);
-
-    partDaughterPdg[40].push_back( -211); //Lambdac_bar -> pi- K+ p-
-    partDaughterPdg[40].push_back(  321);
-    partDaughterPdg[40].push_back(-2212);
-
-    partDaughterPdg[41].push_back(  411); //D*0 -> D+ pi-
-    partDaughterPdg[41].push_back( -211);
-
-    partDaughterPdg[42].push_back( -411); //D*0_bar -> D- pi+
-    partDaughterPdg[42].push_back(  211);
-
-    partDaughterPdg[43].push_back(  421); //D*+ -> D0 pi+
-    partDaughterPdg[43].push_back(  211);
-
-    partDaughterPdg[44].push_back( -421); //D*- -> D0_bar pi-
-    partDaughterPdg[44].push_back( -211);
-
-    partDaughterPdg[45].push_back(  421); //D*+ -> D04 pi+
-    partDaughterPdg[45].push_back(  211);
-
-    partDaughterPdg[46].push_back( -421); //D*- -> D04_bar pi-
-    partDaughterPdg[46].push_back( -211);
-
-    partDaughterPdg[47].push_back( 3122); //H0-> Lambda pi- p
-    partDaughterPdg[47].push_back( -211);
-    partDaughterPdg[47].push_back( 2212);
-
+    int curPart = 0;
+    
+    partDaughterPdg[curPart].push_back(  211); //K0s -> pi+ pi-
+    partDaughterPdg[curPart].push_back( -211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( 2212); //Lambda -> p pi-
+    partDaughterPdg[curPart].push_back( -211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(-2212); //Lambda_bar -> p- pi+
+    partDaughterPdg[curPart].push_back(  211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( 3122); //Xi- -> Lambda pi-
+    partDaughterPdg[curPart].push_back( -211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(-3122); //Xi+ -> Lambda_bar pi+
+    partDaughterPdg[curPart].push_back(  211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( 3122); //Xi0 -> Lambda pi0
+    partDaughterPdg[curPart].push_back(  111);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(-3122); //Xi0_bar -> Lambda_bar pi0
+    partDaughterPdg[curPart].push_back(  111);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( 3122); //Omega- -> Lambda K-
+    partDaughterPdg[curPart].push_back( -321);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(-3122); //Omega+ -> Lambda_bar K+
+    partDaughterPdg[curPart].push_back(  321);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(   22); //Sigma0 -> Lambda Gamma
+    partDaughterPdg[curPart].push_back( 3122);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(   22); //Sigma0_bar -> Lambda_bar Gamma
+    partDaughterPdg[curPart].push_back(-3122);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(  111); //Sigma+ -> p pi0
+    partDaughterPdg[curPart].push_back( 2212);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(  111); //Sigma+_bar -> p- pi0
+    partDaughterPdg[curPart].push_back(-2212);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(  321); //K*0 -> K+ pi-
+    partDaughterPdg[curPart].push_back( -211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( -321); //K*0_bar -> K- pi+
+    partDaughterPdg[curPart].push_back(  211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(  310); //K*+ -> K0s pi+
+    partDaughterPdg[curPart].push_back(  211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(  310); //K*- -> K0s pi-
+    partDaughterPdg[curPart].push_back( -211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(  310); //K*0 -> K0 pi0
+    partDaughterPdg[curPart].push_back(  111);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(  321); //K*+ -> K+ pi0
+    partDaughterPdg[curPart].push_back(  111);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( -321); //K*- -> K- pi0
+    partDaughterPdg[curPart].push_back(  111);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( 3122); //Sigma+ -> Lambda pi+
+    partDaughterPdg[curPart].push_back(  211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( 3122); //Sigma- -> Lambda pi-
+    partDaughterPdg[curPart].push_back( -211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(-3122); //Sigma+_bar -> Lambda_bar pi+
+    partDaughterPdg[curPart].push_back(  211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(-3122); //Sigma-_bar -> Lambda_bar pi-
+    partDaughterPdg[curPart].push_back( -211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( 3122); //Sigma*0 -> Lambda pi0
+    partDaughterPdg[curPart].push_back(  111);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(-3122); //Sigma*0_bar -> Lambda_bar pi0
+    partDaughterPdg[curPart].push_back(  111);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( 2212); //Lambda* -> p K-
+    partDaughterPdg[curPart].push_back( -321);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(-2212); //Lambda*_bar -> p- K+
+    partDaughterPdg[curPart].push_back(  321);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( 3312); //Xi*0 -> Xi- pi+
+    partDaughterPdg[curPart].push_back(  211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(-3312); //Xi*0_bar -> Xi+ pi-
+    partDaughterPdg[curPart].push_back( -211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( 3122); //Xi*- -> Lambda K-
+    partDaughterPdg[curPart].push_back( -321);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(-3122); //Xi*+ -> Lambda_bar K+
+    partDaughterPdg[curPart].push_back(  321);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( 3312); //Xi*- -> Xi- pi0
+    partDaughterPdg[curPart].push_back(  111);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(-3312); //Xi*+ -> Xi+ pi0
+    partDaughterPdg[curPart].push_back(  111);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( 3312); //Omega*- -> Xi- pi+ K-
+    partDaughterPdg[curPart].push_back(  211);
+    partDaughterPdg[curPart].push_back( -321);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(-3312); //Omega*- -> Xi+ pi- K+
+    partDaughterPdg[curPart].push_back( -211);
+    partDaughterPdg[curPart].push_back(  321);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( 3122); //H-dibar -> Lambda Lambda
+    partDaughterPdg[curPart].push_back( 3122);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(  321); //phi -> K+ K-
+    partDaughterPdg[curPart].push_back( -321);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(  211); //rho, omega, phi -> pi+ pi-
+    partDaughterPdg[curPart].push_back( -211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(   11); //rho, omega, phi -> e+ e-
+    partDaughterPdg[curPart].push_back(  -11);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(   13); //rho, omega, phi -> mu+ mu-
+    partDaughterPdg[curPart].push_back(  -13);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(   11); //gamma -> e+ e-
+    partDaughterPdg[curPart].push_back(  -11);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(   22); //pi0 -> gamma gamma
+    partDaughterPdg[curPart].push_back(   22);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(  111); //eta -> pi0 pi0
+    partDaughterPdg[curPart].push_back(  111);
+    partDaughterPdg[curPart].push_back(  111);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(   11); //JPsi -> e+ e-
+    partDaughterPdg[curPart].push_back(  -11);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(   13); //JPsi -> mu+ mu-
+    partDaughterPdg[curPart].push_back(  -13);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(  211); //D0 -> pi+ K-
+    partDaughterPdg[curPart].push_back( -321);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( -211); //D0_bar -> K+ pi-
+    partDaughterPdg[curPart].push_back(  321);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(  211); //D0 -> pi+ pi+ pi- K-
+    partDaughterPdg[curPart].push_back(  211);
+    partDaughterPdg[curPart].push_back( -211);
+    partDaughterPdg[curPart].push_back( -321);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( -211); //D0_bar -> pi- pi- pi+ K+
+    partDaughterPdg[curPart].push_back( -211);
+    partDaughterPdg[curPart].push_back(  211);
+    partDaughterPdg[curPart].push_back(  321);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( -321); //D+ -> K- pi+ pi+
+    partDaughterPdg[curPart].push_back(  211);
+    partDaughterPdg[curPart].push_back(  211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(  321); //D- -> K+ pi- pi-
+    partDaughterPdg[curPart].push_back( -211);
+    partDaughterPdg[curPart].push_back( -211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( -321); //Ds+ -> K- K+ pi+
+    partDaughterPdg[curPart].push_back(  321);
+    partDaughterPdg[curPart].push_back(  211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(  321); //Ds- -> K+ K- pi-
+    partDaughterPdg[curPart].push_back( -321);
+    partDaughterPdg[curPart].push_back( -211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(  211); //Lambdac -> pi+ K- p
+    partDaughterPdg[curPart].push_back( -321);
+    partDaughterPdg[curPart].push_back( 2212);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( -211); //Lambdac_bar -> pi- K+ p-
+    partDaughterPdg[curPart].push_back(  321);
+    partDaughterPdg[curPart].push_back(-2212);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(  411); //D*0 -> D+ pi-
+    partDaughterPdg[curPart].push_back( -211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( -411); //D*0_bar -> D- pi+
+    partDaughterPdg[curPart].push_back(  211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(  421); //D*+ -> D0 pi+
+    partDaughterPdg[curPart].push_back(  211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( -421); //D*- -> D0_bar pi-
+    partDaughterPdg[curPart].push_back( -211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(  421); //D*+ -> D04 pi+
+    partDaughterPdg[curPart].push_back(  211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( -421); //D*- -> D04_bar pi-
+    partDaughterPdg[curPart].push_back( -211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( 3122); //H0-> Lambda pi- p
+    partDaughterPdg[curPart].push_back( -211);
+    partDaughterPdg[curPart].push_back( 2212);
+    curPart++;
+    
     for(int iP=0; iP<nParticles; iP++)
     {
       partPDG[iP] = mPartPDG[iP];
@@ -336,6 +492,7 @@ class KFPartEfficiencies: public TNamed
       partTitle[iP] = mPartTitle[iP];
       partMHistoMin[iP] = mPartMHistoMin[iP];
       partMHistoMax[iP] = mPartMHistoMax[iP];
+      partMaxMult[iP] = mPartMaxMult[iP];
     }
 
     for(int iP=0; iP<nParticles; iP++)
@@ -499,15 +656,14 @@ class KFPartEfficiencies: public TNamed
     file >> *this;
   }
 
-  static const int nParticles = 49;
+  static const int nParticles = 74;
   int partPDG[nParticles];
   TString partName[nParticles];
   TString partTitle[nParticles];
   std::vector<std::vector<int> > partDaughterPdg;
   float partMHistoMin[nParticles];
   float partMHistoMax[nParticles];
-
-//   ClassDef(KFPartEfficiencies,1);
+  int partMaxMult[nParticles];
 
  private:
   std::vector<TString> names; // names counters indexed by index of counter

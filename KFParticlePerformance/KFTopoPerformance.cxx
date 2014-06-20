@@ -886,6 +886,11 @@ void KFTopoPerformance::CalculatePVEfficiency()
 
 void KFTopoPerformance::FillHistos()
 {
+  vector<int> multiplicities(KFPartEfficiencies::nParticles, 0);
+  vector<int> multiplicitiesGhost(KFPartEfficiencies::nParticles, 0);
+  vector<int> multiplicitiesBG(KFPartEfficiencies::nParticles, 0);
+  vector<int> multiplicitiesSignal(KFPartEfficiencies::nParticles, 0);
+  
   //fill histograms for found short-lived particles
   for(unsigned int iP=0; iP<fTopoReconstructor->GetParticles().size(); iP++)
   {
@@ -943,6 +948,7 @@ void KFTopoPerformance::FillHistos()
     hPartParam[iParticle][14]->Fill(l[0]);
     hPartParam[iParticle][15]->Fill(l[0]/dl[0]);
 
+    multiplicities[iParticle]++;
 
     hPartParam2D[iParticle][0]->Fill(Rapidity,Pt,1);
 
@@ -968,11 +974,13 @@ void KFTopoPerformance::FillHistos()
         hPartParamGhost[iParticle][14]->Fill(l[0]);
         hPartParamGhost[iParticle][15]->Fill(l[0]/dl[0]);
     
+        multiplicitiesGhost[iParticle]++;
+        
         hPartParam2DGhost[iParticle][0]->Fill(Rapidity,Pt,1);
       }
       else
       {
-        // for phisical background
+        // for physical background
 
         hPartParamBG[iParticle][ 0]->Fill(M);
         hPartParamBG[iParticle][ 1]->Fill(P);
@@ -991,6 +999,8 @@ void KFTopoPerformance::FillHistos()
         hPartParamBG[iParticle][14]->Fill(l[0]);
         hPartParamBG[iParticle][15]->Fill(l[0]/dl[0]);
 
+        multiplicitiesBG[iParticle]++;
+        
         hPartParam2DBG[iParticle][0]->Fill(Rapidity,Pt,1);
       }
       continue;
@@ -1013,6 +1023,8 @@ void KFTopoPerformance::FillHistos()
     hPartParamSignal[iParticle][14]->Fill(l[0]);
     hPartParamSignal[iParticle][15]->Fill(l[0]/dl[0]);
 
+    multiplicitiesSignal[iParticle]++;
+    
     hPartParam2DSignal[iParticle][0]->Fill(Rapidity,Pt,1);
 
     int iMCPart = RtoMCParticleId[iP].GetBestMatchWithPdg();
@@ -1021,7 +1033,11 @@ void KFTopoPerformance::FillHistos()
     {
       int iMCTrack = mcPart.GetMCTrackID();
       KFMCTrack &mcTrack = vMCTracks[iMCTrack];
-      int mcDaughterId = mcPart.GetDaughterIds()[0];
+      int mcDaughterId = -1;
+      if(iParticle > 62 && iParticle <73)
+        mcDaughterId = iMCTrack;
+      else
+        mcDaughterId = mcPart.GetDaughterIds()[0];
       KFMCTrack &mcDaughter = vMCTracks[mcDaughterId];
 
       TParticlePDG* particlePDG = TDatabasePDG::Instance()->GetParticle(mcTrack.PDG());
@@ -1399,6 +1415,12 @@ void KFTopoPerformance::FillHistos()
     }
   }
   
+  for(unsigned int iP=0; iP < KFPartEfficiencies::nParticles; iP++) {
+    hPartParam[iP][16]->Fill(multiplicities[iP]);
+    hPartParamGhost[iP][16]->Fill(multiplicitiesGhost[iP]);
+    hPartParamBG[iP][16]->Fill(multiplicitiesBG[iP]);
+    hPartParamSignal[iP][16]->Fill(multiplicitiesSignal[iP]);
+  }
 } // void KFTopoPerformance::FillHistos()
 
 void KFTopoPerformance::AddV0Histos()

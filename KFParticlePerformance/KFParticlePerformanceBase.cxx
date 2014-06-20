@@ -124,15 +124,15 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
           gDirectory->mkdir("Parameters");
           gDirectory->cd("Parameters");
           {
-            TString parName[nHistoPartParam] = {"M","p","p_{t}","y","DecayL","c#tau","chi2ndf","prob","#theta","phi","X","Y","Z","R", "L", "l/dl"};
+            TString parName[nHistoPartParam] = {"M","p","p_{t}","y","DecayL","c#tau","chi2ndf","prob","#theta","phi","X","Y","Z","R", "L", "l/dl","Multiplicity"};
             TString parAxisName[nHistoPartParam] = {"m [GeV/c^{2}]","p [GeV/c]","p_{t} [GeV/c]",
                                                     "y","Decay length [cm]","Life time c#tau [cm]",
                                                     "chi2/ndf","prob","#theta [rad]",
-                                                    "phi [rad]","x [cm]","y [cm]","z [cm]","Rxy [cm]", "L [cm]", "L/dL"};
-            int nBins[nHistoPartParam] = {1000,100,100,100,100,100,100,100,100,100,100,1000,1000,1000,1000,1000};
-            float xMin[nHistoPartParam] = {fParteff.partMHistoMin[iPart],  0., 0.,-6., -5.,  0.,  0., 0., -2., -2., -200., -200., -200.,   0.,   0., -1.};
-            float xMax[nHistoPartParam] = {fParteff.partMHistoMax[iPart], 10., 3., 6., 55., 30., 20., 1.,  2.,  2.,  200.,  200.,  200., 200., 400., 35.};
-            
+                                                    "phi [rad]","x [cm]","y [cm]","z [cm]","Rxy [cm]", "L [cm]", "L/dL","Multiplicity"};
+            int nBins[nHistoPartParam] = {1000,100,100,100,100,100,100,100,100,100,100,1000,1000,1000,1000,1000, fParteff.partMaxMult[iPart]+1};
+            float xMin[nHistoPartParam] = {fParteff.partMHistoMin[iPart],  0., 0.,-6., -5.,  0.,  0., 0., -2., -2., -200., -200., -200.,   0.,   0., -1., -0.5};
+            float xMax[nHistoPartParam] = {fParteff.partMHistoMax[iPart], 10., 3., 6., 55., 30., 20., 1.,  2.,  2.,  200.,  200.,  200., 200., 400., 35., float(fParteff.partMaxMult[iPart])+0.5};
+                        
             for(int iH=0; iH<nHistoPartParam; iH++)
             {
               hPartParam[iPart][iH]       = new TH1F(parName[iH].Data(),parName[iH].Data(),
