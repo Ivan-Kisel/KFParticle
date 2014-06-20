@@ -209,9 +209,13 @@ void KFParticleTopoReconstructor::Init(vector<KFParticle> &particles, vector<int
     fTracks = new KFPTrackVector[4];
   
   fParticles.clear();
-  
+  fPV.clear(); 
+
   int nTracks = particles.size();
   fTracks[0].Resize(nTracks);
+  fTracks[1].Resize(0);
+  fTracks[2].Resize(0);
+  fTracks[3].Resize(0);
   
   for(int iTr=0; iTr<nTracks; iTr++)
   {  
@@ -237,7 +241,7 @@ void KFParticleTopoReconstructor::Init(vector<KFParticle> &particles, vector<int
 #endif /// USE_TIMERS
 }
 
-void KFParticleTopoReconstructor::Init(KFPTrackVector &tracks, vector<int>* pdg)
+void KFParticleTopoReconstructor::Init(KFPTrackVector &tracks)
 {
 #ifdef USE_TIMERS
   timer.Start();
@@ -247,25 +251,15 @@ void KFParticleTopoReconstructor::Init(KFPTrackVector &tracks, vector<int>* pdg)
     fTracks = new KFPTrackVector[4];
   
   fParticles.clear();
+  fPV.clear(); 
   
   int nTracks = tracks.Size();
   fTracks[0].Resize(nTracks);
+  fTracks[0].Set(tracks, nTracks, 0);
   
-  for(int iTr=0; iTr<nTracks; iTr++)
-  {  
-    short trackPDG = -1;
-    if(pdg)
-      trackPDG = (*pdg)[iTr];
-    
-    for(int iP=0; iP<6; iP++)
-      fTracks[0].SetParameter(tracks.Parameter(iP)[iTr], iP, iTr);
-    for(int iC=0; iC<21; iC++)
-      fTracks[0].SetCovariance(tracks.Covariance(iC)[iTr], iC, iTr);
-    fTracks[0].SetId(iTr, iTr);
-    fTracks[0].SetPDG(trackPDG, iTr);
-    fTracks[0].SetQ(tracks.Q()[iTr], iTr);
-    fTracks[0].SetPVIndex(-1, iTr);
-  }
+  fTracks[1].Resize(0);
+  fTracks[2].Resize(0);
+  fTracks[3].Resize(0);
   
   fKFParticlePVReconstructor->Init( &fTracks[0], nTracks );
   
@@ -282,7 +276,8 @@ void KFParticleTopoReconstructor::Init(const KFPTrackVector *particles, const ve
 #endif // USE_TIMERS
     
   fParticles.clear();
-  
+  fPV.clear(); 
+
   fTracks = const_cast< KFPTrackVector* >(particles);
   
   fChiToPrimVtx[0].resize(fTracks[0].Size());
@@ -305,6 +300,8 @@ void KFParticleTopoReconstructor::ReconstructPrimVertex(bool isHeavySystem)
 #endif // USE_TIMERS
   fKFParticlePVReconstructor->ReconstructPrimVertex();
   
+  fPV.clear(); 
+
   int nPrimVtx = NPrimaryVertices();
   int nPV = 0;
   if(isHeavySystem)
@@ -469,18 +466,18 @@ void KFParticleTopoReconstructor::ReconstructParticles()
 #ifdef USE_TIMERS
   timer.Start();
 #endif // USE_TIMERS
-  
+    fParticles.clear();
+
   if(fPV.size() < 1) return;
 
   //calculate chi to primary vertex, chi = sqrt(dr C-1 dr)
   GetChiToPrimVertex(&(fPV[0]), fPV.size());
-  
-  fParticles.clear();
+
   KFParticleFinder kfpf;
   kfpf.SetNThreads(fNThreads);
   kfpf.FindParticles(fTracks, fChiToPrimVtx, fParticles, &(fPV[0]), fPV.size());
 // #pragma omp critical 
-// std::cout << "NPart " << fParticles.size() << std::endl;
+//   std::cout << "NPart " << fParticles.size() << " " << fTracks[0].Size() << " "<< fTracks[1].Size() << " " << fTracks[2].Size() << " " << fTracks[3].Size()<< std::endl;
 
   #ifdef USE_TIMERS
   timer.Stop();

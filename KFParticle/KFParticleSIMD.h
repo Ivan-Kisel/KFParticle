@@ -11,7 +11,7 @@
 
 
 //#define NonhomogeneousField
-#define HomogeneousField
+// #define HomogeneousField
 
 #ifndef KFPARTICLESIMD_H
 #define KFPARTICLESIMD_H

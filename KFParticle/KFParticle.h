@@ -16,7 +16,7 @@
 //_________________________________________________________________________________
 
 //#define NonhomogeneousField
-#define HomogeneousField
+// #define HomogeneousField
 
 #ifndef ALIKFPARTICLE_H
 #define ALIKFPARTICLE_H

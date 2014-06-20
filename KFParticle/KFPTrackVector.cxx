@@ -47,6 +47,8 @@ void KFPTrackVector::SetTracks(const KFPTrackVector& track, const kfvector_uint&
   //track - input vector of tracks
   //trackIndex - indexes of tracks in a vector "track", which should be stored 
   //to the current vector
+
+  if(nIndexes == 0) return;
   
   Resize(nIndexes);
 
@@ -220,37 +222,48 @@ void KFPTrackVector::PrintTrack(int n)
 
 void KFPTrackVector::PrintTracks()
 {
-  std::cout << Size() << std::endl;
+  std::cout << "NTracks " << Size() << std::endl;
+  if( Size()==0 ) return;
+  
+  std::cout << "Parameters: " << std::endl;
   for(int iP=0; iP<6; iP++)
   {
+    std::cout << "  iP " << iP << ": ";
     for(int iTr=0; iTr<Size(); iTr++)
       std::cout << Parameter(iP)[iTr]<< " ";
     std::cout << std::endl;
   }
-
+  
+  std::cout << "Cov matrix: " << std::endl;
   for(int iC=0; iC<21; iC++)
   {
+    std::cout << "  iC " << iC << ": ";
     for(int iTr=0; iTr<Size(); iTr++)
       std::cout << Covariance(iC)[iTr]<< " ";
     std::cout << std::endl;
   }
 
+  std::cout << "Id: " << std::endl;
   for(int iTr=0; iTr<Size(); iTr++)
     std::cout <<  Id()[iTr] << " ";
   std::cout << std::endl;
   
+  std::cout << "Pdg: " << std::endl;
   for(int iTr=0; iTr<Size(); iTr++)
     std::cout <<  PDG()[iTr] << " ";
   std::cout << std::endl;
 
+  std::cout << "Q: " << std::endl;
   for(int iTr=0; iTr<Size(); iTr++)
     std::cout <<  Q()[iTr] << " ";
   std::cout << std::endl;
   
+  std::cout << "PV index: " << std::endl;
   for(int iTr=0; iTr<Size(); iTr++)
     std::cout <<  PVIndex()[iTr] << " ";
   std::cout << std::endl;
   
+  std::cout << "Last particle index: " << std::endl;
   std::cout << LastElectron() << " "
             << LastMuon() << " "
             << LastPion() << " "
