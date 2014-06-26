@@ -63,10 +63,7 @@ KFParticleFinder::KFParticleFinder():
 }
 
 void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* ChiToPrimVtx,
-#ifdef NonhomogeniousField
-                                           vector<L1FieldRegion>& vField,
-#endif
-                                           vector<KFParticle>& Particles, KFParticleSIMD* PrimVtx, int nPV)
+                                     vector<KFParticle>& Particles, KFParticleSIMD* PrimVtx, int nPV)
 {
   //* Finds particles (K0s and Lambda) from a given set of tracks
 // std::cout << "kfp size  " <<  sizeof(KFParticle) << std::endl;
@@ -100,6 +97,8 @@ void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* C
         vRTracks[iV].SetId(Particles.size(),iTr);
         tmp.SetNDaughters(1);
         tmp.AddDaughterId( kfTrack.Id() );
+        for(int iF=0; iF<10; iF++)
+          tmp.SetFieldCoeff( vRTracks[iV].FieldCoefficient(iF)[iTr], iF);
         Particles.push_back(tmp);
       }
     }
@@ -120,9 +119,6 @@ void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* C
   vector<KFParticle> vPi0Sec;
   
   Find2DaughterDecay(vRTracks, ChiToPrimVtx,
-#ifdef NonhomogeniousField
-                     vField,
-#endif
                      Particles, PrimVtx, fCuts2D,
                      fSecCuts, vV0Prim, vV0Sec);
   
@@ -136,15 +132,9 @@ void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* C
   
   //Xi- -> Lambda pi-, Omega- -> Lambda K-
   FindTrackV0Decay(vV0Sec[0], 3122, vRTracks[1], -1, vRTracks[1].FirstPion(), vRTracks[1].LastKaon(),
-#ifdef NonhomogeniousField
-                   vField,
-#endif
                    Particles, PrimVtx, -1, &(ChiToPrimVtx[1]), &vXiPrim);
   //Xi+ -> Lambda pi+, Omega+ -> Lambda K+
   FindTrackV0Decay(vV0Sec[1], -3122, vRTracks[0], 1, vRTracks[0].FirstPion(), vRTracks[0].LastKaon(),
-#ifdef NonhomogeniousField
-                   vField,
-#endif
                    Particles, PrimVtx, -1, &(ChiToPrimVtx[0]), &vXiBarPrim);
   for(int iPV=0; iPV<fNPV; iPV++ )
   {
@@ -155,97 +145,55 @@ void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* C
   //K*+ -> K0 pi+
   for(int iPV=0; iPV<fNPV; iPV++)
     FindTrackV0Decay(vV0Prim[0][iPV], 310, vRTracks[2], 1, vRTracks[2].FirstPion(), vRTracks[2].LastPion(),
-#ifdef NonhomogeniousField
-                     vField,
-#endif
                      Particles, PrimVtx, iPV, 0);
   //K*- -> K0 pi-
   for(int iPV=0; iPV<fNPV; iPV++)
     FindTrackV0Decay(vV0Prim[0][iPV], 310, vRTracks[3], -1, vRTracks[3].FirstPion(), vRTracks[3].LastPion(),
-#ifdef NonhomogeniousField
-                     vField,
-#endif
                      Particles, PrimVtx, iPV, 0);
   //Sigma*+ -> Lambda pi+
   for(int iPV=0; iPV<fNPV; iPV++)
     FindTrackV0Decay(vV0Prim[1][iPV], 3122, vRTracks[2], 1, vRTracks[2].FirstPion(), vRTracks[2].LastPion(),
-#ifdef NonhomogeniousField
-                     vField,
-#endif
                      Particles, PrimVtx, iPV, 0);
   //Sigma*- -> Lambda pi-, Xi*- -> Lambda K-
   for(int iPV=0; iPV<fNPV; iPV++)
     FindTrackV0Decay(vV0Prim[1][iPV], 3122, vRTracks[3], -1, vRTracks[3].FirstPion(), vRTracks[3].LastKaon(),
-#ifdef NonhomogeniousField
-                     vField,
-#endif
                      Particles, PrimVtx, iPV, 0);
     //Sigma*+_bar -> Lambda_bar pi-
     for(int iPV=0; iPV<fNPV; iPV++)
       FindTrackV0Decay(vV0Prim[2][iPV], -3122, vRTracks[3], -1, vRTracks[3].FirstPion(), vRTracks[3].LastPion(),
-#ifdef NonhomogeniousField
-                       vField,
-#endif
                        Particles, PrimVtx, iPV, 0);
     //Sigma*-_bar -> Lambda_bar pi+, Xi*+ -> Lambda_bar + K+
     for(int iPV=0; iPV<fNPV; iPV++)
       FindTrackV0Decay(vV0Prim[2][iPV], -3122, vRTracks[2], 1, vRTracks[2].FirstPion(), vRTracks[2].LastKaon(),
-#ifdef NonhomogeniousField
-                       vField,
-#endif
                        Particles, PrimVtx, iPV, 0);
     //Xi*0 -> Xi- pi+
     for(int iPV=0; iPV<fNPV; iPV++)
       FindTrackV0Decay(vXiPrim[iPV], 3312, vRTracks[2], 1, vRTracks[2].FirstPion(), vRTracks[2].LastPion(),
-#ifdef NonhomogeniousField
-                       vField,
-#endif
                        Particles, PrimVtx, iPV, 0, &vXiStarPrim);
     //Xi*0_bar -> Xi+ pi-
     for(int iPV=0; iPV<fNPV; iPV++)
       FindTrackV0Decay(vXiBarPrim[iPV], -3312, vRTracks[3], -1, vRTracks[3].FirstPion(), vRTracks[3].LastPion(),
-#ifdef NonhomogeniousField
-                       vField,
-#endif
                        Particles, PrimVtx, iPV, 0, &vXiStarBarPrim);
     //Omega*- -> Xi- pi+ K-
     for(int iPV=0; iPV<fNPV; iPV++)
       FindTrackV0Decay(vXiStarPrim[iPV], 3324, vRTracks[3], -1, vRTracks[3].FirstKaon(), vRTracks[3].LastKaon(),
-#ifdef NonhomogeniousField
-                       vField,
-#endif
                        Particles, PrimVtx, iPV, 0);
     //Omega*+ -> Xi+ pi- K+
     for(int iPV=0; iPV<fNPV; iPV++)
       FindTrackV0Decay(vXiStarBarPrim[iPV], -3324, vRTracks[2], 1, vRTracks[2].FirstKaon(), vRTracks[2].LastKaon(),
-#ifdef NonhomogeniousField
-                       vField,
-#endif
                        Particles, PrimVtx, iPV, 0);
     // Charm
     //LambdaC -> pi+ K- p, Ds+ -> pi+ K- K+, D+ -> pi+ K- pi+
     FindTrackV0Decay(fD0, 421, vRTracks[0], 1, vRTracks[0].FirstPion(), vRTracks[0].LastProton(),
-#ifdef NonhomogeniousField
-                     vField,
-#endif
                      Particles, PrimVtx, -1, &(ChiToPrimVtx[0]));
     //LambdaC_bar -> pi- K+ p-, Ds- -> pi- K+ K-, D- -> pi- K+ pi-
     FindTrackV0Decay(fD0bar, -421, vRTracks[1], -1, vRTracks[1].FirstPion(), vRTracks[1].LastProton(),
-#ifdef NonhomogeniousField
-                     vField,
-#endif
                      Particles, PrimVtx, -1, &(ChiToPrimVtx[1]));    
     //D0->pi+ K- pi+ pi-
     FindTrackV0Decay(fDPlus, 411, vRTracks[1], -1, vRTracks[1].FirstPion(), vRTracks[1].LastPion(),
-#ifdef NonhomogeniousField
-                     vField,
-#endif
                      Particles, PrimVtx, -1, &(ChiToPrimVtx[1]));
     //D0_bar->pi- K+ pi- pi+
     FindTrackV0Decay(fDMinus, -411, vRTracks[0], 1, vRTracks[0].FirstPion(), vRTracks[0].LastPion(),
-#ifdef NonhomogeniousField
-                     vField,
-#endif
                      Particles, PrimVtx, -1, &(ChiToPrimVtx[0]));    
     //D0 -> pi+ K-
     SelectParticles(Particles,fD0,PrimVtx,fCutsCharm[0][2],fCutsCharm[0][1]);
@@ -254,16 +202,10 @@ void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* C
     //D*+->D0 pi+
     for(int iPV=0; iPV<fNPV; iPV++)
       FindTrackV0Decay(fD0, 421, vRTracks[2], 1, vRTracks[2].FirstPion(), vRTracks[2].LastPion(),
-#ifdef NonhomogeniousField
-                       vField,
-#endif
                        Particles, PrimVtx, iPV, 0);
     //D*- -> D0_bar pi-
     for(int iPV=0; iPV<fNPV; iPV++)
       FindTrackV0Decay(fD0, -421, vRTracks[3], -1, vRTracks[3].FirstPion(), vRTracks[3].LastPion(),
-#ifdef NonhomogeniousField
-                       vField,
-#endif
                        Particles, PrimVtx, iPV, 0);
     //D0 -> pi+ K- pi+ pi-
     SelectParticles(Particles,fD04,PrimVtx,fCutsCharm[0][2],fCutsCharm[0][1]);
@@ -272,16 +214,10 @@ void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* C
     //D*+->D0 pi+
     for(int iPV=0; iPV<fNPV; iPV++)
       FindTrackV0Decay(fD04, 100421, vRTracks[2], 1, vRTracks[2].FirstPion(), vRTracks[2].LastPion(),
-#ifdef NonhomogeniousField
-                       vField,
-#endif
                        Particles, PrimVtx, iPV, 0);
     //D0*- -> D0_bar pi-
     for(int iPV=0; iPV<fNPV; iPV++)
       FindTrackV0Decay(fD04bar, -100421, vRTracks[3], -1, vRTracks[3].FirstPion(), vRTracks[3].LastPion(),
-#ifdef NonhomogeniousField
-                       vField,
-#endif
                        Particles, PrimVtx, iPV, 0);
     //D+
     SelectParticles(Particles,fDPlus,PrimVtx,fCutsCharm[1][2],fCutsCharm[1][1]);
@@ -290,25 +226,16 @@ void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* C
     //D*0->D+ pi-
     for(int iPV=0; iPV<fNPV; iPV++)
       FindTrackV0Decay(fDPlus, 411, vRTracks[3], -1, vRTracks[3].FirstPion(), vRTracks[3].LastPion(),
-#ifdef NonhomogeniousField
-                       vField,
-#endif
                        Particles, PrimVtx, iPV, 0);
     //D*0_bar->D- pi+
     for(int iPV=0; iPV<fNPV; iPV++)
       FindTrackV0Decay(fDMinus, -411, vRTracks[2], 1, vRTracks[2].FirstPion(), vRTracks[2].LastPion(),
-#ifdef NonhomogeniousField
-                       vField,
-#endif
                        Particles, PrimVtx, iPV, 0);
 
     //H0 -> Lambda Lambda
     CombinePartPart(vV0Sec[0], vV0Sec[0], Particles, PrimVtx, fCutsPartPart[0], -1, 3000, 1, 1);
     //H0 -> Lambda p pi-
     FindTrackV0Decay(fLPi, 3002, vRTracks[0], 1, vRTracks[0].FirstProton(), vRTracks[0].LastProton(),
-#ifdef NonhomogeniousField
-                     vField,
-#endif
                      Particles, PrimVtx, -1);
     //Sigma0 -> Lambda Gamma
     for(int iPV=0; iPV<fNPV; iPV++)
@@ -331,15 +258,9 @@ void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* C
     //TODO implement this
     //Sigma+ -> p pi0
     FindTrackV0Decay(vPi0Sec, 111, vRTracks[0],  1, vRTracks[0].FirstProton(), vRTracks[0].LastProton(),
-#ifdef NonhomogeniousField
-                     vField,
-#endif
                      Particles, PrimVtx, -1);
     //Sigma+_bar -> p- pi0
     FindTrackV0Decay(vPi0Sec, 111, vRTracks[1], -1, vRTracks[1].FirstProton(), vRTracks[1].LastProton(),
-#ifdef NonhomogeniousField
-                     vField,
-#endif
                      Particles, PrimVtx, -1);
     //Xi0 -> Lambda pi0
     CombinePartPart(vPi0Sec, vV0Sec[0], Particles, PrimVtx, fCutsPartPart[4], -1, 3322);
@@ -348,16 +269,10 @@ void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* C
     //K*+ -> K+ pi0
     for(int iPV=0; iPV<fNPV; iPV++)
       FindTrackV0Decay(vPi0Prim[iPV], 111, vRTracks[2],  1, vRTracks[2].FirstKaon(), vRTracks[2].LastKaon(),
-#ifdef NonhomogeniousField
-                       vField,
-#endif
                        Particles, PrimVtx, -1);
     //K*- -> K- pi0
     for(int iPV=0; iPV<fNPV; iPV++)
       FindTrackV0Decay(vPi0Prim[iPV], 111, vRTracks[3], -1, vRTracks[3].FirstKaon(), vRTracks[3].LastKaon(),
-#ifdef NonhomogeniousField
-                       vField,
-#endif
                        Particles, PrimVtx, -1);
     //K*0 -> K0 pi0
     for(int iPV=0; iPV<fNPV; iPV++)
@@ -511,9 +426,6 @@ float_v KFParticleFinder::GetChi2BetweenParticles(KFParticleSIMD &p1, KFParticle
 inline void KFParticleFinder::ConstructV0(KFPTrackVector* vTracks,
                                           int iTrTypePos,
                                           int iTrTypeNeg,
-#ifdef NonhomogeniousField
-                                          const vector<L1FieldRegion>& vField,
-#endif
                                           uint_v& idPosDaughters,
                                           uint_v& idNegDaughters,
                                           int_v& daughterPosPDG,
@@ -543,31 +455,9 @@ inline void KFParticleFinder::ConstructV0(KFPTrackVector* vTracks,
   trackId.gather( &(vTracks[iTrTypePos].Id()[0]), idPosDaughters );
   posDaughter.SetId(trackId);
 
-#ifdef NonhomogeniousField
-  L1FieldRegion posField;      
-  for(unsigned short iv=0; iv<nBufEntry; iv++)
-  {
-    int entrSIMDPos = idPosDaughters[iv] % float_vLen;
-    int entrVecPos  = idPosDaughters[iv] / float_vLen;
-    posField.SetOneEntry(iv,vField[entrVecPos],entrSIMDPos);
-  }
-  posDaughter.SetField(posField);
-#endif
-
   KFParticleSIMD negDaughter(vTracks[iTrTypeNeg],idNegDaughters, daughterNegPDG);
   trackId.gather( &(vTracks[iTrTypeNeg].Id()[0]), idNegDaughters );
   negDaughter.SetId(trackId);
-  
-#ifdef NonhomogeniousField
-  L1FieldRegion negField;
-  for(unsigned short iv=0; iv<nBufEntry; iv++)
-  {
-    int entrSIMDPos = idNegDaughters[iv] % float_vLen;
-    int entrVecPos  = idNegDaughters[iv] / float_vLen;
-    negField.SetOneEntry(iv,vField[entrVecPos],entrSIMDPos);
-  }
-  negDaughter.SetField(negField);
-#endif
   
   float_v vtxGuess[3];
   float_v vtxErrGuess[3];
@@ -815,9 +705,6 @@ inline void KFParticleFinder::SaveV0PrimSecCand(KFParticleSIMD& mother,
 }
 
 void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_float* ChiToPrimVtx,
-#ifdef NonhomogeniousField
-                                          const vector<L1FieldRegion>& vField,
-#endif
                                           vector<KFParticle>& Particles,
                                           KFParticleSIMD* PrimVtx,
                                           const float* cuts,
@@ -946,8 +833,8 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
           float_v negPy = reinterpret_cast<const float_v&>(negTracks.Py()[iTrN]);
           float_v negPz = reinterpret_cast<const float_v&>(negTracks.Pz()[iTrN]);
           
-          float_v chiPrimNeg;
-          float_v chiPrimPos;
+          float_v chiPrimNeg(Vc::Zero);
+          float_v chiPrimPos(Vc::Zero);
           
           if( (iTrTypeNeg == 0) && (iTrTypePos == 0) )
             chiPrimNeg = reinterpret_cast<const float_v&>( ChiToPrimVtx[trTypeIndexNeg[iTrTypeNeg]][iTrN]);
@@ -1152,10 +1039,7 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
                   {
                     KFParticleDatabase::Instance()->GetMotherMass(V0PDG,massMotherPDG,massMotherPDGSigma);
                     mother.SetPDG( V0PDG );
-                    ConstructV0(vTracks, trTypeIndexPos[iTrTypePos], trTypeIndexNeg[iTrTypeNeg],
-      #ifdef NonhomogeniousField
-                                vField,
-      #endif                          
+                    ConstructV0(vTracks, trTypeIndexPos[iTrTypePos], trTypeIndexNeg[iTrTypeNeg],                
                                 idPosDaughters, idNegDaughters, daughterPosPDG, daughterNegPDG, dS,
                                 mother, mother_temp,
                                 nBufEntry, l, dl, Particles, PrimVtx,
@@ -1180,10 +1064,7 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
           KFParticleDatabase::Instance()->GetMotherMass(V0PDG,massMotherPDG,massMotherPDGSigma);
           mother.SetPDG( V0PDG );
 
-          ConstructV0(vTracks, trTypeIndexPos[iTrTypePos], trTypeIndexNeg[iTrTypeNeg],
-#ifdef NonhomogeniousField
-                      vField,
-#endif                          
+          ConstructV0(vTracks, trTypeIndexPos[iTrTypePos], trTypeIndexNeg[iTrTypeNeg],              
                       idPosDaughters, idNegDaughters, daughterPosPDG, daughterNegPDG, dS,
                       mother, mother_temp,
                       nBufEntry, l, dl, Particles, PrimVtx,
@@ -1203,9 +1084,6 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
 }
 
 void KFParticleFinder::ConstructTrackV0Cand(KFPTrackVector& vTracks,
-#ifdef NonhomogeniousField
-                                            const std::vector<L1FieldRegion>& vField,
-#endif
                                             uint_v& idTracks,
                                             int_v& trackPDG,
                                             KFParticle* vV0[],
@@ -1231,16 +1109,6 @@ void KFParticleFinder::ConstructTrackV0Cand(KFPTrackVector& vTracks,
   KFParticleSIMD V0(vV0,nElements);
   KFParticleSIMD track(vTracks, idTracks, trackPDG);
   track.SetId(trackId);
-#ifdef NonhomogeniousField
-  L1FieldRegion trackField;
-  for(unsigned short iv=0; iv<nBufEntry; iv++)
-  {
-    int entrSIMDPos = idTracks[iv] % float_vLen;
-    int entrVecPos  = idTracks[iv] / float_vLen;
-    trackField.SetOneEntry(iv,vField[entrVecPos],entrSIMDPos);
-  }
-  track.SetField(trackField);
-#endif
   
   float_v vtxGuess[3];
   float_v vtxErrGuess[3];
@@ -1467,10 +1335,6 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
                                         const int q,
                                         const int firstTrack,
                                         const int lastTrack,
-#ifdef NonhomogeniousField
-                                        const vector<L1FieldRegion>& vField,
-#endif
-
                                         vector<KFParticle>& Particles,    
                                         KFParticleSIMD* PrimVtx,
                                         int v0PVIndex,
@@ -1734,10 +1598,7 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
           if(nBufEntry == float_vLen)
           {
             mother.SetPDG( motherParticlePDG );
-            ConstructTrackV0Cand(vTracks,
-#ifdef NonhomogeniousField
-                                 vField,
-#endif                          
+            ConstructTrackV0Cand(vTracks,   
                                  idTrack, trackPDGMother, v0Pointer, dS,
                                  mother, motherTopo, mother_temp,
                                  nBufEntry, l, dl, Particles, PrimVtx,
@@ -1756,10 +1617,7 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
       idTrack[iV] = idTrack[0];
     
     mother.SetPDG( motherParticlePDG );
-    ConstructTrackV0Cand(vTracks,
-#ifdef NonhomogeniousField
-                          vField,
-#endif                          
+    ConstructTrackV0Cand(vTracks,  
                           idTrack, trackPDGMother, v0Pointer, dS,
                           mother, motherTopo, mother_temp,
                           nBufEntry, l, dl, Particles, PrimVtx,

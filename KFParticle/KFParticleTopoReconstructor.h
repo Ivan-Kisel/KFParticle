@@ -80,8 +80,10 @@ class KFParticleTopoReconstructor{
   }
 
   void SetBeamLine(KFParticle& p) { fKFParticlePVReconstructor->SetBeamLine(p); }
-
+#ifdef HomogeneousField
   void SetField(double b);
+#endif
+  
   //speed measurements
 #ifdef USE_TIMERS
   void SetTime(double d) { fTime = d; }

@@ -25,15 +25,8 @@
 // #include "TMath.h"
 #include <cmath>
 
-#ifdef HomogeneousField
 class KFPTrack;
 class KFPVertex;
-#endif
-
-#ifdef NonhomogeneousField
-class CbmKFTrackInterface;
-class CbmKFVertexInterface;
-#endif
 
 class KFParticle :public KFParticleBase
 {
@@ -71,7 +64,6 @@ class KFParticle :public KFParticleBase
 
   void Create( const float Param[], const float Cov[], Int_t Charge, float mass /*Int_t PID*/ );
 
-#ifdef HomogeneousField
  //* Initialisation from ALICE track, PID hypothesis shoould be provided 
 
   KFParticle( const KFPTrack &track, const int PID );
@@ -80,12 +72,6 @@ class KFParticle :public KFParticleBase
   //* Initialisation from VVertex 
 
   KFParticle( const KFPVertex &vertex );
-#endif
-
-#ifdef NonhomogeneousField
-  KFParticle( CbmKFTrackInterface* Track, float *z0=0,  Int_t *qHypo=0, Int_t *PID=0 );
-  KFParticle( CbmKFVertexInterface &vertex );
-#endif
 
   void CleanDaughtersId() { fDaughtersIds.clear(); }
   void SetNDaughters( int n ) { fDaughtersIds.reserve(n); }
@@ -379,10 +365,6 @@ class KFParticle :public KFParticleBase
   //* Other methods required by the abstract KFParticleBase class 
   
   void GetDStoParticle( const KFParticleBase &p, float &DS, float &DSp )const ;
-  static void GetExternalTrackParam( const KFParticleBase &p, float &X, float &Alpha, float P[5]  ) ;
-
-  //void GetDStoParticleALICE( const KFParticleBase &p, float &DS, float &DS1 ) const;
-
 
  private:
 #ifdef HomogeneousField

@@ -20,10 +20,6 @@
 
 #include <vector>
 
-#ifdef NonhomogeniousField
-class L1FieldRegion;
-#endif
-
 class KFParticleFinder
 {
  public:
@@ -46,9 +42,6 @@ class KFParticleFinder
   /// cut[*][3] - chi2/ndf of the reconstructed particle fitted to the PV;
 
      void FindParticles(KFPTrackVector* vRTracks, kfvector_float* ChiToPrimVtx,
-#ifdef NonhomogeniousField
-                        std::vector<L1FieldRegion>& vField,
-#endif
                         std::vector<KFParticle>& Particles, KFParticleSIMD* PrimVtx, int nPV);
 
      void ExtrapolateToPV(std::vector<KFParticle>& vParticles, KFParticleSIMD& PrimVtx);
@@ -57,9 +50,6 @@ class KFParticleFinder
     inline void ConstructV0(KFPTrackVector* vTracks,
                      int iTrTypePos,
                      int iTrTypeNeg,
-#ifdef NonhomogeniousField
-                     const std::vector<L1FieldRegion>& vField,
-#endif
                      uint_v& idPosDaughters,
                      uint_v& idNegDaughters,
                      int_v& daughterPosPDG,
@@ -92,9 +82,6 @@ class KFParticleFinder
                            std::vector<KFParticle>* vMotherSec);
     
     void ConstructTrackV0Cand(KFPTrackVector& vTracks,
-#ifdef NonhomogeniousField
-                               const std::vector<L1FieldRegion>& vField,
-#endif
                                uint_v& idTracks,
                                int_v& trackPDG,
                                KFParticle* vV0[],
@@ -115,9 +102,6 @@ class KFParticleFinder
                                std::vector<KFParticle>* vMotherSec);
 
     void Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_float* ChiToPrimVtx,
-#ifdef NonhomogeniousField
-                            const std::vector<L1FieldRegion>& vField,
-#endif
                             std::vector<KFParticle>& Particles,
                             KFParticleSIMD* PrimVtx,
                             const float* cuts,
@@ -131,10 +115,6 @@ class KFParticleFinder
                         const int q,
                         const int firstTrack,
                         const int lastTrack,
-#ifdef NonhomogeniousField
-                        const std::vector<L1FieldRegion>& vField,
-#endif
-
                         std::vector<KFParticle>& Particles,    
                         KFParticleSIMD* PrimVtx,
                         int v0PVIndex = -1,

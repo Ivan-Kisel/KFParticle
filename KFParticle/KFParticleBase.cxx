@@ -21,8 +21,8 @@
 
 #include <iostream>
 
-KFParticleBase::KFParticleBase() :fQ(0), fNDF(-3), fChi2(0), fSFromDecay(0), fAtProductionVertex(0), fIsLinearized(0),
-  fConstructMethod(2), SumDaughterMass(0), fMassHypo(-1), fId(-1), fDaughtersIds(), fPDG(0)
+KFParticleBase::KFParticleBase() : fChi2(0), fSFromDecay(0), 
+   SumDaughterMass(0), fMassHypo(-1), fNDF(-3), fId(-1), fAtProductionVertex(0),  fIsLinearized(0), fQ(0), fConstructMethod(2), fPDG(0), fDaughtersIds()
 { 
   //* Constructor 
 
@@ -2238,7 +2238,6 @@ void KFParticleBase::GetDStoParticleCBM( const KFParticleBase &p, float &dS, flo
 
   float fld[3];
   GetFieldValue( fP, fld );
-
   float fld1[3];
   GetFieldValue( p.fP, fld1 );
 
@@ -2343,7 +2342,7 @@ void KFParticleBase::TransportCBM( float dS,
     GetFieldValue( p0, fld[0] );
     GetFieldValue( p1, fld[1] );
     GetFieldValue( p2, fld[2] );
-    
+
     sx = c*( fld[0][0] + 4*fld[1][0] + fld[2][0] )*dS/6.;
     sy = c*( fld[0][1] + 4*fld[1][1] + fld[2][1] )*dS/6.;
     sz = c*( fld[0][2] + 4*fld[1][2] + fld[2][2] )*dS/6.;

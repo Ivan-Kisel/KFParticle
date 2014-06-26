@@ -18,14 +18,9 @@
 
 #include "KFParticle.h"
 #include "KFParticleDatabase.h"
-#ifdef HomogeneousField
+
 #include "KFPTrack.h"
 #include "KFPVertex.h"
-#endif
-
-#ifdef NonhomogeneousField
-#include "CbmKFTrack.h"
-#endif
 
 #ifdef HomogeneousField
 float KFParticle::fgBz = -5.;  //* Bz compoment of the magnetic field
@@ -64,102 +59,6 @@ void KFParticle::Create( const float Param[], const float Cov[], Int_t Charge, f
   KFParticleBase::Initialize( Param, C, Charge, mass );
 }
 
-#ifdef NonhomogeneousField
-KFParticle::KFParticle( CbmKFTrackInterface* Track, float *z0, Int_t  *qHypo, Int_t *PID)
-{
-  CbmKFTrack Tr( *Track );
-
-  float *m = Tr.GetTrack();
-  float *V = Tr.GetCovMatrix();
-
-  //* Fit of vertex track slopes and momentum (a,b,qp) to xyz0 vertex
-
-//  if( z0 ) Tr.Extrapolate( *z0 );
-
-  float a = m[2], b = m[3], qp = m[4];
-  
-  //* convert the track to (x,y,px,py,pz,e,t/p) parameterization
-
-  double c2 = 1./(1. + a*a + b*b);
-  double pq = 1./qp;
-  if(qHypo) pq *= *qHypo;
-  double p2 = pq*pq;
-  double pz = sqrt(p2*c2);
-  double px = a*pz;
-  double py = b*pz;
-  double H[3] = { -px*c2, -py*c2, -pz*pq };
-
-  float r[6];
-
-  r[0] = m[0];
-  r[1] = m[1];
-  r[2] = m[5];
-  r[3] = px;
-  r[4] = py;
-  r[5] = pz;
-
-  double cxpz = H[0]*V[ 3] + H[1]*V[ 6] + H[2]*V[10];
-  double cypz = H[0]*V[ 4] + H[1]*V[ 7] + H[2]*V[11];
-  double capz = H[0]*V[ 5] + H[1]*V[ 8] + H[2]*V[12];
-  double cbpz = H[0]*V[ 8] + H[1]*V[ 9] + H[2]*V[13];
-//  double cqpz = H[0]*V[12] + H[1]*V[13] + H[2]*V[14];
-  double cpzpz = H[0]*H[0]*V[5] +H[1]*H[1]*V[9] + H[2]*H[2]*V[14] 
-    + 2*( H[0]*H[1]*V[8] +H[0]*H[2]*V[12] +H[1]*H[2]*V[13]);
-
-  float C[21];
-
-  C[ 0] = V[0];
-  C[ 1] = V[1];
-  C[ 2] = V[2];
-  C[ 3] = 0;
-  C[ 4] = 0;
-  C[ 5] = 0;
-  C[ 6] = V[3]*pz + a*cxpz; 
-  C[ 7] = V[4]*pz + a*cypz; 
-  C[ 8] = 0;
-  C[ 9] = V[5]*pz*pz + 2*a*pz*capz + a*a*cpzpz;
-  C[10] = V[6]*pz+b*cxpz; 
-  C[11] = V[7]*pz+b*cypz; 
-  C[12] = 0;
-  C[13] = V[8]*pz*pz + a*pz*cbpz + b*pz*capz + a*b*cpzpz;
-  C[14] = V[9]*pz*pz + 2*b*pz*cbpz + b*b*cpzpz;
-  C[15] = cxpz; 
-  C[16] = cypz; 
-  C[17] = 0;
-  C[18] = capz*pz + a*cpzpz;
-  C[19] = cbpz*pz + b*cpzpz;
-  C[20] = cpzpz;
-
-  float Charge = (qp>0.) ?1 :( (qp<0) ?-1 :0);
-  if(qHypo) Charge *= *qHypo;
-
-  float mass = Tr.GetMass();
-
-  if(PID)
-    mass=KFParticleDatabase::Instance()->GetMass(*PID);
-
-  Create(r,C,Charge,mass);
-}
-
-// KFParticle::KFParticle( CbmKFVertexInterface &vertex )
-// {
-//   // Constructor from CBM KF vertex
-//   fP[0] = vertex.GetRefX();
-//   fP[1] = vertex.GetRefY();
-//   fP[2] = vertex.GetRefZ();
-//   for( Int_t i=0; i<6; i++)
-//     fC[i] = vertex.GetCovMatrix( )[i];
-//   fChi2 = vertex.GetRefChi2();
-//   fNDF = vertex.GetRefNDF();//2*vertex.GetNContributors() - 3;
-//   fQ = 0;
-//   fAtProductionVertex = 0;
-//   fIsLinearized = 0;
-//   fSFromDecay = 0;
-// }
-
-#endif
-
-#ifdef HomogeneousField
 KFParticle::KFParticle( const KFPTrack &track, const int PID )
 {
   // Constructor from ALICE track, PID hypothesis should be provided
@@ -189,33 +88,6 @@ KFParticle::KFParticle( const KFPVertex &vertex )
   fIsLinearized = 0;
   fSFromDecay = 0;
 }
-
-void KFParticle::GetExternalTrackParam( const KFParticleBase &p, float &X, float &Alpha, float P[5] ) 
-{
-  // Conversion to AliExternalTrackParam parameterization
-
-  float cosA = p.GetPx(), sinA = p.GetPy(); 
-  float pt = sqrt(cosA*cosA + sinA*sinA);
-  float pti = 0;
-  if( pt<1.e-4 ){
-    cosA = 1;
-    sinA = 0;
-  } else {
-    pti = 1./pt;
-    cosA*=pti;
-    sinA*=pti;
-  }
-  Alpha = atan2(sinA,cosA);  
-  X   = p.GetX()*cosA + p.GetY()*sinA;   
-  P[0]= p.GetY()*cosA - p.GetX()*sinA;
-  P[1]= p.GetZ();
-  P[2]= 0;
-  P[3]= p.GetPz()*pti;
-  P[4]= p.GetQ()*pti;
-}
-
-#endif
-
 
 Bool_t KFParticle::GetDistanceFromVertexXY( const float vtx[], const float Cv[], float &val, float &err ) const
 {
@@ -438,43 +310,6 @@ float KFParticle::GetAngleRZ( const KFParticle &p ) const
   else a = (a>=0) ?0 :3.14;
   return a;
 }
-
-
-/*
-
-#include "AliExternalTrackParam.h"
-
-void KFParticle::GetDStoParticleALICE( const KFParticleBase &p, 
-					   float &DS, float &DS1 ) 
-  const
-{ 
-  DS = DS1 = 0;   
-  float x1, a1, x2, a2;
-  float par1[5], par2[5], cov[15];
-  for(int i=0; i<15; i++) cov[i] = 0;
-  cov[0] = cov[2] = cov[5] = cov[9] = cov[14] = .001;
-
-  GetExternalTrackParam( *this, x1, a1, par1 );
-  GetExternalTrackParam( p, x2, a2, par2 );
-
-  AliExternalTrackParam t1(x1,a1, par1, cov);
-  AliExternalTrackParam t2(x2,a2, par2, cov);
-
-  float xe1=0, xe2=0;
-  t1.GetDCA( &t2, -GetFieldAlice(), xe1, xe2 );
-  t1.PropagateTo( xe1, -GetFieldAlice() );
-  t2.PropagateTo( xe2, -GetFieldAlice() );
-
-  float xyz1[3], xyz2[3];
-  t1.GetXYZ( xyz1 );
-  t2.GetXYZ( xyz2 );
-  
-  DS = GetDStoPoint( xyz1 );
-  DS1 = p.GetDStoPoint( xyz2 );
-
-  return;
-}
-*/
 
   // * Pseudo Proper Time of decay = (r*pt) / |pt| * M/|pt|
 float KFParticle::GetPseudoProperDecayTime( const KFParticle &pV, const float& mass, float* timeErr2 ) const

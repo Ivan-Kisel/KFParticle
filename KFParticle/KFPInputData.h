@@ -116,7 +116,7 @@ class KFPInputData
     int nPV;
     ifile>>nPV;
     fPV.resize(nPV);
-    for(int iPV=0; iPV < fPV.size(); iPV++)
+    for(unsigned int iPV=0; iPV < fPV.size(); iPV++)
     {
       for(int iP=0; iP<3; iP++)
         ifile >> fPV[iPV].Parameter(iP);

@@ -17,6 +17,10 @@ void KFPTrackVector::Resize(const int n)
     fP[i].resize(n);
   for(int i=0; i<21; i++)
     fC[i].resize(n);
+#ifdef NonhomogeneousField
+  for(int i=0; i<10; i++)
+    fField[i].resize(n);
+#endif
 //     fChi2.resize(n);
 //     fNDF.resize(n);
   fId.resize(n);
@@ -33,6 +37,10 @@ void KFPTrackVector::Set(KFPTrackVector& v, int vSize, int offset)
       fP[i][offset+iV] = v.fP[i][iV];
     for(int i=0; i<21; i++)
       fC[i][offset+iV] = v.fC[i][iV];
+#ifdef NonhomogeneousField
+    for(int i=0; i<10; i++)
+      fField[i][offset+iV] = v.fField[i][iV];
+#endif
 //       fChi2[offset+iV] = v.fChi2[iV];
 //       fNDF[offset+iV] = v.fNDF[iV];
     fId[offset+iV] = v.fId[iV];
@@ -79,6 +87,21 @@ void KFPTrackVector::SetTracks(const KFPTrackVector& track, const kfvector_uint&
     float_v& vec = reinterpret_cast<float_v&>(fC[iC][iElement]);
     vec.gather(&(track.fC[iC][0]), index, float_m(iElement+uint_v::IndexesFromZero()<nIndexes));
   }
+#ifdef NonhomogeneousField
+  for(int iP=0; iP<10; iP++)
+  {
+    int iElement = 0;
+    for(iElement=0; iElement<nIndexes-float_vLen; iElement += float_vLen)
+    {
+      const uint_v& index = reinterpret_cast<const uint_v&>(trackIndex[iElement]);
+      float_v& vec = reinterpret_cast<float_v&>(fField[iP][iElement]);
+      vec.gather(&(track.fField[iP][0]), index);
+    }
+    const uint_v& index = reinterpret_cast<const uint_v&>(trackIndex[iElement]);
+    float_v& vec = reinterpret_cast<float_v&>(fField[iP][iElement]);
+    vec.gather(&(track.fField[iP][0]), index, float_m(iElement+uint_v::IndexesFromZero()<nIndexes)); 
+  }
+#endif
   {
     int iElement=0;
     for(iElement=0; iElement<nIndexes-float_vLen; iElement += float_vLen)

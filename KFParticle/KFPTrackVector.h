@@ -40,6 +40,9 @@ class KFPTrackVector
 
   const kfvector_float& Parameter(const int i)  const { return fP[i]; }
   const kfvector_float& Covariance(const int i)  const { return fC[i]; }
+#ifdef NonhomogeneousField
+  const kfvector_float& FieldCoefficient(const int i)  const { return fField[i]; }
+#endif
 
   const kfvector_int& Id()    const { return fId; }
   const kfvector_int& PDG()   const { return fPDG; }
@@ -52,6 +55,9 @@ class KFPTrackVector
   //modifiers 
   void SetParameter (float value, int iP, int iTr) { fP[iP][iTr] = value; }
   void SetCovariance(float value, int iC, int iTr) { fC[iC][iTr] = value; }
+#ifdef NonhomogeneousField
+  void SetFieldCoefficient(float value, int iP, int iTr) { fField[iP][iTr] = value; }
+#endif
   void SetId        (int value, int iTr)           { fId[iTr] = value; }
   void SetPDG       (int value, int iTr)           { fPDG[iTr] = value; }
   void SetQ         (int value, int iTr)           { fQ[iTr] = value; }
@@ -126,6 +132,15 @@ class KFPTrackVector
         fC[i][n] = track.fC[i][n];
     }
 
+#ifdef NonhomogeneousField
+    for(int i=0; i<10; i++)
+    {
+      fField[i].resize(localSize);
+      for(int n=0; n<localSize; n++)
+        fField[i][n] = track.fField[i][n];
+    }
+#endif
+
     fId.resize(localSize);
     for(int n=0; n<localSize; n++)
       fId[n] = track.fId[n];
@@ -159,6 +174,10 @@ class KFPTrackVector
   kfvector_int fPDG;
   kfvector_int fQ;     //charge
   kfvector_int fPVIndex; //index of Primary Vertex, to which the track is attached
+  
+#ifdef NonhomogeneousField
+  kfvector_float fField[10];
+#endif
   
   int fNE, fNMu, fNPi, fNK, fNP;
 };

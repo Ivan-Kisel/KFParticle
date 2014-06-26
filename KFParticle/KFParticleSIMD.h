@@ -18,18 +18,12 @@
 
 #include "KFParticleBaseSIMD.h"
 
-#ifdef HomogeneousField
 #include "KFPTrack.h"
 #include "KFPTrackVector.h"
 #include "KFPVertex.h"
-//class KFPTrack;
-//class KFPVertex;
-#endif
 
 #ifdef NonhomogeneousField
-class CbmKFTrackInterface;
-class CbmKFVertexInterface;
-#include "L1Field.h"
+#include "KFParticleField.h"
 #endif
 
 class KFParticle;
@@ -54,12 +48,9 @@ class KFParticleSIMD :public KFParticleBaseSIMD
   static void SetField( float_v Bz );
 #endif
 #ifdef NonhomogeneousField
-  void SetField(const L1FieldRegion &field, bool isOneEntry=0, const int iVec=0)
+  void SetField(const KFParticleFieldRegion &field)
   {
-    if(!isOneEntry)
       fField = field;
-    else
-      fField.SetOneEntry(field,iVec);
   }
 #endif
   //* Constructor (empty)
@@ -84,8 +75,6 @@ class KFParticleSIMD :public KFParticleBaseSIMD
   void Create( const float_v Param[], const float_v Cov[], float_v Charge, float_v mass /*Int_t PID*/ );
 
   void SetOneEntry(int iEntry, KFParticleSIMD& part, int iEntryPart);
-#ifdef HomogeneousField
- //* Initialisation from ALICE track, PID hypothesis shoould be provided 
 
   KFParticleSIMD( const KFPTrack &track, Int_t PID );
   KFParticleSIMD( const KFPTrack *track, Int_t PID );
@@ -101,14 +90,7 @@ class KFParticleSIMD :public KFParticleBaseSIMD
   //* Initialisation from VVertex 
 
   KFParticleSIMD( const KFPVertex &vertex );
-#endif
 
-#ifdef NonhomogeneousField
-  KFParticleSIMD( CbmKFTrackInterface* Track[], int NTracks, Int_t *qHypo=0, const Int_t *pdg=0 );
-  KFParticleSIMD( CbmKFTrackInterface &Track, Int_t *qHypo=0, const Int_t *pdg=0);
-  KFParticleSIMD( CbmKFVertexInterface &vertex );
-  void Create(CbmKFTrackInterface* Track[], int NTracks, Int_t *qHypo=0, const Int_t *pdg=0);
-#endif
   KFParticleSIMD( KFParticle* part[], const int nPart = 0 );
   KFParticleSIMD( KFParticle &part );
 
@@ -399,17 +381,13 @@ class KFParticleSIMD :public KFParticleBaseSIMD
   //* Other methods required by the abstract KFParticleBaseSIMD class 
   
   void GetDStoParticle( const KFParticleBaseSIMD &p, float_v &DS, float_v &DSp )const ;
-  static void GetExternalTrackParam( const KFParticleBaseSIMD &p, Double_t X[float_vLen], Double_t Alpha[float_vLen], Double_t P[5][float_vLen]  ) ;
-
-  //void GetDStoParticleALICE( const KFParticleBaseSIMD &p, float_v &DS, float_v &DS1 ) const;
-
 
  private:
 #ifdef HomogeneousField
   static float_v fgBz;  //* Bz compoment of the magnetic field
 #endif
 #ifdef NonhomogeneousField
-  L1FieldRegion fField;
+  KFParticleFieldRegion fField;
 #endif
 };
 
@@ -901,14 +879,14 @@ inline void KFParticleSIMD::Construct( const KFParticleSIMD *vDaughters[], int n
 
   #ifdef NonhomogeneousField
   // calculate a field region for the constructed particle
-  L1FieldValue field[3];
-  float_v zField[3] = {0, fP[2]/2, fP[2]};
+  KFParticleFieldValue field[3];
+  float_v zField[3] = {0.f, fP[2]/2, fP[2]};
 
   for(int iPoint=0; iPoint<3; iPoint++)
   {
     for(int iD=0; iD<nDaughters; ++iD)
     {
-      L1FieldValue b = const_cast<KFParticleSIMD *>(vDaughters[iD])->fField.Get(zField[iPoint]);
+      KFParticleFieldValue b = const_cast<KFParticleSIMD *>(vDaughters[iD])->fField.Get(zField[iPoint]);
       field[iPoint].x += b.x;
       field[iPoint].y += b.y;
       field[iPoint].z += b.z;
@@ -1051,7 +1029,7 @@ inline void KFParticleSIMD::GetFieldValue( const float_v * /*xyz*/, float_v B[] 
 #ifdef NonhomogeneousField
 inline void KFParticleSIMD::GetFieldValue( const float_v xyz[], float_v B[] ) const 
 {
-  L1FieldValue mB = const_cast<L1FieldRegion&>(fField).Get(xyz[2]);
+  KFParticleFieldValue mB = const_cast<KFParticleFieldRegion&>(fField).Get(xyz[2]);
   B[0] = mB.x;
   B[1] = mB.y;
   B[2] = mB.z;

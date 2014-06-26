@@ -36,11 +36,13 @@ KFParticleTopoReconstructor::~KFParticleTopoReconstructor()
   if(fTracks) delete [] fTracks;
 }
 
+#ifdef HomogeneousField
 void KFParticleTopoReconstructor::SetField(double b)
 {
   KFParticle::SetField(b);
   KFParticleSIMD::SetField(float(b));
 }
+#endif
 
 #ifdef KFPWITHTRACKER
 void KFParticleTopoReconstructor::Init(AliHLTTPCCAGBTracker* tracker, vector<int>* pdg)
@@ -284,7 +286,7 @@ void KFParticleTopoReconstructor::Init(const KFPTrackVector *particles, const ve
   fChiToPrimVtx[1].resize(fTracks[1].Size());
   
   fPV.resize(pv.size());
-  for(int iPV=0; iPV<fPV.size(); iPV++)
+  for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
     fPV[iPV] = const_cast<KFParticle&>(pv[iPV]);
     
 #ifdef USE_TIMERS
@@ -308,7 +310,7 @@ void KFParticleTopoReconstructor::ReconstructPrimVertex(bool isHeavySystem)
   {
     if(NPrimaryVertices() > 1)
     {
-      int nMax = GetPVTrackIndexArray(0).size();
+      unsigned int nMax = GetPVTrackIndexArray(0).size();
       for(int i=1; i<NPrimaryVertices(); i++)
         if(GetPVTrackIndexArray(i).size() > nMax)
         {
@@ -375,7 +377,6 @@ void KFParticleTopoReconstructor::SortTracks()
     int iTrSorted = sortedTracks[iTr].fIndex;
     
     int q = fTracks[0].Q()[iTrSorted];
-    int pdg = fTracks[0].PDG()[iTrSorted];
 
     if(fTracks[0].PVIndex()[iTrSorted] < 0)
     {
@@ -502,7 +503,7 @@ void KFParticleTopoReconstructor::SaveInputParticles(const string prefix, bool o
   if(onlySecondary)
     nSets = 2;
     
-  float B[3], r[3] = {0.f};
+  float B[3] = {0.f}, r[3] = {0.f};
   KFParticle kfpTmp;
   kfpTmp.GetFieldValue(r, B);
   out << -B[2] << std::endl;
@@ -549,7 +550,7 @@ void KFParticleTopoReconstructor::SaveInputParticles(const string prefix, bool o
 
   //Save PVs
   out << fPV.size() << std::endl;
-  for(int iPV=0; iPV < fPV.size(); iPV++)
+  for(unsigned int iPV=0; iPV < fPV.size(); iPV++)
   {
     out << fPV[iPV].X()[0] << " " << fPV[iPV].Y()[0] << " " << fPV[iPV].Z()[0] << " " << std::endl;
   

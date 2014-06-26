@@ -83,7 +83,7 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
     primVtx.Z() = pvEstimation[2];
     
     nPrimCand = 0;
-    for ( int iP = 0; iP < fParticles.size(); iP++ )
+    for ( unsigned int iP = 0; iP < fParticles.size(); iP++ )
     {
       const KFParticle &p = fParticles[iP];
       float chi = p.GetDeviationFromVertex( primVtx );      

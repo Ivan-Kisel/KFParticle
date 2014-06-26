@@ -59,220 +59,8 @@ void KFParticleSIMD::Create( const float_v Param[], const float_v Cov[], float_v
   KFParticleBaseSIMD::Initialize( Param, C, Charge, mass );
 }
 
-#ifdef NonhomogeneousField
-KFParticleSIMD::KFParticleSIMD( CbmKFTrackInterface* Track[], int NTracks, Int_t *qHypo, const Int_t *pdg)
-{
-  Create(Track, NTracks, qHypo, pdg);
-}
-
-void KFParticleSIMD::Create(CbmKFTrackInterface* Track[], int NTracks, Int_t *qHypo, const Int_t *pdg)
-{
-  float_v m[6];
-  float_v V[15];
-  float_v TrMass;
-
-  fDaughterIds.push_back( float_v(-1) );
-  for (int j=0; j<NTracks; j++)
-  {
-    fDaughterIds.back()[j] =  Track[j]->Id();
-
-//    TrMass[j] = pdg ? TDatabasePDG::Instance()->GetParticle(*pdg)->Mass() : Track[j]->GetMass();
-    TrMass[j] = pdg ? KFParticleDatabase::Instance()->GetMass(*pdg) : Track[j]->GetMass();
-
-    fNDF[j] = Track[j]->GetRefNDF();
-    fChi2[j] = Track[j]->GetRefChi2();
-
-    for(int i = 0; i < 6; i++) m[i][j] = Track[j]->GetTrack()[i];
-    for(int i = 0; i < 15; i++) V[i][j] = Track[j]->GetCovMatrix()[i];
-
-  }
-
-  float_v a = m[2], b = m[3], qp = m[4];
-  
-  //* convert the track to (x,y,px,py,pz,e,t/p) parameterization
-
-  float_v c2 = 1.f/(1.f + a*a + b*b);
-  float_v pq = 1.f/qp;
-  float_v p2 = pq*pq;
-  float_v pz = sqrt(p2*c2);
-  float_v px = a*pz;
-  float_v py = b*pz;
-  float_v eE = sqrt( TrMass*TrMass + p2 );
-    
-  float_v H[3] = { -px*c2, -py*c2, -pz*pq };
-  float_v HE = -pq*p2/eE;
-
-  fP[0] = m[0];
-  fP[1] = m[1];
-  fP[2] = m[5];
-  fP[3] = px;
-  fP[4] = py;
-  fP[5] = pz;
-  fP[6] = eE;
-  fP[7] = 0.f;
-
-  float_v cxpz = H[0]*V[ 3] + H[1]*V[ 6] + H[2]*V[10];
-  float_v cypz = H[0]*V[ 4] + H[1]*V[ 7] + H[2]*V[11];
-  float_v capz = H[0]*V[ 5] + H[1]*V[ 8] + H[2]*V[12];
-  float_v cbpz = H[0]*V[ 8] + H[1]*V[ 9] + H[2]*V[13];
-  float_v cqpz = H[0]*V[12] + H[1]*V[13] + H[2]*V[14];
-  float_v cpzpz = H[0]*H[0]*V[5] +H[1]*H[1]*V[9] + H[2]*H[2]*V[14] 
-    + 2.f*( H[0]*H[1]*V[8] +H[0]*H[2]*V[12] +H[1]*H[2]*V[13]);
-
-  fC[ 0] = V[0];
-  fC[ 1] = V[1];
-  fC[ 2] = V[2];
-  fC[ 3] = 0.f;
-  fC[ 4] = 0.f;
-  fC[ 5] = 0.f;
-  fC[ 6] = V[3]*pz + a*cxpz; 
-  fC[ 7] = V[4]*pz + a*cypz; 
-  fC[ 8] = 0.f;
-  fC[ 9] = V[5]*pz*pz + 2*a*pz*capz + a*a*cpzpz;
-  fC[10] = V[6]*pz+b*cxpz; 
-  fC[11] = V[7]*pz+b*cypz; 
-  fC[12] = 0.f;
-  fC[13] = V[8]*pz*pz + a*pz*cbpz + b*pz*capz + a*b*cpzpz;
-  fC[14] = V[9]*pz*pz + 2*b*pz*cbpz + b*b*cpzpz;
-  fC[15] = cxpz; 
-  fC[16] = cypz; 
-  fC[17] = 0.f;
-  fC[18] = capz*pz + a*cpzpz;
-  fC[19] = cbpz*pz + b*cpzpz;
-  fC[20] = cpzpz;
-  fC[21] = HE*V[10];
-  fC[22] = HE*V[11];
-  fC[23] = 0.f;
-  fC[24] = HE*( V[12]*pz + a*cqpz );
-  fC[25] = HE*( V[13]*pz + b*cqpz );
-  fC[26] = HE*cqpz;
-  fC[27] = HE*HE*V[14];	    
-  fC[28] = fC[29] = fC[30] = fC[31] = fC[32] = fC[33] = fC[34] = 0;
-  fC[35] = 1.f;
-
-  for(int j=0; j<float_vLen; j++)
-    fQ[j] = (qp[j]>0.) ?1 :( (qp[j]<0) ?-1 :0);
-  fAtProductionVertex = 1;
-  fIsVtxGuess = false;
-  fIsVtxErrGuess = false;
-  fIsLinearized = false;
-}
-
-KFParticleSIMD::KFParticleSIMD(CbmKFTrackInterface &Track, Int_t *qHypo, const Int_t *pdg)
-{
-  fDaughterIds.push_back( Track.Id() );
-  
-  float_v m[6];
-  float_v V[15];
-  float_v TrMass;
-
-  CbmKFTrack Tr(Track);
-  for(unsigned int i=0; i<6; i++)
-    m[i] = Tr.GetTrack()[i];
-  for(unsigned int i=0; i<15; i++)
-    V[i] = Tr.GetCovMatrix()[i];
-//  TrMass = pdg ? TDatabasePDG::Instance()->GetParticle(*pdg)->Mass() :Tr.GetMass();
-  TrMass = pdg ? KFParticleDatabase::Instance()->GetMass(*pdg) :Tr.GetMass();
-
-  fNDF  = Tr.GetRefNDF();
-  fChi2 = Tr.GetRefChi2();
-
-  float_v a = m[2], b = m[3], qp = m[4];
-  
-  //* convert the track to (x,y,px,py,pz,e,t/p) parameterization
-
-  float_v c2 = 1.f/(1.f + a*a + b*b);
-  float_v pq = 1.f/qp;
-  float_v p2 = pq*pq;
-  float_v pz = sqrt(p2*c2);
-  float_v px = a*pz;
-  float_v py = b*pz;
-  float_v eE = sqrt( TrMass*TrMass + p2 );
-    
-  float_v H[3] = { -px*c2, -py*c2, -pz*pq };
-  float_v HE = -pq*p2/eE;
-
-  fP[0] = m[0];
-  fP[1] = m[1];
-  fP[2] = m[5];
-  fP[3] = px;
-  fP[4] = py;
-  fP[5] = pz;
-  fP[6] = eE;
-  fP[7] = 0;
-
-  float_v cxpz = H[0]*V[ 3] + H[1]*V[ 6] + H[2]*V[10];
-  float_v cypz = H[0]*V[ 4] + H[1]*V[ 7] + H[2]*V[11];
-  float_v capz = H[0]*V[ 5] + H[1]*V[ 8] + H[2]*V[12];
-  float_v cbpz = H[0]*V[ 8] + H[1]*V[ 9] + H[2]*V[13];
-  float_v cqpz = H[0]*V[12] + H[1]*V[13] + H[2]*V[14];
-  float_v cpzpz = H[0]*H[0]*V[5] +H[1]*H[1]*V[9] + H[2]*H[2]*V[14] 
-    + 2*( H[0]*H[1]*V[8] +H[0]*H[2]*V[12] +H[1]*H[2]*V[13]);
-
-  fC[ 0] = V[0];
-  fC[ 1] = V[1];
-  fC[ 2] = V[2];
-  fC[ 3] = 0.f;
-  fC[ 4] = 0.f;
-  fC[ 5] = 0.f;
-  fC[ 6] = V[3]*pz + a*cxpz; 
-  fC[ 7] = V[4]*pz + a*cypz; 
-  fC[ 8] = 0.f;
-  fC[ 9] = V[5]*pz*pz + 2*a*pz*capz + a*a*cpzpz;
-  fC[10] = V[6]*pz+b*cxpz; 
-  fC[11] = V[7]*pz+b*cypz; 
-  fC[12] = 0.f;
-  fC[13] = V[8]*pz*pz + a*pz*cbpz + b*pz*capz + a*b*cpzpz;
-  fC[14] = V[9]*pz*pz + 2*b*pz*cbpz + b*b*cpzpz;
-  fC[15] = cxpz; 
-  fC[16] = cypz; 
-  fC[17] = 0.f;
-  fC[18] = capz*pz + a*cpzpz;
-  fC[19] = cbpz*pz + b*cpzpz;
-  fC[20] = cpzpz;
-  fC[21] = HE*V[10];
-  fC[22] = HE*V[11];
-  fC[23] = 0.f;
-  fC[24] = HE*( V[12]*pz + a*cqpz );
-  fC[25] = HE*( V[13]*pz + b*cqpz );
-  fC[26] = HE*cqpz;
-  fC[27] = HE*HE*V[14];	    
-  fC[28] = fC[29] = fC[30] = fC[31] = fC[32] = fC[33] = fC[34] = 0;
-  fC[35] = 1.f;
-
-  fQ[j](qp>0.f) = 1.f;
-  fQ[j](qp<0.f) = -1.f;
-  fQ[j](qp==0.f) = 0.f;
-
-  fAtProductionVertex = 1;
-  fIsVtxGuess = false;
-  fIsVtxErrGuess = false;
-  fIsLinearized = false;
-}
-
-// KFParticleSIMD::KFParticleSIMD( CbmKFVertexInterface &vertex )
-// {
-//   // Constructor from CBM KF vertex
-//   fP[0] = vertex.GetRefX();
-//   fP[1] = vertex.GetRefY();
-//   fP[2] = vertex.GetRefZ();
-//   for( Int_t i=0; i<6; i++)
-//     fC[i] = vertex.GetCovMatrix( )[i];
-//   fChi2 = vertex.GetRefChi2();
-//   fNDF = vertex.GetRefNDF();//2*vertex.GetNContributors() - 3;
-//   fQ = 0;
-//   fAtProductionVertex = 0;
-//   fIsLinearized = 0;
-//   fSFromDecay = 0;
-// }
-
-#endif
-
-#ifdef HomogeneousField
 KFParticleSIMD::KFParticleSIMD( const KFPTrack *track, Int_t PID )
 {
-  // Constructor from ALICE track, PID hypothesis should be provided
-
   Double_t r[3];
   Double_t C[21];
 
@@ -329,7 +117,10 @@ KFParticleSIMD::KFParticleSIMD(KFPTrackVector &track, int n, Int_t *qHypo, const
     fP[i] = track.Parameter(i)[n];
   for(int i=0; i<21; i++)
     fC[i] = track.Covariance(i)[n];
-    
+#ifdef NonhomogeneousField
+  for(int i=0; i<10; i++)
+    fField.fField[i] = track.FieldCoefficient(i)[n];
+#endif
   fQ = track.Q()[n];
 
   float_v mass = KFParticleDatabase::Instance()->GetMass(*pdg);
@@ -384,8 +175,12 @@ void KFParticleSIMD::Create(KFPTrackVector &track, uint_v& index, const int_v& p
     fP[i].gather(&(track.Parameter(i)[0]), index);
   for(int i=0; i<21; i++)
     fC[i].gather(&(track.Covariance(i)[0]), index);
-    
-//   fPDG.gather(&(track.PDG()[0]), index);
+#ifdef NonhomogeneousField
+  for(int i=0; i<10; i++)
+    fField.fField[i].gather(&(track.FieldCoefficient(i)[0]), index);
+#endif
+  
+  //   fPDG.gather(&(track.PDG()[0]), index);
   fQ = track.Q()[index[0]];
 
   float_v mass = KFParticleDatabase::Instance()->GetMass(pdg);
@@ -413,43 +208,6 @@ KFParticleSIMD::KFParticleSIMD( const KFPVertex &vertex )
   fSFromDecay = 0;
 }
 
-void KFParticleSIMD::GetExternalTrackParam( const KFParticleBaseSIMD &p, Double_t X[float_vLen], Double_t Alpha[float_vLen], Double_t P[5][float_vLen] ) 
-{
-  // Conversion to AliExternalTrackParam parameterization
-
-  float_v cosA = p.GetPx(), sinA = p.GetPy(); 
-  float_v pt = sqrt(cosA*cosA + sinA*sinA);
-  float_v pti = Zero;
-  float_m mask = (pt < float_v(1.e-4));
-  pti(!mask) = (One/pt);
-  cosA(mask) = One;
-  cosA(!mask) = cosA*pti;
-  sinA(mask) = One;
-  sinA(!mask) = sinA*pti;
-
-  float_v AlphaSIMD = atan2(sinA,cosA);
-  float_v XSIMD     = p.GetX()*cosA + p.GetY()*sinA;
-  float_v PSIMD[5];
-  PSIMD[0]= p.GetY()*cosA - p.GetX()*sinA;
-  PSIMD[1]= p.GetZ();
-  PSIMD[2]= Zero;
-  PSIMD[3]= p.GetPz()*pti;
-  PSIMD[4]= p.GetQ()*pti;
-
-  for(int iPart=0; iPart<float_vLen; iPart++)
-  {
-    X[iPart] = XSIMD[iPart];
-    Alpha[iPart] = AlphaSIMD[iPart];
-    P[0][iPart] = PSIMD[0][iPart];
-    P[1][iPart] = PSIMD[1][iPart];
-    P[2][iPart] = PSIMD[2][iPart];
-    P[3][iPart] = PSIMD[3][iPart];
-    P[4][iPart] = PSIMD[4][iPart];
-  }
-}
-
-#endif
-
 void KFParticleSIMD::SetOneEntry(int iEntry, KFParticleSIMD& part, int iEntryPart)
 {
   for( int i = 0; i < 7; ++i )
@@ -476,8 +234,7 @@ void KFParticleSIMD::SetOneEntry(int iEntry, KFParticleSIMD& part, int iEntryPar
     fDaughterIds[iD][iEntry] = part.fDaughterIds[iD][iEntryPart];
 
 #ifdef NonhomogeneousField
-  L1FieldRegion field(part.GetFieldCoeff());
-  fField.SetOneEntry( iEntry, field, iEntryPart ); //CHECKME
+  fField.SetOneEntry( iEntry, part.fField, iEntryPart ); //CHECKME
 #endif
 }
 
@@ -519,8 +276,7 @@ KFParticleSIMD::KFParticleSIMD(KFParticle* parts[], const int nPart)
     fQ[iEntry] = part.GetQ();
     fAtProductionVertex = part.GetAtProductionVertex(); // CHECKME
 #ifdef NonhomogeneousField
-    L1FieldRegion field(part.GetFieldCoeff());
-    fField.SetOneEntry( iEntry, field, 0 );
+    fField.SetOneEntry( part.GetFieldCoeff(), iEntry);
 #endif
   }
 }
@@ -548,7 +304,7 @@ KFParticleSIMD::KFParticleSIMD( KFParticle &part)
     fC[i] = part.CovarianceMatrix()[i];
 
 #ifdef NonhomogeneousField
-  fField = L1FieldRegion(part.GetFieldCoeff());
+  fField = KFParticleFieldRegion(part.GetFieldCoeff());
 #endif
 }
 
@@ -899,17 +655,9 @@ void KFParticleSIMD::GetKFParticle(KFParticle &Part, int iPart)
   Part.Chi2() = GetChi2()[iPart];
   Part.Q()    = GetQ()[iPart];
   Part.SetAtProductionVertex(fAtProductionVertex);
-#ifdef NonomogeneousField
-  Part.SetFieldCoeff(fField.cx0[iPart], 0);
-  Part.SetFieldCoeff(fField.cx1[iPart], 1);
-  Part.SetFieldCoeff(fField.cx2[iPart], 2);
-  Part.SetFieldCoeff(fField.cy0[iPart], 3);
-  Part.SetFieldCoeff(fField.cy1[iPart], 4);
-  Part.SetFieldCoeff(fField.cy2[iPart], 5);
-  Part.SetFieldCoeff(fField.cz0[iPart], 6);
-  Part.SetFieldCoeff(fField.cz1[iPart], 7);
-  Part.SetFieldCoeff(fField.cz2[iPart], 8);
-  Part.SetFieldCoeff(fField.z0[iPart],  9);
+#ifdef NonhomogeneousField
+  for(int iF=0; iF<10; iF++)
+    Part.SetFieldCoeff(fField.fField[iF][iPart], iF);
 #endif
 }
 
