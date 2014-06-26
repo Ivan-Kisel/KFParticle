@@ -83,7 +83,7 @@ void KFTopoPerformance::CheckMCTracks()
   fMCTrackToMCPVMatch.resize(vMCTracks.size(),-1);
   
   vector<int> pvIndex;
-  for(int iTr=0; iTr<vMCTracks.size(); iTr++)
+  for(unsigned int iTr=0; iTr<vMCTracks.size(); iTr++)
   {
     KFMCTrack &mctr = vMCTracks[iTr];
     int motherID = mctr.MotherId();
@@ -141,7 +141,7 @@ void KFTopoPerformance::GetMCParticles()
   vMCParticles.clear();
   vMCParticles.reserve(vMCTracks.size());
   // all MC tracks are copied into KF MC Particles
-  for(int iMC=0; iMC < vMCTracks.size(); iMC++)
+  for(unsigned int iMC=0; iMC < vMCTracks.size(); iMC++)
   {
     KFMCTrack &mtra = vMCTracks[iMC];
     KFMCParticle part;
@@ -151,8 +151,8 @@ void KFTopoPerformance::GetMCParticles()
     vMCParticles.push_back( part );
   }
   // find relations between mother and daughter MC particles
-  const unsigned int nMCParticles = vMCParticles.size();
-  for ( unsigned int iP = 0; iP < nMCParticles; iP++ ) {
+  const int nMCParticles = vMCParticles.size();
+  for (int iP = 0; iP < nMCParticles; iP++ ) {
     KFMCParticle &part = vMCParticles[iP];
     int motherId = part.GetMotherId();
     if(motherId < 0) continue;
@@ -705,7 +705,7 @@ void KFTopoPerformance::CalculateEfficiency()
     }
 
     {
-      for(int iPType=0; iPType<iParticle.size(); iPType++)
+      for(unsigned int iPType=0; iPType<iParticle.size(); iPType++)
       {
         int iPart = iParticle[iPType];
         if(iPart<0) continue;
@@ -1415,7 +1415,7 @@ void KFTopoPerformance::FillHistos()
     }
   }
   
-  for(unsigned int iP=0; iP < KFPartEfficiencies::nParticles; iP++) {
+  for(int iP=0; iP < KFPartEfficiencies::nParticles; iP++) {
     hPartParam[iP][16]->Fill(multiplicities[iP]);
     hPartParamGhost[iP][16]->Fill(multiplicitiesGhost[iP]);
     hPartParamBG[iP][16]->Fill(multiplicitiesBG[iP]);

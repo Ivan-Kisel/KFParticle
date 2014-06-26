@@ -55,8 +55,8 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
           {
             TString parName[nFitQA/2] = {"X","Y","Z","Px","Py","Pz","E","M"};
             int nBins = 100;
-//            float xMax[nFitQA/2] = {0.15,0.15,0.03,0.01,0.01,0.06,0.06,0.01};
-            float xMax[nFitQA/2] = {2.,2.,5.,0.3,0.3,0.3,0.03,0.03};
+           float xMax[nFitQA/2] = {0.15,0.15,0.03,0.01,0.01,0.06,0.06,0.01};
+//             float xMax[nFitQA/2] = {2.,2.,5.,0.3,0.3,0.3,0.03,0.03};
   
             for( int iH=0; iH<nFitQA/2; iH++ ){
               hFitDaughtersQA[iPart][iH]   = new TH1F((res+parName[iH]).Data(),
@@ -74,8 +74,8 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
           {
             TString parName[nFitQA/2] = {"X","Y","Z","Px","Py","Pz","E","M"};
             int nBins = 50;
-//            float xMax[nFitQA/2] = {0.15,0.15,1.2,0.02,0.02,0.15,0.15,0.006};
-            float xMax[nFitQA/2] = {2.,2.,5.,0.3,0.3,0.3,0.03,0.03};
+           float xMax[nFitQA/2] = {0.15,0.15,1.2,0.02,0.02,0.15,0.15,0.006};
+//             float xMax[nFitQA/2] = {2.,2.,5.,0.3,0.3,0.3,0.03,0.03};
   
             for( int iH=0; iH<nFitQA/2; iH++ ){
               hFitQA[iPart][iH]   = new TH1F((res+parName[iH]).Data(),
