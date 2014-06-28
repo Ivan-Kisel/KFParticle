@@ -97,8 +97,10 @@ void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* C
         vRTracks[iV].SetId(Particles.size(),iTr);
         tmp.SetNDaughters(1);
         tmp.AddDaughterId( kfTrack.Id() );
+#ifdef NonhomogeneousField
         for(int iF=0; iF<10; iF++)
           tmp.SetFieldCoeff( vRTracks[iV].FieldCoefficient(iF)[iTr], iF);
+#endif
         Particles.push_back(tmp);
       }
     }
