@@ -25,7 +25,12 @@
 #include "KFParticleSIMD.h"
 
 #ifdef USE_TIMERS
+#ifndef HLTCA_STANDALONE
+#include "TStopwatch.h"
+typedef TStopwatch Stopwatch;
+#else
 #include "Stopwatch.h"
+#endif
 #endif
 
 #ifdef KFPWITHTRACKER

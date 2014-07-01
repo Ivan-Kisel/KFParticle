@@ -23,8 +23,9 @@
 
 static const float_v small = 1.e-20f;
 
-KFParticleBaseSIMD::KFParticleBaseSIMD() :fQ(0.f), fNDF(-3), fChi2(0.f), fSFromDecay(0.f), fAtProductionVertex(0), fIsVtxGuess(0),
-  fIsVtxErrGuess(0), fIsLinearized(0), fConstructMethod(0), SumDaughterMass(0.f), fMassHypo(-1), fId(-1), fDaughterIds(), fPDG(0)
+KFParticleBaseSIMD::KFParticleBaseSIMD() :fQ(0.f), fNDF(-3), fChi2(0.f), fSFromDecay(0.f),
+  SumDaughterMass(0.f), fMassHypo(-1), fId(-1), fAtProductionVertex(0), fIsVtxGuess(0),
+  fIsVtxErrGuess(0), fIsLinearized(0), fPDG(0), fConstructMethod(0), fDaughterIds()
 { 
   //* Constructor 
 
@@ -1665,32 +1666,34 @@ void KFParticleBaseSIMD::GetDistanceToVertexLine( const KFParticleBaseSIMD &Vert
 }
 
 
-float_v KFParticleBaseSIMD::GetDStoPointBz( float_v B, const float_v xyz[] ) 
+float_v KFParticleBaseSIMD::GetDStoPointBz( float_v B, const float_v xyz[], const float_v* param) 
   const
 { 
   
+  if(!param)
+    param = fP;
   //* Get dS to a certain space point for Bz field
   const float_v kCLight = 0.000299792458f;
   float_v bq = B*fQ*kCLight;
-  float_v pt2 = fP[3]*fP[3] + fP[4]*fP[4];
-  float_v p2 = pt2 + fP[5]*fP[5];  
+  float_v pt2 = param[3]*param[3] + param[4]*param[4];
+  float_v p2 = pt2 + param[5]*param[5];  
   
-  float_v dx = xyz[0] - fP[0];
-  float_v dy = xyz[1] - fP[1]; 
-  float_v dz = xyz[2] - fP[2]; 
-  float_v a = dx*fP[3]+dy*fP[4];
+  float_v dx = xyz[0] - param[0];
+  float_v dy = xyz[1] - param[1]; 
+  float_v dz = xyz[2] - param[2]; 
+  float_v a = dx*param[3]+dy*param[4];
   float_v dS(Vc::Zero);
   
   float_v abq = bq*a;
 
   const float_v LocalSmall = 1.e-8f;
   float_m mask = ( abs(bq)<LocalSmall );
-  dS(mask && float_m(p2>1.e-4f)) = (a + dz*fP[5])/p2;
+  dS(mask && float_m(p2>1.e-4f)) = (a + dz*param[5])/p2;
   if(mask.isFull())
     return dS;
   
   
-  dS(!mask) = KFPMath::ATan2( abq, pt2 + bq*(dy*fP[3] -dx*fP[4]) )/bq;
+  dS(!mask) = KFPMath::ATan2( abq, pt2 + bq*(dy*param[3] -dx*param[4]) )/bq;
 
   float_v bs= bq*dS;
 
@@ -1698,13 +1701,13 @@ float_v KFParticleBaseSIMD::GetDStoPointBz( float_v B, const float_v xyz[] )
 
   bq(abs(bq) < LocalSmall) = LocalSmall;
   float_v aCoeff = a;
-  float_v bCoeff = dx*fP[4] - dy*fP[3] - pt2/bq;
+  float_v bCoeff = dx*param[4] - dy*param[3] - pt2/bq;
   
   float_v sz(Vc::Zero);
-  sz(abs(fP[5]) > 1.e-4f) = dz/fP[5];
+  sz(abs(param[5]) > 1.e-4f) = dz/param[5];
   float_v kz(Vc::Zero);
-  float_v cCoeff = ( sz * (bq*(bCoeff*c - aCoeff*s) - fP[5]*fP[5]) );
-  kz(abs(cCoeff) > 1.e-8f) = (dS*fP[5] - dz)*fP[5] / cCoeff;
+  float_v cCoeff = ( sz * (bq*(bCoeff*c - aCoeff*s) - param[5]*param[5]) );
+  kz(abs(cCoeff) > 1.e-8f) = (dS*param[5] - dz)*param[5] / cCoeff;
   dS(!mask) += sz*kz;
   
   bs= bq*dS;
@@ -1718,20 +1721,20 @@ float_v KFParticleBaseSIMD::GetDStoPointBz( float_v B, const float_v xyz[] )
   cB(LocalSmall < abs(bs)) = (1.f-c)/bq;
   cB(LocalSmall >= abs(bs)) = .5f*sB*bs;
 
-  const float_v px = fP[3];
-  const float_v py = fP[4];
+  const float_v px = param[3];
+  const float_v py = param[4];
 
   float_v p[5];
-  p[0] = fP[0] + sB*px + cB*py;
-  p[1] = fP[1] - cB*px + sB*py;
-  p[2] = fP[2] +  dS*fP[5];
+  p[0] = param[0] + sB*px + cB*py;
+  p[1] = param[1] - cB*px + sB*py;
+  p[2] = param[2] +  dS*param[5];
   p[3] =          c*px + s*py;
   p[4] =         -s*px + c*py;
 
   dx = xyz[0] - p[0];
   dy = xyz[1] - p[1];
   dz = xyz[2] - p[2];
-  a = dx*p[3]+dy*p[4] + dz*fP[5];
+  a = dx*p[3]+dy*p[4] + dz*param[5];
 
   abq = bq*a;
 
@@ -1740,27 +1743,16 @@ float_v KFParticleBaseSIMD::GetDStoPointBz( float_v B, const float_v xyz[] )
   return dS;
 }
 
-float_v KFParticleBaseSIMD::GetDStoPointBy( float_v B, const float_v xyz[] ) 
+float_v KFParticleBaseSIMD::GetDStoPointBy( float_v By, const float_v xyz[] ) 
   const
 { 
   
   //* Get dS to a certain space point for Bz field
 
-  const float_v kCLight = 0.000299792458f;
-  float_v bq = B*fQ*kCLight;
-  float_v pt2 = fP[3]*fP[3] + fP[5]*fP[5];
-
-  float_v dx = xyz[0] - fP[0];
-  float_v dy = -xyz[2] + fP[2]; 
-  float_v a = dx*fP[3]-dy*fP[5];
-  float_v dS = 0.f;
+  const float_v param[6] = { fP[0], -fP[2], fP[1], fP[3], -fP[5], fP[4] };
+  const float_v point[3] = { xyz[0], -xyz[2], xyz[1] };
   
-  const float_v LocalSmall = 1.e-8f;
-  float_m mask = ( abs(bq)<LocalSmall );
-  dS(mask) = a/pt2;
-  dS(!mask) = KFPMath::ATan2( bq*a, pt2 + bq*(dy*fP[3] +dx*fP[5]) )/bq;
-  
-  return dS;
+  return GetDStoPointBz(By, point, param);
 }
 
 void KFParticleBaseSIMD::GetMaxDistanceToParticleBz(const float_v& B, const KFParticleBaseSIMD &p, float_v &r ) const
@@ -1775,25 +1767,25 @@ void KFParticleBaseSIMD::GetMaxDistanceToParticleBz(const float_v& B, const KFPa
   
   const float_v& px1 = fP[3];
   const float_v& py1 = fP[4];
-  const float_v& pz1 = fP[5];
+//   const float_v& pz1 = fP[5];
 
   const float_v& px2 = p.fP[3];
   const float_v& py2 = p.fP[4];
-  const float_v& pz2 = p.fP[5];
+//   const float_v& pz2 = p.fP[5];
 
   const float_v& x01 = fP[0];
   const float_v& y01 = fP[1];
-  const float_v& z01 = fP[2];
+//   const float_v& z01 = fP[2];
 
   const float_v& x02 = p.fP[0];
   const float_v& y02 = p.fP[1];
-  const float_v& z02 = p.fP[2];
+//   const float_v& z02 = p.fP[2];
 
   const float_v& dx0 = (x01 - x02) + (py1/bq1 - py2/bq2);
   const float_v& dy0 = (y01 - y02) - (px1/bq1 - px2/bq2);
   const float_v& pt12 = px1*px1 + py1*py1;
   const float_v& pt22 = px2*px2 + py2*py2;
-  const float_v& dr02 = dx0*dx0 + dy0*dy0;
+//   const float_v& dr02 = dx0*dx0 + dy0*dy0;
 
   float_v yy1 = dy0*pt12;
   float_v xx1 = dx0*pt12;
@@ -1806,8 +1798,14 @@ void KFParticleBaseSIMD::GetMaxDistanceToParticleBz(const float_v& B, const KFPa
   dS2(!isStraight1 && !isStraight2) = KFPMath::ATan2( (yy2*py2+xx2*px2), (yy2*px2-xx2*py2) )/bq2;
 }
 
-void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD &p, float_v &DS, float_v &DS1 ) const
+void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD &p, float_v &DS, float_v &DS1, const float_v* param1, const float_v* param2 ) const
 { 
+  if(!param1)
+  {
+    param1 = fP;
+    param2 = p.fP;
+  }
+
   //* Get dS to another particle for Bz field
   const float_v kOvSqr6 = 1.f/sqrt(float_v(6.f));
   const float_v kCLight = 0.000299792458f;
@@ -1825,24 +1823,24 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
     return;
   }
   
-  const float_v& px1 = fP[3];
-  const float_v& py1 = fP[4];
-  const float_v& pz1 = fP[5];
+  const float_v& px1 = param1[3];
+  const float_v& py1 = param1[4];
+  const float_v& pz1 = param1[5];
 
-  const float_v& px2 = p.fP[3];
-  const float_v& py2 = p.fP[4];
-  const float_v& pz2 = p.fP[5];
+  const float_v& px2 = param2[3];
+  const float_v& py2 = param2[4];
+  const float_v& pz2 = param2[5];
 
   const float_v& pt12 = px1*px1 + py1*py1;
   const float_v& pt22 = px2*px2 + py2*py2;
 
-  const float_v& x01 = fP[0];
-  const float_v& y01 = fP[1];
-  const float_v& z01 = fP[2];
+  const float_v& x01 = param1[0];
+  const float_v& y01 = param1[1];
+  const float_v& z01 = param1[2];
 
-  const float_v& x02 = p.fP[0];
-  const float_v& y02 = p.fP[1];
-  const float_v& z02 = p.fP[2];
+  const float_v& x02 = param2[0];
+  const float_v& y02 = param2[1];
+  const float_v& z02 = param2[2];
 
   float_v dS1[2] = {0.f}, dS2[2]={0.f};
   
@@ -1902,9 +1900,9 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
     cB(bs1Big) = (1.f-ccc)/bq1;
     cB(!bs1Big) = .5f*sB*bs1;
   
-    const float_v& x1 = fP[0] + sB*px1 + cB*py1;
-    const float_v& y1 = fP[1] - cB*px1 + sB*py1;
-    const float_v& z1 = fP[2] + dS1[iP]*fP[5];
+    const float_v& x1 = param1[0] + sB*px1 + cB*py1;
+    const float_v& y1 = param1[1] - cB*px1 + sB*py1;
+    const float_v& z1 = param1[2] + dS1[iP]*param1[5];
 
     sss = KFPMath::Sin(bs2), ccc = KFPMath::Cos(bs2);
 
@@ -1913,9 +1911,9 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
     cB(bs2Big) = (1.f-ccc)/bq2;
     cB(!bs2Big) = .5f*sB*bs2;
 
-    const float_v& x2 = p.fP[0] + sB*px2 + cB*py2;
-    const float_v& y2 = p.fP[1] - cB*px2 + sB*py2;
-    const float_v& z2 = p.fP[2] + dS2[iP]*p.fP[5];
+    const float_v& x2 = param2[0] + sB*px2 + cB*py2;
+    const float_v& y2 = param2[1] - cB*px2 + sB*py2;
+    const float_v& z2 = param2[2] + dS2[iP]*param2[5];
 
     float_v dx = (x1-x2);
     float_v dy = (y1-y2);
@@ -2028,12 +2026,12 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
 //     cB(bs1Big) = (1.f-c1)/bq1;
 //     cB(!bs1Big) = .5f*sB*bs1;
 //   
-//     float_v x1 = fP[0] + sB*px1 + cB*py1;
-//     float_v y1 = fP[1] - cB*px1 + sB*py1;
-//     float_v z1 = fP[2] + DS*fP[5];
-//     float_v vx1 = s1*fP[4] + c1*fP[3];
-//     float_v vy1 = c1*fP[4] - s1*fP[3];
-//     float_v vz1 = fP[5];
+//     float_v x1 = param1[0] + sB*px1 + cB*py1;
+//     float_v y1 = param1[1] - cB*px1 + sB*py1;
+//     float_v z1 = param1[2] + DS*param1[5];
+//     float_v vx1 = s1*param1[4] + c1*param1[3];
+//     float_v vy1 = c1*param1[4] - s1*param1[3];
+//     float_v vz1 = param1[5];
 // 
 //     const float_m& bs2Big = abs(bs2) > 1.e-8f;
 //     sB(bs2Big) = s2/bq2;
@@ -2041,12 +2039,12 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
 //     cB(bs2Big) = (1.f-c2)/bq2;
 //     cB(!bs2Big) = .5f*sB*bs2;
 // 
-//     float_v x2 = p.fP[0] + sB*px2 + cB*py2;
-//     float_v y2 = p.fP[1] - cB*px2 + sB*py2;
-//     float_v z2 = p.fP[2] + DS1*p.fP[5];
-//     float_v vx2 = s2*p.fP[4] + c2*p.fP[3];
-//     float_v vy2 = c2*p.fP[4] - s2*p.fP[3];    
-//     float_v vz2 = p.fP[5];
+//     float_v x2 = param2[0] + sB*px2 + cB*py2;
+//     float_v y2 = param2[1] - cB*px2 + sB*py2;
+//     float_v z2 = param2[2] + DS1*param2[5];
+//     float_v vx2 = s2*param2[4] + c2*param2[3];
+//     float_v vy2 = c2*param2[4] - s2*param2[3];    
+//     float_v vz2 = param2[5];
 // 
 //     float_v dx = (x1-x2);
 //     float_v dy = (y1-y2);
@@ -2068,156 +2066,32 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
 }
 
 void KFParticleBaseSIMD::GetDStoParticleBy( float_v B, const KFParticleBaseSIMD &p, float_v &DS, float_v &DS1 ) const
-{ 
-  //* Get dS to another particle for Bz field
-
-  float_v px = fP[3];
-  float_v py = -fP[5];
-  float_v pz = fP[4];
-
-  float_v px1 = p.fP[3];
-  float_v py1 = -p.fP[5];
-  float_v pz1 = p.fP[4];
-
-  const float_v kCLight = 0.000299792458f;
-
-  float_v bq = B*fQ*kCLight;
-  float_v bq1 = B*p.fQ*kCLight;
-  float_v s=0.f, ds=0.f, s1=0.f, ds1=0.f;
-
-  const float_v LocalSmall = 1.e-8f;
-
-  float_m bq_big = (LocalSmall < abs(bq));
-  float_m bq1_big = (LocalSmall < abs(bq1));
-  {
-    const float_v two = 2.f;
-    const float_v four = 2.f;
-    float_v dx = (p.fP[0] - fP[0]);
-    float_v dy = (-p.fP[2] + fP[2]);
-    float_v d2 = (dx*dx+dy*dy);
-    
-    float_v p2  = (px *px  + py *py); 
-    float_v p21 = (px1*px1 + py1*py1);
-    
-    float_v a = (px*py1 - py*px1);
-    float_v b = (px*px1 + py*py1);
-
-    float_v ldx = bq*bq1*dx - bq1*py + bq*py1 ;
-    float_v ldy = bq*bq1*dy + bq1*px - bq*px1 ;
-    float_v l2 = ldx*ldx + ldy*ldy;
-    
-    float_v cS = bq1*p2 + bq*bq1*(dy* px - dx* py) -  bq*b;
-    float_v cS1= bq*p21 - bq*bq1*(dy*px1 - dx*py1) - bq1*b;
-
-    float_v ca  = bq*bq*bq1*d2  + two*( cS + bq*bq*(py1*dx-px1*dy)) ;
-    float_v ca1 = bq*bq1*bq1*d2 + two*( cS1 - bq1*bq1*(py*dx-px*dy)) ;  
+{
+  const float_v param1[6] = { fP[0], -fP[2], fP[1], fP[3], -fP[5], fP[4] };
+  const float_v param2[6] = { p.fP[0], -p.fP[2], p.fP[1], p.fP[3], -p.fP[5], p.fP[4] };
   
-    float_v sa = 4.f*l2*p2 - ca*ca;
-    float_v sa1 = 4.f*l2*p21 - ca1*ca1;
-    
-    const float_m saNeg = (sa<0.f);
-    sa(saNeg) = 0.f;
-    const float_m sa1Neg = (sa1<0.f);
-    sa1(sa1Neg)= 0.f;
-
-    
-    s(bq_big) = KFPMath::ATan2( bq*( bq1*(dx*px +dy*py) + a ) , cS )/bq;
-    s(!bq_big) = (( (dx*px + dy*py) + (py*px1-px*py1)/bq1)/p2);
-    ds(bq_big) = (KFPMath::ATan2(sqrt(sa),ca)/bq);
-    ds(!bq_big) = (s*s - (d2-two*(px1*dy-py1*dx)/bq1)/p2);
-    float_m dsNeg = (ds<0.f);
-    ds((!dsNeg) && (!bq_big)) = sqrt(ds);
-    ds((dsNeg) && (!bq_big)) = 0.f;
-    ds(bq_big) = ds;
-    
-
-    s1(bq1_big) = KFPMath::ATan2( -bq1*( bq*(dx*px1+dy*py1) + a), cS1 )/bq1;
-    s1(!bq1_big) = (-(dx*px1 + dy*py1) + (py*px1-px*py1)/bq)/p21;
-    ds1(bq1_big) = KFPMath::ATan2(sqrt(sa1),ca1)/bq1;
-    ds1(!bq1_big) = s1*s1 - (d2+two*(px*dy-py*dx)/bq)/p21;
-    float_m ds1Neg = (ds1<0.f);
-    ds1((!ds1Neg) && (!bq1_big)) = sqrt(ds1);
-    ds1((ds1Neg) && (!bq1_big)) = 0.f;
-    ds1(bq1_big) = ds1;    
-  }
-
-  float_v ss[2], ss1[2], g[2][5],g1[2][5];
-  
-  ss[0] = s + ds;
-  ss[1] = s - ds;
-  ss1[0] = s1 + ds1;
-  ss1[1] = s1 - ds1;
-// std::cout << "    ss " << ss[0][0] << " " << ss[1][0] << "  " << ss1[0][0] << " " << ss1[1][0] << std::endl;
-  for( Int_t i=0; i<2; i++){
-    float_v bs = bq*ss[i];
-    float_v sss = KFPMath::Sin(bs), c = KFPMath::Cos(bs);
-
-    float_v cB(Vc::Zero), sB(Vc::Zero);
-    const float_v kOvSqr6 = 1.f/sqrt(float_v(6.f));
-    sB(bq_big) = sss/bq;
-    sB(!bq_big) = (1.f-bs*kOvSqr6)*(1.f+bs*kOvSqr6)*ss[i];
-    cB(bq_big) = (1.f-c)/bq;
-    cB(!bq_big) = .5f*sB*bs;
-    
-    g[i][0] = fP[0] + sB*px + cB*py;
-    g[i][1] = -fP[2] - cB*px + sB*py;
-    g[i][2] = fP[1] + ss[i]*pz;
-    g[i][3] =       + c*px + sss*py;
-    g[i][4] =       - sss*px + c*py;
-
-    bs = bq1*ss1[i];  
-    sss = KFPMath::Sin(bs), c = KFPMath::Cos(bs);
-
-    sB(bq1_big) = sss/bq1;
-    sB(!bq1_big) = ((1.f-bs*kOvSqr6)*(1.f+bs*kOvSqr6)*ss1[i]);
-    cB(bq1_big) = (1.f-c)/bq1;
-    cB(!bq1_big) = .5f*sB*bs;
-    
-    g1[i][0] = p.fP[0] + sB*px1 + cB*py1;
-    g1[i][1] = -p.fP[2] - cB*px1 + sB*py1;
-    g1[i][2] = p.fP[1] + ss1[i]*pz1;
-    g1[i][3] =         + c*px1 + sss*py1;
-    g1[i][4] =         - sss*px1 + c*py1;
-  }
-
-  DS  = ss[0];
-  DS1 = ss1[0];
-
-  float_v dMin = 1.e10f;
-  for( Int_t j=0; j<2; j++){
-    for( Int_t j1=0; j1<2; j1++){
-      float_v xx = g[j][0]-g1[j1][0];
-      float_v yy = g[j][1]-g1[j1][1];
-      float_v zz = g[j][2]-g1[j1][2];
-      float_v d = xx*xx + yy*yy + zz*zz;
-
-      float_m mask = (d<dMin);
-      DS(mask)  = ss[j];
-      DS1(mask) = ss1[j];
-      dMin(mask) = d;
-    }
-  }
+  return GetDStoParticleBz(B, p, DS, DS1, param1, param2);
 }
 
 float_v KFParticleBaseSIMD::GetDStoPointCBM( const float_v xyz[] ) const
 {
   //* Transport the particle on dS, output to P[],C[], for CBM field
 
-  const float_v *r = fP;
-  float_v p2 = r[3]*r[3] + r[4]*r[4] + r[5]*r[5];
-  float_v dS(Vc::Zero);
-  dS(abs(p2) > float_v(1.E-4f)) = ( r[3]*(xyz[0]-r[0]) + r[4]*(xyz[1]-r[1]) + r[5]*(xyz[2]-r[2]) )/p2;
+//   const float_v *r = fP;
+//   float_v p2 = r[3]*r[3] + r[4]*r[4] + r[5]*r[5];
+//   float_v dS(Vc::Zero);
+//   dS(abs(p2) > float_v(1.E-4f)) = ( r[3]*(xyz[0]-r[0]) + r[4]*(xyz[1]-r[1]) + r[5]*(xyz[2]-r[2]) )/p2;
 
-//   float_v dS = 0;
-// 
+  float_v dS(Vc::Zero);
+
 //   if( fQ[0]==0 ){
 //     dS = GetDStoPointLine( xyz );
 //     return dS;
 //   }
-// 
-//   float_v fld[3];
-//   GetFieldValue( fP, fld );
-//   dS = GetDStoPointBy( fld[1],xyz );
+
+  float_v fld[3];
+  GetFieldValue( fP, fld );
+  dS = GetDStoPointBy( fld[1],xyz );
 
   dS(abs(dS)>1.E3f) = 0.f;
 
@@ -2251,39 +2125,39 @@ void KFParticleBaseSIMD::GetDStoParticleCBM( const KFParticleBaseSIMD &p, float_
 {
   //* Transport the particle on dS, output to P[],C[], for CBM field
 
-    float_v mTy[2];
-    float_v mY[2];
-    float_v mZ[2];
-
-    mY[0]  = GetY();
-    mZ[0]  = GetZ();
-    mTy[0] = 1.f;
-    mTy[0](abs(GetPz()) > small) = GetPy()/GetPz();
-
-    mY[1]  = p.GetY();
-    mZ[1]  = p.GetZ();
-    mTy[1] = 1.f;
-    mTy[1]( abs(p.GetPz()) > small) = p.GetPy()/p.GetPz();
-
-    float_v r0[3] = {0.f};
-    float_v dty = mTy[0]-mTy[1];
-    
-    r0[2](abs(dty) > small) = (mTy[0]*mZ[0]-mTy[1]*mZ[1] + mY[1] -mY[0])/dty;
-    r0[1] = mY[0] + mTy[0]*(r0[2]-mZ[0]);
-    r0[0] = GetX() + GetPx()/GetPz()*(r0[2]-mZ[0]);
-    
-    dS = GetDStoPointCBM(r0);
-    dS1 = p.GetDStoPoint(r0);
+//     float_v mTy[2];
+//     float_v mY[2];
+//     float_v mZ[2];
+// 
+//     mY[0]  = GetY();
+//     mZ[0]  = GetZ();
+//     mTy[0] = 1.f;
+//     mTy[0](abs(GetPz()) > small) = GetPy()/GetPz();
+// 
+//     mY[1]  = p.GetY();
+//     mZ[1]  = p.GetZ();
+//     mTy[1] = 1.f;
+//     mTy[1]( abs(p.GetPz()) > small) = p.GetPy()/p.GetPz();
+// 
+//     float_v r0[3] = {0.f};
+//     float_v dty = mTy[0]-mTy[1];
+//     
+//     r0[2](abs(dty) > small) = (mTy[0]*mZ[0]-mTy[1]*mZ[1] + mY[1] -mY[0])/dty;
+//     r0[1] = mY[0] + mTy[0]*(r0[2]-mZ[0]);
+//     r0[0] = GetX() + GetPx()/GetPz()*(r0[2]-mZ[0]);
+//     
+//     dS = GetDStoPointCBM(r0);
+//     dS1 = p.GetDStoPoint(r0);
 
 //   if( fQ[0]==0 ){
 //     GetDStoParticleLine( p, dS, dS1 );
 //     return;
 //   }
-// 
-//   float_v fld[3];
-//   GetFieldValue( fP, fld );
-// 
-//   GetDStoParticleBy(fld[1],p,dS,dS1);
+
+  float_v fld[3];
+  GetFieldValue( fP, fld );
+
+  GetDStoParticleBy(fld[1],p,dS,dS1);
 }
 
 void KFParticleBaseSIMD::TransportCBM( float_v dS, 

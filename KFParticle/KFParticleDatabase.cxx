@@ -38,15 +38,24 @@ KFParticleDatabase::KFParticleDatabase()
   fMassSecPDGSigma[0]=17.7e-3;
   fMassSecPDGSigma[1]=5.9e-3;
   fMassSecPDGSigma[2]=7.3e-3;
-#else
+#elif defined CBM
+  fMassSecPDGSigma[0]=2.2e-3;
+  fMassSecPDGSigma[1]=1.2e-3;
+  fMassSecPDGSigma[2]=2.0e-3;  
+#else 
   fMassSecPDGSigma[0]=4.9e-3; //TODO tune
   fMassSecPDGSigma[1]=2.5e-3;
   fMassSecPDGSigma[2]=2.5e-3; //TODO tune
 #endif
-  fMassSecPDGSigma[3]=6.0e-3; //TODO tune
+  fMassSecPDGSigma[3]=6.0e-3; //TODO tune //Gamma
 
   fMassPi0PDG = 0.13498;
   fMassPi0PDGSigma = 0.006;
+  
+  fMassD0PDG = 1.86484;
+  fMassD0PDGSigma = 0.005;
+  fMassDPlusPDG = 1.86962;
+  fMassDPlusPDGSigma = 0.005;
   
   fDatabase = this;
 }

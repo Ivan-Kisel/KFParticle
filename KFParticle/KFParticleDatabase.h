@@ -80,6 +80,10 @@ class KFParticleDatabase
   
   const float& GetPi0Mass() const { return fMassPi0PDG; }
   const float& GetPi0MassSigma() const { return fMassPi0PDGSigma; }
+  const float& GetD0Mass() const { return fMassD0PDG; }
+  const float& GetD0MassSigma() const { return fMassD0PDGSigma; }
+  const float& GetDPlusMass() const { return fMassDPlusPDG; }
+  const float& GetDPlusMassSigma() const { return fMassDPlusPDGSigma; }
   
   static const KFParticleDatabase* Instance() { return fDatabase; }
 
@@ -92,6 +96,11 @@ class KFParticleDatabase
   float fMassPi0PDG;
   float fMassPi0PDGSigma;
 
+  float fMassD0PDG;
+  float fMassD0PDGSigma;
+  float fMassDPlusPDG;
+  float fMassDPlusPDGSigma;
+  
   static KFParticleDatabase* fDatabase;
 };
 
