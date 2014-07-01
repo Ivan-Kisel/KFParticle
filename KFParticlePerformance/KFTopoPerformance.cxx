@@ -56,12 +56,14 @@ void KFTopoPerformance::SetNewEvent(
   vMCTracks.resize(mcTracks->Size());
   for(int iTr=0; iTr<vMCTracks.size(); iTr++)
   {
-    for(int iP=0; iP<7; iP++)
+    for(int iP=0; iP<3; iP++)
       vMCTracks[iTr].SetPar(iP, (*mcTracks)[iTr].Par(iP));
+    for(int iP=3; iP<6; iP++)
+      vMCTracks[iTr].SetPar(iP, (*mcTracks)[iTr].Par(iP) * (*mcTracks)[iTr].P());
+    vMCTracks[iTr].SetPar(6, (*mcTracks)[iTr].Par(6));
+    
     vMCTracks[iTr].SetPDG( (*mcTracks)[iTr].PDG() );
     vMCTracks[iTr].SetMotherId( (*mcTracks)[iTr].MotherId() );
-    vMCTracks[iTr].SetP( (*mcTracks)[iTr].P() );
-    vMCTracks[iTr].SetPt( (*mcTracks)[iTr].Pt() );
     vMCTracks[iTr].SetNMCPoints( (*mcTracks)[iTr].NMCPoints() );
   } 
 } // void KFTopoPerformance::SetNewEvent

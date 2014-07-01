@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include <vector>
+#include <cmath>
 using std::ostream;
 using std::istream;
 
@@ -25,7 +26,7 @@ using std::istream;
 class KFMCTrack
 {
  public:
-  KFMCTrack():fMotherId(-1),fPDG(0),fP(0.f),fPt(0.f),fNMCPoints(0),fIsReconstructed(0) {};
+  KFMCTrack():fMotherId(-1),fPDG(0),fNMCPoints(0),fIsReconstructed(0) {};
 
   int MotherId()          const { return fMotherId; }
   int    PDG()            const { return fPDG;}
@@ -33,11 +34,11 @@ class KFMCTrack
   float X()               const { return fPar[0]; }
   float Y()               const { return fPar[1]; }
   float Z()               const { return fPar[2]; }
-  float Px()              const { return fPar[3]*fP; }
-  float Py()              const { return fPar[4]*fP; }
-  float Pz()              const { return fPar[5]*fP; }
-  float P()               const { return fP; }
-  float Pt()              const { return fPt; }
+  float Px()              const { return fPar[3]; }
+  float Py()              const { return fPar[4]; }
+  float Pz()              const { return fPar[5]; }
+  float P()               const { return sqrt(fPar[3]*fPar[3] + fPar[4]*fPar[4] + fPar[5]*fPar[5]); }
+  float Pt()              const { return sqrt(fPar[3]*fPar[3] + fPar[4]*fPar[4]); }
   const float *Par()      const { return fPar; }
   int   NMCPoints()       const { return fNMCPoints; }
   bool  IsReconstructed() const { return fIsReconstructed; }
@@ -51,8 +52,6 @@ class KFMCTrack
   void SetPz( float v )          { fPar[5] = v; }
   void SetQP( float v )          { fPar[6] = v; }
   void SetMotherId( int v )      { fMotherId = v; }
-  void SetP ( float v )          { fP = v; }
-  void SetPt( float v )          { fPt = v; }
   void SetPDG( int v )           { fPDG = v; }
   void SetNMCPoints( int v )     { fNMCPoints = v; }
   void SetReconstructed()        { fIsReconstructed = 1; }
@@ -62,7 +61,6 @@ class KFMCTrack
   int   fMotherId;      //* index of mother track in tracks array. -1 for primary tracks. -2 if a mother track is not in the acceptance
   int   fPDG;           //* particle pdg code
   float fPar[7];        //* x,y,z,ex,ey,ez,q/p
-  float fP, fPt;        //* momentum and transverse momentum
   int   fNMCPoints;     //* N MC points
   
   bool fIsReconstructed;

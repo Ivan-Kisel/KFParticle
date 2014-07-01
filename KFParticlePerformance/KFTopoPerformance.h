@@ -56,6 +56,7 @@ class KFTopoPerformance: public KFParticlePerformanceBase
     AliHLTResizableArray<AliHLTTPCCALocalMCPoint> *localMCPoints);
 #endif  
   void SetTopoReconstructor( const KFParticleTopoReconstructor * const TopoReconstructor ); // use together with SetNewEvent !!!
+  const KFParticleTopoReconstructor * GetTopoReconstructor() const { return fTopoReconstructor; }
     
     /// Efficiency
     // Check if MC track is reconstructable. Calculate set of MC track. Etc.
