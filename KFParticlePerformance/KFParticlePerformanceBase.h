@@ -94,6 +94,9 @@ class KFParticlePerformanceBase
   TH1F *hFitDaughtersQA[KFPartEfficiencies::nParticles][nFitQA];
   TH1F *hFitQA[KFPartEfficiencies::nParticles][nFitQA];
 
+  static const int nDSToParticleQA = 7;
+  TH1F *hDSToParticleQA[KFPartEfficiencies::nParticles][nDSToParticleQA];
+  
   static const int nHistoPartParam = 17;
   TH1F *hPartParam[KFPartEfficiencies::nParticles][nHistoPartParam]; // mass, p, pt, Y, decay length, c*tau, chi/ndf, prob, theta, phi, z, multiplicity
   TH1F *hPartParamBG[KFPartEfficiencies::nParticles][nHistoPartParam];

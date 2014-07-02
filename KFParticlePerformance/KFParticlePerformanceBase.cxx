@@ -68,7 +68,27 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
             }
           }
           gDirectory->cd(".."); //particle directory
+
+          gDirectory->mkdir("DSToParticleQA");
+          gDirectory->cd("DSToParticleQA");
+          {
+            TString parName[3] = {"X","Y","Z"};
+            int nBins = 100;
+            float xMax[3] = {2., 2., 5.};
   
+            for( int iH=0; iH<3; iH++ ){
+              hDSToParticleQA[iPart][iH]   = new TH1F((res+parName[iH]).Data(),
+                                                      (res+parName[iH]).Data(), 
+                                                      nBins, -xMax[iH],xMax[iH]);
+              hDSToParticleQA[iPart][iH+3] = new TH1F((pull+parName[iH]).Data(),
+                                                                      (pull+parName[iH]).Data(), 
+                                                                      nBins, -6,6);
+            }
+            
+            hDSToParticleQA[iPart][6] = new TH1F("r", "r", 1000, 0.0, 20.0);
+          }
+          gDirectory->cd(".."); //particle directory
+          
           gDirectory->mkdir("FitQA");
           gDirectory->cd("FitQA");
           {

@@ -1046,9 +1046,9 @@ void KFTopoPerformance::FillHistos()
       const float mcX =  mcDaughter.X();
       const float mcY =  mcDaughter.Y();
       const float mcZ =  mcDaughter.Z();
-      const float mcPx = mcTrack.Par(3)*mcTrack.P();
-      const float mcPy = mcTrack.Par(4)*mcTrack.P();
-      const float mcPz = mcTrack.Par(5)*mcTrack.P();
+      const float mcPx = mcTrack.Par(3);
+      const float mcPy = mcTrack.Par(4);
+      const float mcPz = mcTrack.Par(5);
 
       float decayVtx[3] = { mcX, mcY, mcZ };
       float recParam[8] = { 0 };
@@ -1145,6 +1145,8 @@ void KFTopoPerformance::FillHistos()
       
     }
     // Fit quality of daughters
+    int daughterIndex[2] = {-1, -1};
+    
     for(int iD=0; iD<mcPart.NDaughters(); ++iD)
     {
       int mcDaughterId = mcPart.GetDaughterIds()[iD];
@@ -1190,6 +1192,41 @@ void KFTopoPerformance::FillHistos()
       {
         hFitDaughtersQA[iParticle][iPar]->Fill(res[iPar]);
         hFitDaughtersQA[iParticle][iPar+8]->Fill(pull[iPar]);
+      }
+      
+      //fill Histos for GetDStoParticle
+      if(iD == 0)
+        daughterIndex[0] = recDaughterId;
+      if(iD == 1 && daughterIndex[0] > -1)
+      {
+        daughterIndex[1] = recDaughterId;
+        KFParticle d1 = fTopoReconstructor->GetParticles()[daughterIndex[0]];
+        KFParticle d2 = fTopoReconstructor->GetParticles()[daughterIndex[1]];
+        
+        KFParticleSIMD daughters[2] = {d1, d2};
+        
+        float_v dS[2] = {0.f};
+        daughters[0].GetDStoParticle(daughters[1], dS[0], dS[1]);
+        float_v pD[2][8] = {0.f}, cD[2][36] = {0.f};
+        for(int iDR=0; iDR<2; iDR++)
+        {
+          daughters[iDR].Transport(dS[iDR],pD[iDR],cD[iDR]);
+          Double_t err[3] = {cD[iDR][0][0], cD[iDR][2][0], cD[iDR][5][0]};
+          for(int iPar=0; iPar<3; iPar++)
+          {
+            res[iPar] = pD[iDR][iPar][0] - decayVtx[iPar];
+            pull[iPar] = res[iPar] / err[iPar];
+            
+            hDSToParticleQA[iParticle][iPar]->Fill(res[iPar]);
+            hDSToParticleQA[iParticle][iPar+3]->Fill(pull[iPar]);
+          }
+        }
+        Double_t dXds = pD[0][0][0] - pD[1][0][0];
+        Double_t dYds = pD[0][1][0] - pD[1][1][0];
+        Double_t dZds = pD[0][2][0] - pD[1][2][0];
+        
+        Double_t dRds = sqrt(dXds*dXds + dYds*dYds + dZds*dZds);
+        hDSToParticleQA[iParticle][6]->Fill(dRds);
       }
     }
   }
