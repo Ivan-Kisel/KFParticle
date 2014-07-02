@@ -425,7 +425,7 @@ float_v KFParticleFinder::GetChi2BetweenParticles(KFParticleSIMD &p1, KFParticle
   const float_v& c5 = p1.GetCovariance(5) + p2.GetCovariance(5);
 
   const float_v r2 = dx*dx + dy*dy + dz*dz;
-  const float_v err2 = c0*dx*dx + c2*dy*dy + c5*dz*dz + 2*( c1*dx*dy + c3*dx*dz + c4*dy*dz );
+  const float_v err2 = c0*dx*dx + c2*dy*dy + c5*dz*dz + 2.f*( c1*dx*dy + c3*dx*dz + c4*dy*dz );
 
   return (r2*r2/err2);
 }
@@ -899,11 +899,35 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
                 daughterNeg.Transport(ds,par1,cov1);
                 daughterPos.Transport(dsPos,par2,cov2);
           
-                float_v r2 = (par1[0] - par2[0])*(par1[0] - par2[0]) + 
-                             (par1[1] - par2[1])*(par1[1] - par2[1]) + 
-                             (par1[2] - par2[2])*(par1[2] - par2[2]);
+                const float_v& dx = par1[0] - par2[0];
+                const float_v& dy = par1[1] - par2[1];
+                const float_v& dz = par1[2] - par2[2];
+                const float_v& r2 = dx*dx + dy*dy + dz*dz;
+                
+                                const float_v vtx[3] = {(par1[0] + par2[0])/2.f,
+                                        (par1[1] + par2[1])/2.f,
+                                        (par1[2] + par2[2])/2.f, };
+        
+                daughterNeg.CorrectErrorsOnS(par1, vtx, cov1);
+                daughterPos.CorrectErrorsOnS(par2, vtx, cov2);
+                
+                const float_v cov[6] = {cov1[0]+cov2[0],
+                                        cov1[1]+cov2[1],
+                                        cov1[2]+cov2[2],
+                                        cov1[3]+cov2[3],
+                                        cov1[4]+cov2[4],
+                                        cov1[5]+cov2[5] };
+                const float_v& err2 = cov[0]*dx*dx + cov[2]*dy*dy + cov[5]*dz*dz + 2.f*( cov[1]*dx*dy + cov[3]*dx*dz + cov[4]*dy*dz );
+  
 
-                closeDaughters &= (r2 < float_v(1.f));
+          
+                closeDaughters &= (r2*r2/err2) < float_v(3.f);
+  
+//                 float_v r2 = (par1[0] - par2[0])*(par1[0] - par2[0]) + 
+//                              (par1[1] - par2[1])*(par1[1] - par2[1]) + 
+//                              (par1[2] - par2[2])*(par1[2] - par2[2]);
+// 
+//                 closeDaughters &= (r2 < float_v(1.f));
               }
               if(closeDaughters.isEmpty()) continue;
               
