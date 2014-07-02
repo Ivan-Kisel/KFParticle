@@ -1421,7 +1421,7 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
 
       float_v r2 = (par1[0] - par2[0])*(par1[0] - par2[0]) + (par1[1] - par2[1])*(par1[1] - par2[1]) + (par1[2] - par2[2])*(par1[2] - par2[2]);
 
-      const float_m& closeDaughters = float_m(isSamePV) /*&& ( ( (r2 < float_v(1.f)) && isSecondary) || isPrimary )*/ && float_m(int_v::IndexesFromZero() < int(NTracks));
+      const float_m& closeDaughters = float_m(isSamePV) && ( ( (r2 < float_v(1.f)) && isSecondary) || isPrimary ) && float_m(int_v::IndexesFromZero() < int(NTracks));
       if(closeDaughters.isEmpty()) continue;
       
       int_v trackPdgPos[2];
