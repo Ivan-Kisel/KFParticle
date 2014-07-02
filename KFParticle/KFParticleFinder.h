@@ -126,7 +126,10 @@ class KFParticleFinder
                        std::vector<KFParticle>& vCandidates,
                        KFParticleSIMD* PrimVtx,
                        const float& cutChi2Topo,
-                       const float& cutLdL);
+                       const float& cutLdL,
+                       const float& mass,
+                       const float& massErr,
+                       const float& massCut);
   
   void CombinePartPart(std::vector<KFParticle>& particles1,
                        std::vector<KFParticle>& particles2,

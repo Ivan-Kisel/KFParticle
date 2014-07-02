@@ -245,7 +245,7 @@ class KFParticleBaseSIMD {
   void TransportBz( float_v Bz, float_v dS, float_v P[], float_v C[] ) const;
   void TransportCBM( float_v dS, float_v P[], float_v C[] ) const;  
 
-
+  void CorrectErrorsOnS(const float_v* par, const float_v* vtx, float_v* covMatrix) const;
   //* 
   //* OTHER UTILITIES
   //*

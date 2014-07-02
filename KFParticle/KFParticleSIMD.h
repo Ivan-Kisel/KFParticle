@@ -83,6 +83,8 @@ class KFParticleSIMD :public KFParticleBaseSIMD
 
   void Create(KFPTrack* Track[], int NTracks, Int_t *qHypo=0, const Int_t *pdg=0);
   void Create(KFPTrackVector &track, uint_v& index, const int_v& pdg);
+  void Load(KFPTrackVector &track, int index, const int_v& pdg);
+  void Rotate();
 
   KFParticleSIMD(KFPTrack &Track, Int_t *qHypo=0, const Int_t *pdg=0);
   KFParticleSIMD(KFPTrackVector &track, int n, Int_t *qHypo=0, const Int_t *pdg=0);

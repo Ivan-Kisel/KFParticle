@@ -187,6 +187,37 @@ void KFParticleSIMD::Create(KFPTrackVector &track, uint_v& index, const int_v& p
   Create(fP,fC,fQ,mass);
 }
 
+void KFParticleSIMD::Load(KFPTrackVector &track, int index, const int_v& pdg)
+{
+  for(int i=0; i<6; i++)
+    fP[i] = reinterpret_cast<const float_v&>(track.Parameter(i)[index]);
+  for(int i=0; i<21; i++)
+    fC[i] = reinterpret_cast<const float_v&>(track.Covariance(i)[index]);
+#ifdef NonhomogeneousField
+  for(int i=0; i<10; i++)
+    fField.fField[i] = reinterpret_cast<const float_v&>(track.FieldCoefficient(i)[index]);
+#endif
+  
+  //   fPDG.gather(&(track.PDG()[0]), index);
+  fQ = track.Q()[index];
+
+  float_v mass = KFParticleDatabase::Instance()->GetMass(pdg);
+  Create(fP,fC,fQ,mass);
+}
+
+void KFParticleSIMD::Rotate()
+{
+  for(int i=0; i<6; i++)
+    fP[i] = fP[i].rotated(1);
+  for(int i=0; i<21; i++)
+    fC[i] = fC[i].rotated(1);
+#ifdef NonhomogeneousField
+  for(int i=0; i<10; i++)
+    fField.fField[i] = fField.fField[i].rotated(1);
+#endif
+  fQ = fQ.rotated(1);
+}
+
 KFParticleSIMD::KFParticleSIMD( const KFPVertex &vertex )
 {
   // Constructor from ALICE vertex

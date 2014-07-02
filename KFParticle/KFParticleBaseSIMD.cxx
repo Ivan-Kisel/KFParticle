@@ -359,7 +359,25 @@ float_v KFParticleBaseSIMD::GetSCorrection( const float_v Part[], const float_v 
   sigmaS(1.e-4f < p2) = 0.1f+10.f*sqrt( (d[0]*d[0]+d[1]*d[1]+d[2]*d[2])/p2 );
 //   float_v sigmaS = GetDStoPoint(XYZ)*0.08;
 
-  return sigmaS;
+  return sigmaS ;
+}
+
+void KFParticleBaseSIMD::CorrectErrorsOnS(const float_v* par, const float_v* vtx, float_v* covMatrix) const
+{
+  float_v sigmaS = GetSCorrection( par, vtx );
+  
+    float_v h[6];
+
+  h[0] = par[3]*sigmaS;
+  h[1] = par[4]*sigmaS;
+  h[2] = par[5]*sigmaS;
+  
+  covMatrix[ 0]+= h[0]*h[0];
+  covMatrix[ 1]+= h[1]*h[0];
+  covMatrix[ 2]+= h[1]*h[1];
+  covMatrix[ 3]+= h[2]*h[0];
+  covMatrix[ 4]+= h[2]*h[1];
+  covMatrix[ 5]+= h[2]*h[2];
 }
 
 void KFParticleBaseSIMD::GetMeasurement( const float_v XYZ[], float_v m[], float_v V[], Bool_t isAtVtxGuess ) const

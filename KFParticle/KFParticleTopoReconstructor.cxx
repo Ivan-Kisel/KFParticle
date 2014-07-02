@@ -427,8 +427,8 @@ void KFParticleTopoReconstructor::SortTracks()
 //     fTracks[iTV].PrintTracks();
 //   }
   
-  fChiToPrimVtx[0].resize(fTracks[0].Size());
-  fChiToPrimVtx[1].resize(fTracks[1].Size());
+  fChiToPrimVtx[0].resize(fTracks[0].Size(), -1);
+  fChiToPrimVtx[1].resize(fTracks[1].Size(), -1);
 
 #ifdef USE_TIMERS
   timer.Stop();
@@ -439,6 +439,7 @@ void KFParticleTopoReconstructor::SortTracks()
 void KFParticleTopoReconstructor::GetChiToPrimVertex(KFParticleSIMD* pv, const int nPV)
 { 
   KFParticleSIMD tmpPart; // for chi_prim calculation 
+  const float_v point[3] = {pv->X(), pv->Y(), pv->Z()};
   
   for(int iTV=0; iTV<2; iTV++)
   {
@@ -454,6 +455,7 @@ void KFParticleTopoReconstructor::GetChiToPrimVertex(KFParticleSIMD* pv, const i
 
       for(int iPV=0; iPV<nPV; iPV++)
       {
+        tmpPart.TransportToPoint(point);
         const float_v& chiVec = tmpPart.GetDeviationFromVertex(pv[iPV]);
         chi2( (chi2>chiVec) && float_m(trackIndex<NTr) ) = chiVec;
       }
