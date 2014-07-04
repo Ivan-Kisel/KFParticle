@@ -1207,10 +1207,18 @@ void KFTopoPerformance::FillHistos()
         
         float_v dS[2] = {0.f};
         daughters[0].GetDStoParticle(daughters[1], dS[0], dS[1]);
-        float_v pD[2][8] = {0.f}, cD[2][36] = {0.f};
+        float_v pD[2][8] = {{0.f}, {0.f}}, cD[2][36] = {{0.f}, {0.f}};
+        for(int iDR=0; iDR<2; iDR++)
+          daughters[iDR].Transport(dS[iDR],pD[iDR],cD[iDR]);
+        
+        const float_v vtx[3] = {(pD[0][0] + pD[1][0])/2.f,
+                                (pD[0][1] + pD[1][1])/2.f,
+                                (pD[0][2] + pD[1][2])/2.f };
+        
         for(int iDR=0; iDR<2; iDR++)
         {
-          daughters[iDR].Transport(dS[iDR],pD[iDR],cD[iDR]);
+          daughters[iDR].CorrectErrorsOnS(pD[iDR], vtx, cD[iDR]);
+
           Double_t err[3] = {cD[iDR][0][0], cD[iDR][2][0], cD[iDR][5][0]};
           for(int iPar=0; iPar<3; iPar++)
           {
@@ -1221,6 +1229,7 @@ void KFTopoPerformance::FillHistos()
             hDSToParticleQA[iParticle][iPar+3]->Fill(pull[iPar]);
           }
         }
+
         Double_t dXds = pD[0][0][0] - pD[1][0][0];
         Double_t dYds = pD[0][1][0] - pD[1][1][0];
         Double_t dZds = pD[0][2][0] - pD[1][2][0];
