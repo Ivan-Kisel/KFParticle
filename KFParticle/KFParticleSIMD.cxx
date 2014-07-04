@@ -697,3 +697,63 @@ void KFParticleSIMD::GetKFParticle(KFParticle* Part, int nPart)
   for(int i=0; i<nPart; i++)
     GetKFParticle(Part[i],i);
 }
+
+void KFParticleSIMD::GetVertexApproximation(const KFParticleSIMD &particle, float_v* vtxGuess, float_v* vtxErrGuess) const
+{
+  float_v dS(Vc::Zero), dS1(Vc::Zero);
+  float_v par[2][8], cov[2][36];
+  GetDStoParticle(particle,dS,dS1);
+  
+  Transport(dS,par[0],cov[0]);
+  particle.Transport(dS1, par[1], cov[1]);
+  
+  for(int i=0; i<3; i++)
+    vtxGuess[i] = (par[0][i] + par[1][i]) / 2;
+  
+  for(int iP=0; iP<2; iP++)
+  {
+    float_v sigmaS = GetSCorrection( par[iP], vtxGuess );
+    
+    float_v h[3];
+    h[0] = par[iP][3]*sigmaS;
+    h[1] = par[iP][4]*sigmaS;
+    h[2] = par[iP][5]*sigmaS;
+    
+    cov[iP][0] += h[0]*h[0];
+    cov[iP][1] += h[1]*h[0];
+    cov[iP][2] += h[1]*h[1];
+    cov[iP][3] += h[2]*h[0];
+    cov[iP][4] += h[2]*h[1];
+    cov[iP][5] += h[2]*h[2];
+  }
+  
+  float_v mS[6]= { cov[0][0]+cov[1][0], 
+                   cov[0][1]+cov[1][1], cov[0][2]+cov[1][2], 
+                   cov[0][3]+cov[1][3], cov[0][4]+cov[1][4], cov[0][5]+cov[1][5] };
+  InvertCholetsky3(mS);
+
+  float_v zeta[3] = { par[1][0]-par[0][0], par[1][1]-par[0][1], par[1][2]-par[0][2] };    
+
+  float_v mCHt0[3], mCHt1[3], mCHt2[3];
+
+  mCHt0[0]=cov[0][ 0] ;       mCHt1[0]=cov[0][ 1] ;       mCHt2[0]=cov[0][ 3] ;
+  mCHt0[1]=cov[0][ 1] ;       mCHt1[1]=cov[0][ 2] ;       mCHt2[1]=cov[0][ 4] ;
+  mCHt0[2]=cov[0][ 3] ;       mCHt1[2]=cov[0][ 4] ;       mCHt2[2]=cov[0][ 5] ;
+
+
+  //* Kalman gain K = mCH'*S
+  
+  float_v k0[3], k1[3], k2[3];
+  
+  for(Int_t i=0;i<3;++i){
+    k0[i] = mCHt0[i]*mS[0] + mCHt1[i]*mS[1] + mCHt2[i]*mS[3];
+    k1[i] = mCHt0[i]*mS[1] + mCHt1[i]*mS[2] + mCHt2[i]*mS[4];
+    k2[i] = mCHt0[i]*mS[3] + mCHt1[i]*mS[4] + mCHt2[i]*mS[5];
+  }
+  
+  for(Int_t i=0;i<3;++i) 
+  {
+    vtxGuess[i] = par[0][i] + (k0[i]*zeta[0] + k1[i]*zeta[1] + k2[i]*zeta[2]);
+    vtxErrGuess[i] = sqrt(cov[0][i] - (k0[i]*mCHt0[i] + k1[i]*mCHt1[i] + k2[i]*mCHt2[i] ))*100.f;
+  }
+}

@@ -354,10 +354,10 @@ float_v KFParticleBaseSIMD::GetSCorrection( const float_v Part[], const float_v 
 //  float_v sigmaS = if3( float_v(float_v(1.e-4)<p2) , ( float_v(10.1)+float_v(3.)*sqrt( d[0]*d[0]+d[1]*d[1]+d[2]*d[2]) )/sqrt(p2) , 1.f);
 //  float_v sigmaS = if3( float_v(float_v(1.e-4)<p2) , ( float_v(0.1)+float_v(10.)*sqrt( d[0]*d[0]+d[1]*d[1]+d[2]*d[2]) )/sqrt(p2) , 1.f);
 
-  float_v sigmaS(1.f);
+  float_v sigmaS(Vc::Zero);
   p2(1.e-4f >= p2) = 1.e-4;
   sigmaS(1.e-4f < p2) = 0.1f+10.f*sqrt( (d[0]*d[0]+d[1]*d[1]+d[2]*d[2])/p2 );
-//   float_v sigmaS = GetDStoPoint(XYZ)*0.08;
+// //   float_v sigmaS = GetDStoPoint(XYZ)*0.08;
 
   return sigmaS ;
 }
@@ -395,7 +395,7 @@ void KFParticleBaseSIMD::GetMeasurement( const float_v XYZ[], float_v m[], float
   {
     for(int iM=0; iM<8; iM++)
       m[iM] = fP[iM];
-    for(int iV=0; iV<8; iV++)
+    for(int iV=0; iV<36; iV++)
       V[iV] = fC[iV];
   }
 

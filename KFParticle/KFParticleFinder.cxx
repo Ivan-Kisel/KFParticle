@@ -437,7 +437,6 @@ inline void KFParticleFinder::ConstructV0(KFPTrackVector* vTracks,
                                           uint_v& idNegDaughters,
                                           int_v& daughterPosPDG,
                                           int_v& daughterNegPDG,
-                                          float_v& dS,
                                           KFParticleSIMD& mother,
                                           KFParticle& mother_temp,
                                           const unsigned short NTracks,
@@ -466,34 +465,11 @@ inline void KFParticleFinder::ConstructV0(KFPTrackVector* vTracks,
   trackId.gather( &(vTracks[iTrTypeNeg].Id()[0]), idNegDaughters );
   negDaughter.SetId(trackId);
 
-  float_v vtxGuess[3];
-  float_v vtxErrGuess[3];
+  float_v vtxGuess[3] = {0.f};
+  float_v vtxErrGuess[3] = {0.f};
   if( !(isPrimary.isFull()) )
   {
-    float_v dS1(Vc::Zero);
-    float_v negP[8], negC[36];
-    negDaughter.GetDStoParticle(posDaughter,dS,dS1);
-    negDaughter.Transport(dS,negP,negC);
-
- 
-    vtxGuess[0] = negP[0];
-    vtxGuess[1] = negP[1];
-    vtxGuess[2] = negP[2]; 
-              
-    vtxErrGuess[0] = 100.f*sqrt(negC[0]);
-    vtxErrGuess[1] = 100.f*sqrt(negC[2]);
-    vtxErrGuess[2] = 100.f*sqrt(negC[5]);
-    
-    posDaughter.Transport(dS1,negP,negC);
-    
-    vtxGuess[0] += negP[0];
-    vtxGuess[1] += negP[1];
-    vtxGuess[2] += negP[2]; 
-    
-    vtxGuess[0] /= 2.f;
-    vtxGuess[1] /= 2.f;
-    vtxGuess[2] /= 2.f; 
-
+    negDaughter.GetVertexApproximation(posDaughter, vtxGuess, vtxErrGuess);
   }
   if(!(isPrimary.isEmpty()))
   {
@@ -531,7 +507,10 @@ inline void KFParticleFinder::ConstructV0(KFPTrackVector* vTracks,
   mother.SetVtxErrGuess(vtxErrGuess[0], vtxErrGuess[1], vtxErrGuess[2]);   
 
   const KFParticleSIMD* vDaughtersPointer[2] = {&negDaughter, &posDaughter};
-  mother.Construct(vDaughtersPointer, 2, 0);
+  if(isPrimary.isFull())
+    mother.Construct(vDaughtersPointer, 2, 0, -1, 0, 1);
+  else
+    mother.Construct(vDaughtersPointer, 2, 0);
 
   float_m saveParticle(int_v::IndexesFromZero() < int(NTracks));
   float_v chi2Cut = cuts[1];
@@ -739,7 +718,7 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
   KFParticleSIMD mother;
   vector<float_v> l(fNPV), dl(fNPV);
 
-    KFParticleSIMD daughterNeg, daughterPos;
+  KFParticleSIMD daughterNeg, daughterPos;
 
     
   // for secondary V0
@@ -836,8 +815,8 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
 
           int_v negInd = int_v::IndexesFromZero() + int(iTrN);
 
-          int_v negPDG = reinterpret_cast<const int_v&>(negTracks.PDG()[iTrN]); //(&(negTracks.PDG()[0]), negInd);
-          int_v negPVIndex = reinterpret_cast<const int_v&>(negTracks.PVIndex()[iTrN]); //(&(negTracks.PVIndex()[0]), negInd);
+          int_v negPDG = reinterpret_cast<const int_v&>(negTracks.PDG()[iTrN]);
+          int_v negPVIndex = reinterpret_cast<const int_v&>(negTracks.PVIndex()[iTrN]);
           
           int_v trackPdgNeg = negPDG;
           int_m activeNeg = (negPDG != -1);
@@ -904,7 +883,7 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
                 const float_v& dz = par1[2] - par2[2];
                 const float_v& r2 = dx*dx + dy*dy + dz*dz;
                 
-                                const float_v vtx[3] = {(par1[0] + par2[0])/2.f,
+                const float_v vtx[3] = {(par1[0] + par2[0])/2.f,
                                         (par1[1] + par2[1])/2.f,
                                         (par1[2] + par2[2])/2.f, };
         
@@ -919,15 +898,8 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
                                         cov1[5]+cov2[5] };
                 const float_v& err2 = cov[0]*dx*dx + cov[2]*dy*dy + cov[5]*dz*dz + 2.f*( cov[1]*dx*dy + cov[3]*dx*dz + cov[4]*dy*dz );
   
-
-          
                 closeDaughters &= (r2*r2/err2) < float_v(3.f);
-  
-//                 float_v r2 = (par1[0] - par2[0])*(par1[0] - par2[0]) + 
-//                              (par1[1] - par2[1])*(par1[1] - par2[1]) + 
-//                              (par1[2] - par2[2])*(par1[2] - par2[2]);
-// 
-//                 closeDaughters &= (r2 < float_v(1.f));
+                closeDaughters &= (r2 < float_v(1.f));
               }
               if(closeDaughters.isEmpty()) continue;
               
@@ -1052,7 +1024,7 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
                     KFParticleDatabase::Instance()->GetMotherMass(V0PDG,massMotherPDG,massMotherPDGSigma);
                     mother.SetPDG( V0PDG );
                     ConstructV0(vTracks, trTypeIndexPos[iTrTypePos], trTypeIndexNeg[iTrTypeNeg],                
-                                idPosDaughters, idNegDaughters, daughterPosPDG, daughterNegPDG, dS,
+                                idPosDaughters, idNegDaughters, daughterPosPDG, daughterNegPDG,
                                 mother, mother_temp,
                                 nBufEntry, l, dl, Particles, PrimVtx,
                                 cuts, pvIndexMother, secCuts, massMotherPDG,
@@ -1077,7 +1049,7 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
           mother.SetPDG( V0PDG );
 
           ConstructV0(vTracks, trTypeIndexPos[iTrTypePos], trTypeIndexNeg[iTrTypeNeg],              
-                      idPosDaughters, idNegDaughters, daughterPosPDG, daughterNegPDG, dS,
+                      idPosDaughters, idNegDaughters, daughterPosPDG, daughterNegPDG,
                       mother, mother_temp,
                       nBufEntry, l, dl, Particles, PrimVtx,
                       cuts, pvIndexMother, secCuts, massMotherPDG,
@@ -1099,7 +1071,6 @@ void KFParticleFinder::ConstructTrackV0Cand(KFPTrackVector& vTracks,
                                             uint_v& idTracks,
                                             int_v& trackPDG,
                                             KFParticle* vV0[],
-                                            float_v& dS,
                                             KFParticleSIMD& mother,
                                             KFParticleSIMD* motherTopo,
                                             KFParticle& mother_temp,
@@ -1126,17 +1097,7 @@ void KFParticleFinder::ConstructTrackV0Cand(KFPTrackVector& vTracks,
   float_v vtxErrGuess[3];
   if( !(isPrimary.isFull()) )
   {
-    const float_v Cov[3] = { V0.Covariance(0) + dS*( 2.f*V0.Covariance( 6) + dS*V0.Covariance( 9) ),
-                             V0.Covariance(2) + dS*( 2.f*V0.Covariance(11) + dS*V0.Covariance(14) ),
-                             V0.Covariance(5) + dS*( 2.f*V0.Covariance(17) + dS*V0.Covariance(20) ) };
-
-     vtxGuess[0] = V0.X() + dS*V0.Px();
-     vtxGuess[1] = V0.Y() + dS*V0.Py();
-     vtxGuess[2] = V0.Z() + dS*V0.Pz(); 
-              
-     vtxErrGuess[0] = 10.f*sqrt(Cov[0]);
-     vtxErrGuess[1] = 10.f*sqrt(Cov[1]);
-     vtxErrGuess[2] = 10.f*sqrt(Cov[2]);
+    V0.GetVertexApproximation(track, vtxGuess, vtxErrGuess);
   }
   if(!(isPrimary.isEmpty()))
   {
@@ -1168,12 +1129,15 @@ void KFParticleFinder::ConstructTrackV0Cand(KFPTrackVector& vTracks,
       }
     }
   }
-//   mother.SetVtxGuess(vtxGuess[0], vtxGuess[1], vtxGuess[2]);
-//   mother.SetVtxErrGuess(vtxErrGuess[0], vtxErrGuess[1], vtxErrGuess[2]);  
+  mother.SetVtxGuess(vtxGuess[0], vtxGuess[1], vtxGuess[2]);
+  mother.SetVtxErrGuess(vtxErrGuess[0], vtxErrGuess[1], vtxErrGuess[2]);  
     
   const KFParticleSIMD* vDaughtersPointer[2] = {&V0, &track};
-  mother.Construct(vDaughtersPointer, 2, 0);
- 
+  if(isPrimary.isFull())
+    mother.Construct(vDaughtersPointer, 2, 0, -1, 0, 1);
+  else
+    mother.Construct(vDaughtersPointer, 2, 0);
+  
   float_m active(int_v::IndexesFromZero() < int(nElements));
   
   float_m saveParticle(active);
@@ -1360,7 +1324,7 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
 
   KFParticle* v0Pointer[float_v::Size];
   
-  KFParticleSIMD mother;
+  KFParticleSIMD mother, track;
   KFParticleSIMD *motherTopo = new KFParticleSIMD[fNPV];
   
   vector<float_v> l(fNPV), dl(fNPV);
@@ -1383,15 +1347,7 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
   bool isCharm = ((abs(V0PDG) == 421) || (abs(V0PDG) == 411) || (abs(V0PDG) == 100421)) && (v0PVIndex<0);
 
   for(unsigned short iV0=0; iV0 < vV0.size(); iV0++)
-  {
-    float_v v0X = vV0[iV0].X();
-    float_v v0Y = vV0[iV0].Y();
-    float_v v0Z = vV0[iV0].Z();
-
-    float_v v0Px = vV0[iV0].Px();
-    float_v v0Py = vV0[iV0].Py();
-    float_v v0Pz = vV0[iV0].Pz();
-    
+  {    
     int iNegDaughter = vV0[iV0].DaughterIds()[0];
     int iPosDaughter = vV0[iV0].DaughterIds()[1];
     
@@ -1407,45 +1363,41 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
       const int_m& isPrimary   = int_m( v0PVIndex >= 0 ) && (!isTrackSecondary);
       const int_m& isSamePV = (isPrimary && (v0PVIndex == trackPVIndex)) || !(isPrimary);
 
-      const float_v& trackX = reinterpret_cast<const float_v&>(vTracks.X()[iTr]);
-      const float_v& trackY = reinterpret_cast<const float_v&>(vTracks.Y()[iTr]);
-      const float_v& trackZ = reinterpret_cast<const float_v&>(vTracks.Z()[iTr]);
+      float_m closeDaughters = float_m(isSamePV) && float_m(int_v::IndexesFromZero() < int(NTracks));
 
-      const float_v& trackPx = reinterpret_cast<const float_v&>(vTracks.Px()[iTr]);
-      const float_v& trackPy = reinterpret_cast<const float_v&>(vTracks.Py()[iTr]);
-      const float_v& trackPz = reinterpret_cast<const float_v&>(vTracks.Pz()[iTr]);
-      
-      const float_v p12 = v0Px*v0Px + v0Py*v0Py + v0Pz*v0Pz;
-      const float_v p22 = trackPx*trackPx + trackPy*trackPy + trackPz*trackPz;
-      const float_v p1p2 = v0Px*trackPx + v0Py*trackPy + v0Pz*trackPz;
+      if(v0PVIndex < 0)
+      {
+        KFParticleSIMD v0(vV0[iV0]);
+        track.Load(vTracks, iTr, trackPDG);
+     
+        float_v dsV0, dsTrack;
+        float_v par1[8], cov1[36], par2[8], cov2[36];
+        v0.GetDStoParticle(track, dsV0, dsTrack);
+        v0.Transport(dsV0,par1,cov1);
+        track.Transport(dsTrack,par2,cov2);
+  
+        const float_v& dx = par1[0] - par2[0];
+        const float_v& dy = par1[1] - par2[1];
+        const float_v& dz = par1[2] - par2[2];
+        const float_v& r2 = dx*dx + dy*dy + dz*dz;
+        
+        const float_v vtx[3] = {(par1[0] + par2[0])/2.f,
+                                (par1[1] + par2[1])/2.f,
+                                (par1[2] + par2[2])/2.f, };
 
-      const float_v dpx = trackX-v0X;
-      const float_v dpy = trackY-v0Y;
-      const float_v dpz = trackZ-v0Z;
-    
-      const float_v drp1 = v0Px*dpx + v0Py*dpy + v0Pz*dpz;
-      const float_v drp2 = trackPx*dpx + trackPy*dpy + trackPz*dpz;
-
-      float_v detp =  p1p2*p1p2 - p12*p22;
-
-      detp( abs(detp)<1.e-8f ) = 1.e8f;
-    
-      const float_v detpi = 1.f/detp;
-    
-      const float_v ds  = (drp2*p1p2 - drp1*p22) * detpi;
-      const float_v ds1 = (drp2*p12  - drp1*p1p2)* detpi;
-      
-      float_v par1[3] = {v0X + ds*v0Px,
-                         v0Y + ds*v0Py,
-                         v0Z + ds*v0Pz }; 
-
-      float_v par2[3] = {trackX + ds1*trackPx,
-                         trackY + ds1*trackPy,
-                         trackZ + ds1*trackPz }; 
-
-      float_v r2 = (par1[0] - par2[0])*(par1[0] - par2[0]) + (par1[1] - par2[1])*(par1[1] - par2[1]) + (par1[2] - par2[2])*(par1[2] - par2[2]);
-
-      const float_m& closeDaughters = float_m(isSamePV) && ( ( (r2 < float_v(1.f)) && isSecondary) || isPrimary ) && float_m(int_v::IndexesFromZero() < int(NTracks));
+        v0.CorrectErrorsOnS(par1, vtx, cov1);
+        track.CorrectErrorsOnS(par2, vtx, cov2);
+        
+        const float_v cov[6] = {cov1[0]+cov2[0],
+                                cov1[1]+cov2[1],
+                                cov1[2]+cov2[2],
+                                cov1[3]+cov2[3],
+                                cov1[4]+cov2[4],
+                                cov1[5]+cov2[5] };
+        const float_v& err2 = cov[0]*dx*dx + cov[2]*dy*dy + cov[5]*dz*dz + 2.f*( cov[1]*dx*dy + cov[3]*dx*dz + cov[4]*dy*dz );
+                
+        closeDaughters &= ( (r2 < float_v(1.f)) && (r2*r2/err2) < float_v(3.f) && isSecondary);
+      }
       if(closeDaughters.isEmpty()) continue;
       
       int_v trackPdgPos[2];
@@ -1563,7 +1515,7 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
         
         if(isCharm)
         {
-          const float_v& trackPt = trackPx*trackPx + trackPy*trackPy;
+          const float_v& trackPt = track.Px()*track.Px() + track.Py()*track.Py();
           active[iPDGPos] &= int_m(trackPt >= fCutCharmPt*fCutCharmPt) && int_m(reinterpret_cast<const float_v&>((*ChiToPrimVtx)[iTr]) > fCutCharmChiPrim );
         }
                   
@@ -1585,9 +1537,7 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
           massMotherPDG[nBufEntry] = massMother;
           massMotherPDGSigma[nBufEntry] = massMotherSigma;
           motherParticlePDG[nBufEntry] = motherPDG[iV];
-          
-          dS[nBufEntry] = ds[iV];
-          
+                    
           int motherType = 0;
 
           switch (abs(motherPDG[iV]))
@@ -1611,7 +1561,7 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
           {
             mother.SetPDG( motherParticlePDG );
             ConstructTrackV0Cand(vTracks,   
-                                 idTrack, trackPDGMother, v0Pointer, dS,
+                                 idTrack, trackPDGMother, v0Pointer,
                                  mother, motherTopo, mother_temp,
                                  nBufEntry, l, dl, Particles, PrimVtx,
                                  cuts, pvIndexMother, massMotherPDG,
@@ -1630,7 +1580,7 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
     
     mother.SetPDG( motherParticlePDG );
     ConstructTrackV0Cand(vTracks,  
-                          idTrack, trackPDGMother, v0Pointer, dS,
+                          idTrack, trackPDGMother, v0Pointer,
                           mother, motherTopo, mother_temp,
                           nBufEntry, l, dl, Particles, PrimVtx,
                           cuts, pvIndexMother, massMotherPDG,

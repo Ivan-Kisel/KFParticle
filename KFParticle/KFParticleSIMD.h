@@ -369,6 +369,7 @@ class KFParticleSIMD :public KFParticleBaseSIMD
   void GetFieldValue( const float_v xyz[], float_v B[] ) const ;
   
   void Transport( float_v dS, float_v P[], float_v C[] ) const ;
+  void GetVertexApproximation(const KFParticleSIMD &particle, float_v* vtxGuess, float_v* vtxErrGuess) const;
 
  protected: 
   
