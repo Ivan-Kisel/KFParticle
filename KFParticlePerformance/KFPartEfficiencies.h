@@ -213,7 +213,231 @@ class KFPartEfficiencies: public TNamed
     mPartMaxMult[70] = 50;
     mPartMaxMult[71] = 500;
     mPartMaxMult[72] = 20;
-        
+
+    float mPartMass[nParticles] = { 0.497614, // 0 K0
+                                    1.115683, // 1 Lambda
+                                    1.115683, // 2 Lambda b
+                                    1.32171,  // 3 Xi-
+                                    1.32171,  // 4 Xi+
+                                    1.31486,  // 5 Xi0
+                                    1.31486,  // 6 Xi0 b
+                                    1.67245,  // 7 Omega-
+                                    1.67245,  // 8 Omega+
+                                    1.192642, // 9 Sigma0 
+                                    1.192642, //10 Sigma0 b
+                                    1.18937,  //11 Sigma+
+                                    1.18937,  //12 Sigma+ b
+                                    0.8958,   //13 K*0
+                                    0.8958,   //14 K*0 b
+                                    0.89166,  //15 K*+
+                                    0.89166,  //16 K*-
+                                    0.8958,   //17 K*0
+                                    0.89166,  //18 K*+
+                                    0.89166,  //19 K*-
+                                    1.3828,   //20 Sigma*+
+                                    1.3872,   //21 Sigma*-
+                                    1.3828,   //22 Sigma*+ b
+                                    1.3872,   //23 Sigma*- b 
+                                    1.3837,   //24 Sigma*0 
+                                    1.3837,   //25 Sigma*0 b
+                                    1.5195,   //26 Labmda*
+                                    1.5195,   //27 Labmda* b
+                                    1.53180,  //28 Xi*0
+                                    1.53180,  //29 Xi*0 b
+                                    1.823,    //30 Xi*-
+                                    1.823,    //31 Xi*+
+                                    1.535,    //32 Xi*- 
+                                    1.535,    //33 Xi*+
+                                    2.252,    //34 Omega*-
+                                    2.252,    //35 Omega*+
+                                    2.21,     //36 Hdb
+                                    1.019455, //37 phi
+                                    0.77526,  //38 rho
+                                    0.77526,  //39 rho
+                                    0.77526,  //40 rho
+                                    0.,       //41 gamma
+                                    0.1349766,//42 pi0
+                                    0.547862, //43 eta0
+                                    3.096916, //44 J/Psi
+                                    3.096916, //45 J/Psi
+                                    1.86486,  //46 D0
+                                    1.86486,  //47 D0 b
+                                    1.86486,  //48 D0
+                                    1.86486,  //49 D0 b
+                                    1.86962,  //50 D+
+                                    1.86962,  //51 D-
+                                    1.96850,  //52 Ds+
+                                    1.96850,  //53 Ds-
+                                    2.28646,  //54 Lambdac
+                                    2.28646,  //55 Lambdac b
+                                    2.00699,  //56 D*0
+                                    2.00699,  //57 D*0 b
+                                    2.01029,  //58 D*+
+                                    2.01029,  //59 D*-
+                                    2.01029,  //60 D*+
+                                    2.01029,  //61 D*-
+                                    2.21,     //62 H0
+                                    5.485799e-4, //63 e-
+                                    5.485799e-4, //64 e+
+                                    0.105658, //65 mu-
+                                    0.105658, //66 mu+
+                                    0.139570, //67 pi+
+                                    0.139570, //68 pi-
+                                    0.493677, //69 K+
+                                    0.493677, //70 K-
+                                    0.938272, //71 p
+                                    0.938272, //72 p-
+                                    0};       //73 V0
+                                    
+    float mPartLifeTime[nParticles] = { 8.954e-11, // 0 K0
+                                        2.632e-10, // 1 Lambda
+                                        2.632e-10, // 2 Lambda b
+                                        1.639e-10, // 3 Xi-
+                                        1.7e-10,   // 4 Xi+
+                                        2.9e-10,   // 5 Xi0
+                                        2.9e-10,   // 6 Xi0 b
+                                        0.821e-10, // 7 Omega-
+                                        0.821e-10, // 8 Omega+
+                                        7.4e-20,   // 9 Sigma0 
+                                        7.4e-20,   //10 Sigma0 b
+                                        0.8018e-10,//11 Sigma+
+                                        0.8018e-10,//12 Sigma+ b
+                                        1.38e-23,  //13 K*0
+                                        1.38e-23,  //14 K*0 b
+                                        1.30e-23,  //15 K*+
+                                        1.30e-23,  //16 K*-
+                                        1.38e-23,  //17 K*0
+                                        1.30e-23,  //18 K*+
+                                        1.30e-23,  //19 K*-
+                                        1.83e-23,   //20 Sigma*+
+                                        1.67e-23,   //21 Sigma*-
+                                        1.83e-23,   //22 Sigma*+ b
+                                        1.67e-23,   //23 Sigma*- b 
+                                        1.83e-23,   //24 Sigma*0 
+                                        1.83e-23,   //25 Sigma*0 b
+                                        4.22e-23,   //26 Labmda*
+                                        4.22e-23,   //27 Labmda* b
+                                        7.23e-23,   //28 Xi*0
+                                        7.23e-23,   //29 Xi*0 b
+                                        2.74e-23,   //30 Xi*-
+                                        2.74e-23,   //31 Xi*+
+                                        6.65e-23,   //32 Xi*-
+                                        6.65e-23,   //33 Xi*+
+                                        1.2e-23,    //34 Omega*-
+                                        1.2e-23,    //35 Omega*+
+                                        1.32e-10,   //36 Hdb
+                                        1.55e-22,   //37 phi
+                                        4.45e-24,   //38 rho
+                                        4.45e-24,   //39 rho
+                                        4.45e-24,   //40 rho
+                                        1.e20,      //41 gamma
+                                        8.52e-17,   //42 pi0
+                                        5.0e-19,    //43 eta0
+                                        7.1e-21,    //44 J/Psi
+                                        7.1e-21,    //45 J/Psi
+                                        4.1e-13,    //46 D0
+                                        4.1e-13,    //47 D0 b
+                                        4.1e-13,    //48 D0
+                                        4.1e-13,    //49 D0 b
+                                        1.04e-13,   //50 D+
+                                        1.04e-13,   //51 D-
+                                        5.0e-13,    //52 Ds+
+                                        5.0e-13,    //53 Ds-
+                                        2.0e-13,    //54 Lambdac
+                                        2.0e-13,    //55 Lambdac b
+                                        3.0e-22,    //56 D*0
+                                        3.0e-22,    //57 D*0 b
+                                        6.86e-21,   //58 D*+
+                                        6.86e-21,   //59 D*-
+                                        6.86e-21,   //60 D*+
+                                        6.86e-21,   //61 D*-
+                                        1.32e-10,   //62 H0
+                                        1.0e20,     //63 e-
+                                        1.0e20,     //64 e+
+                                        2.2e-6,     //65 mu-
+                                        2.2e-6,     //66 mu+
+                                        2.6e-8,     //67 pi+
+                                        2.6e-8,     //68 pi-
+                                        1.238e-8,   //69 K+
+                                        1.238e-8,   //70 K-
+                                        1.0e20,     //71 p
+                                        1.0e20,     //72 p-
+                                        0};         //73 V0
+                                        
+    int   mPartCharge[nParticles] = { 0, // 0 K0
+                                      0, // 1 Lambda
+                                      0, // 2 Lambda b
+                                     -1, // 3 Xi-
+                                      1, // 4 Xi+
+                                      0, // 5 Xi0
+                                      0, // 6 Xi0 b
+                                     -1, // 7 Omega-
+                                      1, // 8 Omega+
+                                      0, // 9 Sigma0 
+                                      0, //10 Sigma0 b
+                                      1, //11 Sigma+
+                                     -1, //12 Sigma+ b
+                                      0,  //13 K*0
+                                      0,  //14 K*0 b
+                                      1,  //15 K*+
+                                     -1,  //16 K*-
+                                      0,  //17 K*0
+                                      1,  //18 K*+
+                                     -1,  //19 K*-
+                                      1,   //20 Sigma*+
+                                     -1,   //21 Sigma*-
+                                     -1,   //22 Sigma*+ b
+                                      1,   //23 Sigma*- b 
+                                      0,   //24 Sigma*0 
+                                      0,   //25 Sigma*0 b   
+                                      0,   //26 Labmda*0
+                                      0,   //27 Labmda*0 b
+                                      0,   //28 Xi*0
+                                      0,   //29 Xi*0 b
+                                     -1,   //30 Xi*-
+                                      1,   //31 Xi*+
+                                     -1,   //32 Xi*-
+                                      1,   //33 Xi*+
+                                     -1,   //34 Omega*-
+                                      1,   //35 Omega*+
+                                      0,   //36 Hdb
+                                      0,   //37 phi
+                                      0,   //38 rho
+                                      0,   //39 rho
+                                      0,   //40 rho
+                                      0,   //41 gamma
+                                      0,   //42 pi0
+                                      0,   //43 eta0
+                                      0,   //44 J/Psi
+                                      0,   //45 J/Psi
+                                      0,   //46 D0
+                                      0,   //47 D0 b
+                                      0,   //48 D0
+                                      0,   //49 D0 b
+                                      1,   //50 D+
+                                     -1,   //51 D-
+                                      1,   //52 Ds+
+                                     -1,   //53 Ds-
+                                      1,   //54 Lambdac
+                                     -1,   //55 Lambdac
+                                      0,   //56 D*0
+                                      0,   //57 D*0 b
+                                      1,   //58 D*+
+                                     -1,   //59 D*-
+                                      1,   //60 D*+
+                                     -1,   //61 D*-
+                                      0,   //62 H0
+                                     -1,   //63 e-
+                                      1,   //64 e+
+                                     -1,   //65 mu-
+                                      1,   //66 mu+
+                                      1,   //67 pi+
+                                     -1,   //68 pi-
+                                      1,   //69 K+
+                                     -1,   //70 K-
+                                      1,   //71 p
+                                     -1,   //72 p-
+                                      0};  //73 V0                                      
     //set decay mode
     partDaughterPdg.resize(nParticles);
 
@@ -493,6 +717,9 @@ class KFPartEfficiencies: public TNamed
       partMHistoMin[iP] = mPartMHistoMin[iP];
       partMHistoMax[iP] = mPartMHistoMax[iP];
       partMaxMult[iP] = mPartMaxMult[iP];
+      partMass[iP] = mPartMass[iP];
+      partLifeTime[iP] = mPartLifeTime[iP];
+      partCharge[iP] = mPartCharge[iP];
     }
 
     for(int iP=0; iP<nParticles; iP++)
@@ -655,7 +882,10 @@ class KFPartEfficiencies: public TNamed
     std::fstream file(fileName.Data(),fstream::in);
     file >> *this;
   }
-
+  
+  int GetNDaughters(int iParticle) const { return partDaughterPdg[iParticle].size(); }
+  int GetDaughterPDG(int iParticle, int iDaughter) const { return partDaughterPdg[iParticle][iDaughter]; }
+  
   static const int nParticles = 74;
   int partPDG[nParticles];
   TString partName[nParticles];
@@ -664,6 +894,9 @@ class KFPartEfficiencies: public TNamed
   float partMHistoMin[nParticles];
   float partMHistoMax[nParticles];
   int partMaxMult[nParticles];
+  float partMass[nParticles];
+  float partLifeTime[nParticles];
+  int partCharge[nParticles];
 
  private:
   std::vector<TString> names; // names counters indexed by index of counter

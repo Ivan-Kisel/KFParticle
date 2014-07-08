@@ -282,6 +282,16 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
       float xMin[nHistosPVParam] = {-10., -10., -100.,  0,   -0.5,    0.,   -0.5,    0., 0., -0.01, -0.01, -0.01, -0.01, -0.01, 0.};
       float xMax[nHistosPVParam] = { 10.,  10.,  100., 10, 1000.5, 1000., 1000.5, 1000., 1.,  1.01,  1.01,  1.01,  1.01,  1.01, 100.};
       
+      TString parName2D[nHistosPVParam2D] = {"xy"};
+      TString parXAxisName2D[nHistosPVParam2D] = {"x [cm]"};
+      TString parYAxisName2D[nHistosPVParam2D] = {"y [cm]"};
+      int nBinsX2D[nHistosPVParam2D] = {1000};
+      float xMin2D[nHistosPVParam2D] = {-10.};
+      float xMax2D[nHistosPVParam2D] = { 10.};
+      int nBinsY2D[nHistosPVParam2D] = {1000};
+      float yMin2D[nHistosPVParam2D] = {-10.};
+      float yMax2D[nHistosPVParam2D] = { 10.};
+      
       for(int iH=0; iH<nHistosPVParam; iH++)
       {
         hPVParam[iH]       = new TH1F(parName[iH].Data(),parName[iH].Data(),
@@ -289,6 +299,15 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
         hPVParam[iH]->GetXaxis()->SetTitle(parAxisName[iH].Data());
       }
 
+      for(int iH=0; iH<nHistosPVParam2D; iH++)
+      {
+        hPVParam2D[iH]       = new TH2F(parName2D[iH].Data(),parName2D[iH].Data(),
+                                        nBinsX2D[iH],xMin2D[iH],xMax2D[iH],
+                                        nBinsY2D[iH],yMin2D[iH],yMax2D[iH]);
+        hPVParam2D[iH]->GetXaxis()->SetTitle(parXAxisName2D[iH].Data());
+        hPVParam2D[iH]->GetYaxis()->SetTitle(parYAxisName2D[iH].Data());
+      }
+      
       gDirectory->mkdir("Efficiency");
       gDirectory->cd("Efficiency");
       {
@@ -361,6 +380,28 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
         gDirectory->mkdir("FitQA");
         gDirectory->cd("FitQA");
         {
+          gDirectory->mkdir("FitQAvcNMCPVTracks");
+          gDirectory->cd("FitQAvcNMCPVTracks");
+          {
+            for(int iHPV=0; iHPV<nHistosPV-1; ++iHPV){
+              hPVFitQa2D[0][0][iHPV] = new TH2F(Table[iHPV].name.data(),Table[iHPV].title.data(),
+                                                500, 0., 5000.,
+                                                Table[iHPV].n, Table[iHPV].l, Table[iHPV].r);
+            }
+          }
+          gDirectory->cd(".."); //FitQA
+
+          gDirectory->mkdir("FitQAvcNPVTracks");
+          gDirectory->cd("FitQAvcNPVTracks");
+          {
+            for(int iHPV=0; iHPV<nHistosPV-1; ++iHPV){
+              hPVFitQa2D[0][1][iHPV] = new TH2F(Table[iHPV].name.data(),Table[iHPV].title.data(),
+                                                500, 0., 5000.,
+                                                Table[iHPV].n, Table[iHPV].l, Table[iHPV].r);
+            }
+          }
+          gDirectory->cd(".."); //FitQA
+          
           for(int iHPV=0; iHPV<nHistosPV; ++iHPV){
             hPVFitQa[0][iHPV] = new TH1F(Table[iHPV].name.data(),Table[iHPV].title.data(),
                                          Table[iHPV].n, Table[iHPV].l, Table[iHPV].r);

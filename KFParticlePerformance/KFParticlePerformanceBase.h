@@ -67,6 +67,11 @@ class KFParticlePerformanceBase
 #ifndef KFPWITHTRACKER
   TDirectory* const GetHistosDirectory() { return fHistoDir; }
 #endif
+
+// efficiencies
+  KFPartEfficiencies fParteff;
+  KFPVEfficiencies fPVeff;
+  KFPVEfficiencies fPVeffMCReconstructable;
   
  protected:
 
@@ -81,11 +86,6 @@ class KFParticlePerformanceBase
 // Names of files
   TString outfileName;
   TDirectory* histodir;
-
-// efficiencies
-  KFPartEfficiencies fParteff;
-  KFPVEfficiencies fPVeff;
-  KFPVEfficiencies fPVeffMCReconstructable;
 
   int fNEvents;
 
@@ -119,6 +119,7 @@ class KFParticlePerformanceBase
   
   static const int nHistosPV = 7;
   TH1F *hPVFitQa[2][nHistosPV];
+  TH2F *hPVFitQa2D[2][2][nHistosPV-1];
 
   static const int nHistosPVParam = 15;
   TH1F *hPVParam[nHistosPVParam];
@@ -126,7 +127,9 @@ class KFParticlePerformanceBase
   TH1F *hPVParamSignal[nHistosPVParam];
   TH1F *hPVParamPileup[nHistosPVParam];
   TH1F *hPVParamBG[nHistosPVParam];
-
+  static const int nHistosPVParam2D = 1;
+  TH2F *hPVParam2D[nHistosPVParam2D];
+  
   static const int nFitPVTracksQA = 12;
   TH1F *hFitPVTracksQA[nFitPVTracksQA];
   

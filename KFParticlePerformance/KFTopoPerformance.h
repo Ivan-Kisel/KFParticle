@@ -82,6 +82,7 @@ class KFTopoPerformance: public KFParticlePerformanceBase
     vMCTracks = mcTracks;
   }
   
+  const KFPartEfficiencies GetEfficiency() const { return fParteff; }
   void SetPrintEffFrequency(int n) { fPrintEffFrequency = n;}
  private:
 
