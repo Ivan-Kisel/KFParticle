@@ -345,6 +345,14 @@ void KFParticleTopoReconstructor::ReconstructPrimVertex(bool isHeavySystem)
       fTracks[0].SetPVIndex(pvI, tracks[iTr]);
   }
   
+  if(isHeavySystem)
+  {
+    vector<short int> pvTracks = fKFParticlePVReconstructor->GetPVTrackIndexArray(nPV);
+    KFVertex pv = fKFParticlePVReconstructor->GetPrimKFVertex(nPV);
+    fKFParticlePVReconstructor->CleanPV();
+    fKFParticlePVReconstructor->AddPV(pv, pvTracks);
+  }
+  
 #ifdef USE_TIMERS
   timer.Stop();
   fStatTime[1] = timer.RealTime();

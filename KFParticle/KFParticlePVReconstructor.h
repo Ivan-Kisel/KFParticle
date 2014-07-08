@@ -40,6 +40,7 @@ class KFParticlePVReconstructor{
      /// Accessors
   int NPrimaryVertices() const { return fPrimVertices.size(); }
   KFParticle &GetPrimVertex(int iPV=0)   { return fPrimVertices[iPV]; };
+  KFVertex   &GetPrimKFVertex(int iPV=0)   { return fPrimVertices[iPV]; };
   vector<short int>& GetPVTrackIndexArray(int iPV=0) { return fClusters[iPV].fTracks; }
   KFParticle &GetParticle(int i){ assert( i < fNParticles );          return fParticles[i];    };
   
@@ -48,6 +49,7 @@ class KFParticlePVReconstructor{
   
   void AddPV(const KFVertex &pv, const vector<short int> &tracks);
   void AddPV(const KFVertex &pv);
+  void CleanPV() { fClusters.clear(); fPrimVertices.clear(); }
 
  private:
   KFParticlePVReconstructor &operator=(KFParticlePVReconstructor &);
