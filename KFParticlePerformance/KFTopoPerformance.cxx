@@ -1418,6 +1418,11 @@ void KFTopoPerformance::FillHistos()
       hPVFitQa[iPVType][iHPV]->Fill(dRPVp[iHPV-3]);
     
     for(unsigned int iHPV=0; iHPV<3; ++iHPV)
+      hPVFitQa2D[iPVType][1][iHPV]->Fill(fNCorrectPVTracks[iPV],dRPVr[iHPV]);
+    for(unsigned int iHPV=3; iHPV<6; ++iHPV)
+      hPVFitQa2D[iPVType][1][iHPV]->Fill(fNCorrectPVTracks[iPV],dRPVp[iHPV-3]);
+
+    for(unsigned int iHPV=0; iHPV<3; ++iHPV)
       hPVFitQa2D[iPVType][0][iHPV]->Fill(mcPV.NReconstructedDaughterTracks(),dRPVr[iHPV]);
     for(unsigned int iHPV=3; iHPV<6; ++iHPV)
       hPVFitQa2D[iPVType][0][iHPV]->Fill(mcPV.NReconstructedDaughterTracks(),dRPVp[iHPV-3]);
