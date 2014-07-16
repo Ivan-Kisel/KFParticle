@@ -11,6 +11,28 @@
 
 #include "KFPTrackVector.h"
 
+void KFPTrackVector::SetParameter(const float_v& value, int iP, int iTr)
+{ 
+  if( (iTr+float_vLen) < Size())
+    reinterpret_cast<float_v&>(fP[iP][iTr]) = value;
+  else
+  {
+    const uint_v index(uint_v::IndexesFromZero());
+    (reinterpret_cast<float_v&>(fP[iP][iTr])).gather(reinterpret_cast<const float*>(&value), index, float_m(index<(Size() - iTr)));
+  }
+}
+void KFPTrackVector::SetCovariance(const float_v& value, int iC, int iTr) 
+{ 
+  if( (iTr+float_vLen) < Size())
+    reinterpret_cast<float_v&>(fC[iC][iTr]) = value;
+  else
+  {
+    const uint_v index(uint_v::IndexesFromZero());
+    (reinterpret_cast<float_v&>(fC[iC][iTr])).gather(reinterpret_cast<const float*>(&value), index, float_m(index<(Size() - iTr)));
+  }
+}
+  
+
 void KFPTrackVector::Resize(const int n)
 {
   for(int i=0; i<6; i++)

@@ -56,8 +56,8 @@ class KFPTrackVector
   void SetParameter (float value, int iP, int iTr) { fP[iP][iTr] = value; }
   void SetCovariance(float value, int iC, int iTr) { fC[iC][iTr] = value; }
   
-  void SetParameter (const float_v& value, int iP, int iTr) { reinterpret_cast<float_v&>(fP[iP][iTr]) = value; }
-  void SetCovariance(const float_v& value, int iC, int iTr) { reinterpret_cast<float_v&>(fC[iC][iTr]) = value; }
+  void SetParameter (const float_v& value, int iP, int iTr);
+  void SetCovariance(const float_v& value, int iC, int iTr);
   
 #ifdef NonhomogeneousField
   void SetFieldCoefficient(float value, int iP, int iTr) { fField[iP][iTr] = value; }

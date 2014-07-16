@@ -462,7 +462,7 @@ void KFParticleTopoReconstructor::TransportPVTracksToPrimVertex()
       
       for(unsigned int iV=0; iV < (unsigned int)float_vLen; iV++)
       {
-        if(iV >= NTr) continue;
+        if(iV+iTr >= NTr) continue;
         
         int iPV = pvIndex[iV];
         point[0][iV] = fPV[iPV].X()[0];
