@@ -444,10 +444,45 @@ void KFParticleTopoReconstructor::SortTracks()
 #endif // USE_TIMERS
 }
 
+void KFParticleTopoReconstructor::TransportPVTracksToPrimVertex()
+{
+  float_v point[3];
+  KFParticleSIMD tmpPart;
+  
+  for(int iTV=2; iTV<4; iTV++)
+  {
+    unsigned int NTr = fTracks[iTV].Size(); 
+    for(unsigned int iTr=0; iTr < NTr; iTr += float_vLen) 
+    { 
+      uint_v trackIndex = iTr + uint_v::IndexesFromZero();
+      const int_v& pdg = reinterpret_cast<const int_v&>(fTracks[iTV].PDG()[iTr]);
+      const int_v& pvIndex = reinterpret_cast<const int_v&>(fTracks[iTV].PVIndex()[iTr]);
+      
+      tmpPart.Load(fTracks[iTV], iTr, pdg);
+      
+      for(unsigned int iV=0; iV < (unsigned int)float_vLen; iV++)
+      {
+        if(iV >= NTr) continue;
+        
+        int iPV = pvIndex[iV];
+        point[0][iV] = fPV[iPV].X()[0];
+        point[1][iV] = fPV[iPV].Y()[0];
+        point[2][iV] = fPV[iPV].Z()[0];     
+      }
+      
+      tmpPart.TransportToPoint(point);
+      
+      for(int iP=0; iP<6; iP++)
+        fTracks[iTV].SetParameter( tmpPart.GetParameter(iP), iP, iTr );
+      for(int iC=0; iC<21; iC++)
+        fTracks[iTV].SetCovariance( tmpPart.GetCovariance(iC), iC, iTr ); 
+    }
+  }
+}
+
 void KFParticleTopoReconstructor::GetChiToPrimVertex(KFParticleSIMD* pv, const int nPV)
 { 
   KFParticleSIMD tmpPart; // for chi_prim calculation 
-  const float_v point[3] = {pv->X(), pv->Y(), pv->Z()};
   
   for(int iTV=0; iTV<2; iTV++)
   {
@@ -463,6 +498,7 @@ void KFParticleTopoReconstructor::GetChiToPrimVertex(KFParticleSIMD* pv, const i
 
       for(int iPV=0; iPV<nPV; iPV++)
       {
+        const float_v point[3] = {pv[iPV].X(), pv[iPV].Y(), pv[iPV].Z()};
         tmpPart.TransportToPoint(point);
         const float_v& chiVec = tmpPart.GetDeviationFromVertex(pv[iPV]);
         chi2( (chi2>chiVec) && float_m(trackIndex<NTr) ) = chiVec;
@@ -481,6 +517,8 @@ void KFParticleTopoReconstructor::ReconstructParticles()
 
   if(fPV.size() < 1) return;
 
+  TransportPVTracksToPrimVertex();
+  
   //calculate chi to primary vertex, chi = sqrt(dr C-1 dr)
   GetChiToPrimVertex(&(fPV[0]), fPV.size());
 

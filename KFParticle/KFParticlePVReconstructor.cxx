@@ -186,7 +186,9 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
       float drError2 = dr[0]* (cov[0]* dr[0] + cov[1]* dr[1] + cov[3]* dr[2]) +
                        dr[1]* (cov[1]* dr[0] + cov[2]* dr[1] + cov[4]* dr[2]) + 
                        dr[2]* (cov[3]* dr[0] + cov[4]* dr[1] + cov[5]* dr[2]);
-
+      if(!(dr2==dr2) || !(drError2==drError2))
+        continue;
+  
       if( dr2*dr2 <= (25 * drError2) )
       {
         for(int iP=0; iP<3; iP++)

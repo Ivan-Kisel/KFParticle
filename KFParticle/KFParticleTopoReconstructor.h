@@ -105,7 +105,8 @@ class KFParticleTopoReconstructor{
   KFParticleTopoReconstructor(KFParticleTopoReconstructor &);
 
   void GetChiToPrimVertex(KFParticleSIMD* pv, const int nPV);
-
+  void TransportPVTracksToPrimVertex();
+  
   KFParticlePVReconstructor* fKFParticlePVReconstructor;
 
   KFPTrackVector *fTracks;
