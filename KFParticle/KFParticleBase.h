@@ -330,7 +330,10 @@ class KFParticleBase :public TObject {
 
   int fPDG; // pdg hypothesis
   std::vector<int> fDaughtersIds; // id of particles it created from. if size == 1 then this is id of track. TODO use in functions. why unsigned short int doesn't work???
-//  ClassDef( KFParticleBase, 1 );
+ 
+#ifdef KFParticleInRoot
+  ClassDef( KFParticleBase, 1 )
+#endif
 };
 
 #endif 

@@ -21,6 +21,10 @@
 
 #include <iostream>
 
+#ifdef KFParticleInRoot
+ClassImp(KFParticleBase)
+#endif
+
 KFParticleBase::KFParticleBase() : fChi2(0), fSFromDecay(0), 
    SumDaughterMass(0), fMassHypo(-1), fNDF(-3), fId(-1), fAtProductionVertex(0),  fIsLinearized(0), fQ(0), fConstructMethod(2), fPDG(0), fDaughtersIds()
 { 
