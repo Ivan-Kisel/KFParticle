@@ -334,7 +334,7 @@ class KFParticleBase :public TObject {
   int fPDG; // pdg hypothesis
   std::vector<int> fDaughtersIds; // id of particles it created from. if size == 1 then this is id of track. TODO use in functions. why unsigned short int doesn't work???
  
-#ifndef HLTCA_STANDALONE
+#ifndef KFParticleStandalone
   ClassDef( KFParticleBase, 1 )
 #endif
 };

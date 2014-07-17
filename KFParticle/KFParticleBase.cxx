@@ -21,7 +21,7 @@
 
 #include <iostream>
 
-#ifndef HLTCA_STANDALONE
+#ifndef KFParticleStandalone
 ClassImp(KFParticleBase)
 #endif
 

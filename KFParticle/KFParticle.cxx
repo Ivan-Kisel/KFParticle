@@ -22,8 +22,8 @@
 #include "KFPTrack.h"
 #include "KFPVertex.h"
 
-#ifndef HLTCA_STANDALONE
-ClassImp(KFParticle)
+#ifndef KFParticleStandalone
+ClassImp(KFParticle);
 #endif
 
 

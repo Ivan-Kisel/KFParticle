@@ -374,7 +374,7 @@ class KFParticle :public KFParticleBase
   float fieldRegion[10];
 #endif
   
-#ifndef HLTCA_STANDALONE
+#ifndef KFParticleStandalone
   ClassDef( KFParticle, 1 );
 #endif
 };
