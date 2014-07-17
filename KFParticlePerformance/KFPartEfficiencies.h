@@ -922,7 +922,7 @@ class KFPartEfficiencies: public TNamed
   KFMCCounter<int> bg; // background
   KFMCCounter<int> clone; // background
   
-#ifdef KFParticleInRoot
+#ifndef HLTCA_STANDALONE
   ClassDef( KFPartEfficiencies, 1 )
 #endif
 };

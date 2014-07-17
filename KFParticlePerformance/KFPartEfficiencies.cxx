@@ -11,6 +11,6 @@
 
 #include "KFPartEfficiencies.h"
 
-#ifdef KFParticleInRoot
+#ifndef HLTCA_STANDALONE
 ClassImp(KFPartEfficiencies)
 #endif
