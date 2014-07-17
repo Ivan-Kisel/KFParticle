@@ -921,6 +921,14 @@ class KFPartEfficiencies: public TNamed
   KFMCCounter<int> ghost;
   KFMCCounter<int> bg; // background
   KFMCCounter<int> clone; // background
+  
+#ifdef KFParticleInRoot
+  ClassDef( KFPartEfficiencies, 1 )
+#endif
 };
+
+#ifdef KFParticleInRoot
+ClassImp(KFPartEfficiencies)
+#endif
 
 #endif
