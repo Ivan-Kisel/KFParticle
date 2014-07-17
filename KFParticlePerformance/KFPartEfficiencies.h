@@ -927,8 +927,4 @@ class KFPartEfficiencies: public TNamed
 #endif
 };
 
-#ifdef KFParticleInRoot
-ClassImp(KFPartEfficiencies)
-#endif
-
 #endif
