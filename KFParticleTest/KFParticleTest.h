@@ -39,6 +39,10 @@ class KFParticleTest
   
   KFParticle* fMotherSingle;
   KFParticleSIMD* fMotherSIMD;
+  
+  #ifdef KFParticleInRoot
+  ClassDef( KFParticleTest, 1 )
+  #endif
 };
 
 #endif //KFParticleTest_H
