@@ -373,8 +373,10 @@ class KFParticle :public KFParticleBase
 #ifdef NonhomogeneousField
   float fieldRegion[10];
 #endif
-
-//  ClassDef( KFParticle, 1 );
+  
+#ifndef HLTCA_STANDALONE
+  ClassDef( KFParticle, 1 );
+#endif
 };
 
 

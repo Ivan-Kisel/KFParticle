@@ -22,6 +22,11 @@
 #include "KFPTrack.h"
 #include "KFPVertex.h"
 
+#ifndef HLTCA_STANDALONE
+ClassImp(KFParticle)
+#endif
+
+
 #ifdef HomogeneousField
 float KFParticle::fgBz = -5.;  //* Bz compoment of the magnetic field
 #endif
