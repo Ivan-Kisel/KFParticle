@@ -244,7 +244,7 @@ Int_t KFParticleBase::GetMass( float &m, float &error ) const
 
   if(m2<0.)
   {
-    error = 1.e20;
+    error = 1.e3;
     m = -sqrt(-m2);
     return 1;
   }
@@ -257,10 +257,10 @@ Int_t KFParticleBase::GetMass( float &m, float &error ) const
     }
   }
   else {
-    error = 1.e20;
+    error = 0.;
     return 0;
   }
-  error = 1.e20;
+  error = 1.e3;
 
   return 1;
 }
