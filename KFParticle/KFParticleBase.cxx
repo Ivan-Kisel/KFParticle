@@ -1988,8 +1988,6 @@ void KFParticleBase::GetDStoParticleBz( float B, const KFParticleBase &p,
       sz2 = -cz*(pz2*bq1*kz11 - pz1*bq2*kz21) / delta;
     }
 
-    float eq1 = -ar1*sz1 + br*bq1*sz1 - br*bq2*sz2 + bq2*cz*pz1 + bq2*sz1*pz1*pz1 - bq2*pz1*pz2*sz2;
-    float eq2 = -ar2*sz2 + br*bq1*sz1 - br*bq2*sz2 + bq1*cz*pz2 + bq1*pz1*pz2*sz1 - bq1*pz2*pz2*sz2;
     DS  += sz1;
     DS1 += sz2;
   }
