@@ -344,7 +344,7 @@ float KFParticleBase::GetSCorrection( const float Part[], const float XYZ[] )
   float d[3] = { XYZ[0]-Part[0], XYZ[1]-Part[1], XYZ[2]-Part[2] };
   float p2 = Part[3]*Part[3]+Part[4]*Part[4]+Part[5]*Part[5];
 //  float sigmaS = (p2>1.e-4) ? ( 10.1+3.*sqrt( d[0]*d[0]+d[1]*d[1]+d[2]*d[2]) )/sqrt(p2) : 1.;
-  float sigmaS = (p2>1.e-4) ? ( 0.1+10.*sqrt( d[0]*d[0]+d[1]*d[1]+d[2]*d[2]) )/sqrt(p2) : 1.;
+  float sigmaS = (p2>1.e-4) ?  0.1+10.*sqrt( (d[0]*d[0]+d[1]*d[1]+d[2]*d[2])/sqrt(p2) ): 0.;
   return sigmaS;
 }
 
@@ -1759,154 +1759,239 @@ void KFParticleBase::GetDStoParticleBz( float B, const KFParticleBase &p,
 					   float &DS, float &DS1 ) 
   const
 { 
+  const float* param1 = fP;
+  const float* param2 = p.fP;
+
   //* Get dS to another particle for Bz field
-  float px = fP[3];
-  float py = fP[4];
-  float pz = fP[5];
+  const float kOvSqr6 = 1.f/sqrt(float(6.f));
+  const float kCLight = 0.000299792458f;
 
-  float px1 = p.fP[3];
-  float py1 = p.fP[4];
-  float pz1 = p.fP[5];
+  //in XY plane
+  //first root    
+  const float& bq1 = B*fQ*kCLight;
+  const float& bq2 = B*p.fQ*kCLight;
+  const bool& isStraight1 = fabs(bq1) < 1.e-8f;
+  const bool& isStraight2 = fabs(bq2) < 1.e-8f;
+  
+  if( isStraight1 && isStraight2 )
+  {
+    GetDStoParticleLine(p, DS, DS1);
+    return;
+  }
+  
+  const float& px1 = param1[3];
+  const float& py1 = param1[4];
+  const float& pz1 = param1[5];
 
-  const float kCLight = 0.000299792458;
+  const float& px2 = param2[3];
+  const float& py2 = param2[4];
+  const float& pz2 = param2[5];
 
-  float bq = B*fQ*kCLight;
-  float bq1 = B*p.fQ*kCLight;
-  float s=0, ds=0, s1=0, ds1=0;
+  const float& pt12 = px1*px1 + py1*py1;
+  const float& pt22 = px2*px2 + py2*py2;
 
-  if( fabs(bq)>1.e-8 || fabs(bq1)>1.e-8 ){
+  const float& x01 = param1[0];
+  const float& y01 = param1[1];
+  const float& z01 = param1[2];
 
-    float dx = (p.fP[0] - fP[0]);
-    float dy = (p.fP[1] - fP[1]);
-    float d2 = (dx*dx+dy*dy);
+  const float& x02 = param2[0];
+  const float& y02 = param2[1];
+  const float& z02 = param2[2];
 
-    float p2  = (px *px  + py *py); 
-    float p21 = (px1*px1 + py1*py1);
-
-    if( fabs(p2) < 1.e-8 || fabs(p21) < 1.e-8 )
-    {
-      DS=0.;
-      DS1=0.;
-      return;
-    }
-
-    float a = (px*py1 - py*px1);
-    float b = (px*px1 + py*py1);
-
-    float ldx = bq*bq1*dx - bq1*py + bq*py1 ;
-    float ldy = bq*bq1*dy + bq1*px - bq*px1 ;
-    float l2 = ldx*ldx + ldy*ldy;
+  float dS1[2] = {0.f}, dS2[2]={0.f};
+  
+  const float& dx0 = (x01 - x02);
+  const float& dy0 = (y01 - y02);
+  const float& dr02 = dx0*dx0 + dy0*dy0;
+  const float& drp1  = dx0*px1 + dy0*py1;
+  const float& dxyp1 = dx0*py1 - dy0*px1;
+  const float& drp2  = dx0*px2 + dy0*py2;
+  const float& dxyp2 = dx0*py2 - dy0*px2;
+  const float& p1p2 = px1*px2 + py1*py2;
+  const float& dp1p2 = px1*py2 - px2*py1;
+  
+  const float& k11 = (bq2*drp1 - dp1p2);
+  const float& k21 = (bq1*(bq2*dxyp1 - p1p2) + bq2*pt12);
+  const float& k12 = ((bq1*drp2 - dp1p2));
+  const float& k22 = (bq2*(bq1*dxyp2 + p1p2) - bq1*pt22);
+  
+  const float& kp = (dxyp1*bq2 - dxyp2*bq1 - p1p2);
+  const float& kd = dr02/2.f*bq1*bq2 + kp;
+  const float& c1 = -(bq1*kd + pt12*bq2);
+  const float& c2 = bq2*kd + pt22*bq1; 
+  
+  float d1 = pt12*pt22 - kd*kd;
+  if(d1<0.f)
+    d1 = float(0.f);
+  d1 = sqrt( d1 );
+  float d2 = pt12*pt22 - kd*kd;
+  if(d2<0.f)
+    d2 = float(0.f);
+  d2 = sqrt( d2 );
+  
+  // find two points of closest approach in XY plane
+  if(!isStraight1)
+  {
+    dS1[0] = atan2( (bq1*k11*c1 + k21*d1*bq1), (bq1*k11*d1*bq1 - k21*c1) )/bq1;
+    dS1[1] = atan2( (bq1*k11*c1 - k21*d1*bq1), (-bq1*k11*d1*bq1 - k21*c1) )/bq1;
+  }
+  if(!isStraight2)
+  {
+    dS2[0] = atan2( (bq2*k12*c2 + k22*d2*bq2), (bq2*k12*d2*bq2 - k22*c2) )/bq2;
+    dS2[1] = atan2( (bq2*k12*c2 - k22*d2*bq2), (-bq2*k12*d2*bq2 - k22*c2) )/bq2;
+  }
+  if(isStraight1 && (pt12>0.f) )
+  {
+    dS1[0] = (k11*c1 + k21*d1)/(- k21*c1);
+    dS1[1] = (k11*c1 - k21*d1)/(- k21*c1);
+  }
+  if(isStraight2 && (pt22>0.f) )
+  {
+    dS2[0] = (k12*c2 + k22*d2)/(- k22*c2);
+    dS2[1] = (k12*c2 - k22*d2)/(- k22*c2);  
+  }
+  
+  //select a point which is close to the primary vertex (with the smallest r)
+  
+  float dr2[2];
+  for(int iP = 0; iP<2; iP++)
+  {
+    const float& bs1 = bq1*dS1[iP];
+    const float& bs2 = bq2*dS2[iP];
+    float sss = sin(bs1), ccc = cos(bs1);
     
-    float cS = bq1*p2 + bq*bq1*(dy* px - dx* py) -  bq*b;
-    float cS1= bq*p21 - bq*bq1*(dy*px1 - dx*py1) - bq1*b;
-
-    float ca  = bq*bq*bq1*d2  +2*( cS + bq*bq*(py1*dx-px1*dy)) ;
-    float ca1 = bq*bq1*bq1*d2 +2*( cS1 - bq1*bq1*(py*dx-px*dy)) ;  
-
-    float sa = 4*l2*p2 - ca*ca;
-    float sa1 = 4*l2*p21 - ca1*ca1;
-
-    if(sa<0) sa=0;
-    if(sa1<0)sa1=0;
-
-    if( fabs(bq)>1.e-8){
-      s  = atan2(   bq*( bq1*(dx*px +dy*py) + a ) , cS )/bq;
-      ds = atan2(sqrt(sa),ca)/bq;
-    } else {
-      s = ( (dx*px + dy*py) + (py*px1-px*py1)/bq1)/p2;
-      ds = s*s - (d2-2*(px1*dy-py1*dx)/bq1)/p2; 
-      if( ds<0 ) ds = 0;
-      ds = sqrt(ds);   
+    const bool& bs1Big = fabs(bs1) > 1.e-8f;
+    const bool& bs2Big = fabs(bs2) > 1.e-8f;
+    
+    float sB(0.f), cB(0.f);
+    if(bs1Big)
+    {
+      sB = sss/bq1;
+      cB = (1.f-ccc)/bq1;
     }
-
-    if( fabs(bq1)>1.e-8){
-      s1 = atan2( -bq1*( bq*(dx*px1+dy*py1) + a), cS1 )/bq1;
-      ds1 = atan2(sqrt(sa1),ca1)/bq1;  
-    } else {
-      s1 = (-(dx*px1 + dy*py1) + (py*px1-px*py1)/bq)/p21;
-      ds1 = s1*s1 - (d2+2*(px*dy-py*dx)/bq)/p21; 
-      if( ds1<0 ) ds1 = 0;
-      ds1 = sqrt(ds1);
+    else
+    {
+      sB = ((1.f-bs1*kOvSqr6)*(1.f+bs1*kOvSqr6)*dS1[iP]);
+      cB = .5f*sB*bs1;
     }
-  }
-  float ss[2], ss1[2], g[2][5],g1[2][5];
   
-  ss[0] = s + ds;
-  ss[1] = s - ds;
-  ss1[0] = s1 + ds1;
-  ss1[1] = s1 - ds1;
+    const float& x1 = param1[0] + sB*px1 + cB*py1;
+    const float& y1 = param1[1] - cB*px1 + sB*py1;
+    const float& z1 = param1[2] + dS1[iP]*param1[5];
 
-  for( Int_t i=0; i<2; i++){
-    float bs = bq*ss[i];
-    float c = cos(bs), sss = sin(bs);
-    float cB,sB;
-    if( fabs(bq)>1.e-8){
-      cB= (1-c)/bq;     
-      sB= sss/bq;  
-    }else{
-      const float kOvSqr6 = 1./sqrt(6.);
-      sB = (1.-bs*kOvSqr6)*(1.+bs*kOvSqr6)*ss[i];
-      cB = .5*sB*bs;
-    }
-    g[i][0] = fP[0] + sB*px + cB*py;
-    g[i][1] = fP[1] - cB*px + sB*py;
-    g[i][2] = fP[2] + ss[i]*pz;
-    g[i][3] =       + c*px + sss*py;
-    g[i][4] =       - sss*px + c*py;
+    sss = sin(bs2), ccc = cos(bs2);
 
-    bs = bq1*ss1[i];  
-    c =  cos(bs); sss = sin(bs);
-    if( fabs(bq1)>1.e-8){
-      cB= (1-c)/bq1;   
-      sB= sss/bq1;  
-    }else{
-      const float kOvSqr6 = 1./sqrt(6.);
-      sB = (1.-bs*kOvSqr6)*(1.+bs*kOvSqr6)*ss1[i];
-      cB = .5*sB*bs;
+    if(bs2Big)
+    {
+      sB = sss/bq2;
+      cB = (1.f-ccc)/bq2;
     }
+    else
+    {
+      sB = ((1.f-bs2*kOvSqr6)*(1.f+bs2*kOvSqr6)*dS2[iP]);
+      cB = .5f*sB*bs2;
+    }
+
+    const float& x2 = param2[0] + sB*px2 + cB*py2;
+    const float& y2 = param2[1] - cB*px2 + sB*py2;
+    const float& z2 = param2[2] + dS2[iP]*param2[5];
+
+    float dx = (x1-x2);
+    float dy = (y1-y2);
+    float dz = (z1-z2);
+    
+    dr2[iP] = dx*dx + dy*dy + dz*dz;
+  }
+  
+  const bool isFirstRoot = dr2[0] < dr2[1];
+  if(isFirstRoot)
+  {
+    DS  = dS1[0];
+    DS1 = dS2[0];
+  }
+  else
+  {
+    DS  = dS1[1];
+    DS1 = dS2[1];    
+  }
+  
+  //find correct parts of helices
+  int n1(0);
+  int n2(0);
+  float dzMin = fabs( (z01-z02) + DS*pz1 - DS1*pz2 );
+  const float pi2(6.283185307f);
+  
+  //TODO optimise for loops for neutral particles
+  const float& i1Float = -bq1/pi2*(z01/pz1+DS);
+  for(int di1=-1; di1<=1; di1++)
+  {
+    int i1(0);
+    if(!isStraight1)
+      i1 = int(i1Float) + di1;
+    
+    const float& i2Float = ( ((z01-z02) + (DS+pi2*i1/bq1)*pz1)/pz2 - DS1) * bq2/pi2;
+    for(int di2 = -1; di2<=1; di2++)
+    {
+      int i2(0);
+      if(!isStraight2)
+        i2 = int(i2Float) + di2;
       
-    g1[i][0] = p.fP[0] + sB*px1 + cB*py1;
-    g1[i][1] = p.fP[1] - cB*px1 + sB*py1;
-    g1[i][2] = p.fP[2] + ss1[i]*pz1;
-    g1[i][3] =         + c*px1 + sss*py1;
-    g1[i][4] =         - sss*px1 + c*py1;
+      const float& z1 = z01 + (DS+pi2*i1/bq1)*pz1;
+      const float& z2 = z02 + (DS1+pi2*i2/bq2)*pz2;
+      const float& dz = fabs( z1-z2 );
+    
+      if(dz < dzMin)
+      {
+        n1 = i1;
+        n2 = i2;
+        dzMin = dz;
+      }
+//     std::cout << "!!!!! " << dz << std::endl;
+    }
   }
 
-  Int_t i=0, i1=0;
-  
-  float dMin = 1.e10;
-  for( Int_t j=0; j<2; j++){
-    for( Int_t j1=0; j1<2; j1++){
-      float xx = g[j][0]-g1[j1][0];
-      float yy = g[j][1]-g1[j1][1];
-      float zz = g[j][2]-g1[j1][2];
-      float d = xx*xx + yy*yy + zz*zz;
-      if( d<dMin ){
-	dMin = d;
-	i = j;
-	i1 = j1;
-      }
-    }
-  }  
+  if(!isStraight1)
+    DS += float(n1)*pi2/bq1;
+  if(!isStraight2)
+    DS1 += float(n2)*pi2/bq2;
 
-  DS = ss[i];
-  DS1 = ss1[i1];
-  if(0){
-    float x= g[i][0], y= g[i][1], z= g[i][2], ppx= g[i][3], ppy= g[i][4];  
-    float x1=g1[i1][0], y1= g1[i1][1], z1= g1[i1][2], ppx1= g1[i1][3], ppy1= g1[i1][4];  
-    float dx = x1-x;
-    float dy = y1-y;
-    float dz = z1-z;
-    float a = ppx*ppx1 + ppy*ppy1 + pz*pz1;
-    float b = dx*ppx1 + dy*ppy1 + dz*pz1;
-    float c = dx*ppx  + dy*ppy  + dz*pz ;
-    float pp2 = ppx*ppx + ppy*ppy + pz*pz;
-    float pp21= ppx1*ppx1 + ppy1*ppy1 + pz1*pz1;
-    float det = pp2*pp21 - a*a;    
-    if( fabs(det)>1.e-8 ){
-      DS+=(a*b-pp21*c)/det;
-      DS1+=(a*c-pp2*b)/det;
+  {
+    const float& bs1 = bq1*DS;
+    const float& bs2 = bq2*DS1;
+    
+    float sss = sin(bs1), ccc = cos(bs1);
+    const float& xr1 = sss*px1 - ccc*py1;
+    const float& yr1 = ccc*px1 + sss*py1;
+
+    sss = sin(bs2), ccc = cos(bs2);
+    const float& xr2 = sss*px2 - ccc*py2;
+    const float& yr2 = ccc*px2 + sss*py2;
+    
+    const float& br = xr1*xr2 + yr1*yr2;
+    const float& dx0mod = dx0*bq1*bq2 + py1*bq2 - py2*bq1;
+    const float& dy0mod = dy0*bq1*bq2 - px1*bq2 + px2*bq1;
+    const float& ar1 = dx0mod*xr1 + dy0mod*yr1;
+    const float& ar2 = dx0mod*xr2 + dy0mod*yr2;
+    const float& cz = (z01 - z02) + DS*pz1 - DS1*pz2;
+    
+    const float& kz11 =  - ar1 + bq1*br + bq2*pz1*pz1;
+    const float& kz12 =  -bq2*(br+pz1*pz2);
+    const float& kz21 =   bq1*(br-pz1*pz2);
+    const float& kz22 =  ar2 - bq2*br - bq1*pz2*pz2;
+    
+    const float& delta = kz11*kz22 - kz12*kz21;
+    float sz1(0.f);
+    float sz2(0.f);
+    if( fabs(delta) > 1.e-16f )
+    {
+      sz1 = -cz*(pz1*bq2*kz22 - pz2*bq1*kz12) / delta;
+      sz2 = -cz*(pz2*bq1*kz11 - pz1*bq2*kz21) / delta;
     }
+
+    float eq1 = -ar1*sz1 + br*bq1*sz1 - br*bq2*sz2 + bq2*cz*pz1 + bq2*sz1*pz1*pz1 - bq2*pz1*pz2*sz2;
+    float eq2 = -ar2*sz2 + br*bq1*sz1 - br*bq2*sz2 + bq1*cz*pz2 + bq1*pz1*pz2*sz1 - bq1*pz2*pz2*sz2;
+    DS  += sz1;
+    DS1 += sz2;
   }
 }
 
