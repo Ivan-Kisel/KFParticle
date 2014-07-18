@@ -5,6 +5,7 @@
 #include "KFParticleTest.h"
 
 #include <iostream>
+#include <iomanip>
 #include <cmath>
 
 #ifdef KFParticleInRoot
@@ -19,9 +20,9 @@ std::ostream&  operator<<(std::ostream& os, const KFParticleBase& particle) {
     if (i == 7 && particle.GetParameter(i) <= 0.0) continue; // S
     if (particle.GetParameter(i) == 0. && particle.GetCovariance(i,i) == 0) continue;
     if (particle.GetCovariance(i,i) > 0) 
-      os << " " << vn[i]<<": "<< particle.GetParameter(i)<< " +/- " << sqrt(particle.GetCovariance(i,i));
+      os << " " << vn[i]<<": "<< std::setw(8) << particle.GetParameter(i)<< " +/- " << std::setw(6) << sqrt(particle.GetCovariance(i,i));
     else 
-      os << " " << vn[i] << ": " << particle.GetParameter(i);
+      os << " " << vn[i] << ": " << std::setw(8) << particle.GetParameter(i);
   }
   float Mtp[3], MtpErr[3];
   particle.GetMass(Mtp[0], MtpErr[0]);     if (MtpErr[0] < 1e-7 || MtpErr[0] > 1e10) MtpErr[0] = -13;
@@ -29,10 +30,10 @@ std::ostream&  operator<<(std::ostream& os, const KFParticleBase& particle) {
   particle.GetMomentum(Mtp[2], MtpErr[2]); if (MtpErr[2] <=   0 || MtpErr[2] > 1e10) MtpErr[2] = -13;
   for (Int_t i = 8; i < 11; i++) {
     if (i == 9 && Mtp[i-8] <= 0.0) continue; // t
-    if (MtpErr[i-8] > 0 && MtpErr[i-8] < 1e10) os << " " << vn[i] << ": " << Mtp[i-8] << " +/-" << MtpErr[i-8];
-    else                                       os << " " << vn[i] << ": " << Mtp[i-8];
+    if (MtpErr[i-8] > 0 && MtpErr[i-8] < 1e10) os << " " << vn[i] << ": " << std::setw(8) << Mtp[i-8] << " +/-" << std::setw(7) << MtpErr[i-8];
+    else                                       os << " " << vn[i] << ": " << std::setw(8) << Mtp[i-8];
   }
-  os << " pdg:" << particle.GetPDG() << " Q: "<< particle.GetQ() << " chi2/NDF: " << particle.GetChi2() << "/" << particle.GetNDF();
+  os << " pdg:" << std::setw(5) << particle.GetPDG() << " Q: "<< std::setw(2) << int(particle.GetQ()) << " chi2/NDF: " << std::setw(8) << particle.GetChi2() << "/" << std::setw(2) << particle.GetNDF();
   return os;
 }
 
@@ -56,6 +57,10 @@ void KFParticleTest::RunTest()
 
 void KFParticleTest::RunTestSingle()
 {
+  std::cout.setf(std::ios::fixed);
+  std::cout.setf(std::ios::showpoint);
+  std::cout.precision(3);
+    
   std::cout << "Try different constructors" << std::endl<< std::endl;
   std::cout << "1. Construction from Vertex" << std::endl<< std::endl;
   KFPVertex vert;
@@ -75,7 +80,7 @@ void KFParticleTest::RunTestSingle()
   float point[3]={0.f};
   float b[3] = {0.f};
   p1.GetFieldValue(point,b);
-  std::cout << "Set Field " <<  b[2] << std::endl;
+  std::cout << "Set Field " <<  std::setw(6) << b[2] << std::endl;
   
   std::cout << std::endl << "2. Construction from Track" << std::endl<< std::endl;
   
