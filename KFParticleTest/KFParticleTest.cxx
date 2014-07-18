@@ -67,17 +67,17 @@ void KFParticleTest::RunTestSingle()
   vert.SetChi2(1.01);
   
   KFParticle p1(vert);
-  std::cout << "	Vertex	Particle p1" << std::endl << p1 << std::endl;
+  std::cout << "Vertex Particle p1" << std::endl << "  " << p1 << std::endl;
 
   ///  *****************************************************************************************
   
-  KFParticle::SetField(+4.9797992706298828);
+  KFParticle::SetField(4.9797992706298828);
   float point[3]={0.f};
   float b[3] = {0.f};
   p1.GetFieldValue(point,b);
   std::cout << "Set Field " <<  b[2] << std::endl;
   
-  std::cout << "2. Construction from Track" << std::endl<< std::endl;
+  std::cout << std::endl << "2. Construction from Track" << std::endl<< std::endl;
   
   KFPTrack track;
   track.SetParameters(-0.061996019110347252, -1.3579236865955473,   27.147283554077148, 
@@ -95,11 +95,11 @@ void KFParticleTest::RunTestSingle()
   
   KFParticle p2(track, -211);
   
-  std::cout << "	Track	Particle p2" << std::endl << p2 << std::endl;
+  std::cout << "Track Particle p2" << std::endl <<"  "<< p2 << std::endl;
   
   ///  *****************************************************************************************
   
-  std::cout << "3. Now we will create one more particle from track and call the construction from these 2 particles" << std::endl<< std::endl;
+  std::cout << std::endl << "3. Now we will create one more particle from track and call the construction from these 2 particles" << std::endl<< std::endl;
   
   KFPTrack track2;
   track2.SetParameters(-0.20371287092090862,   3.0678058943547839,  -19.93988037109375, 
@@ -117,13 +117,13 @@ void KFParticleTest::RunTestSingle()
   track2.SetChi2(2.5);
   track2.SetCharge(+1);
   KFParticle p3(track2, 211); // PDG = 11
-  std::cout << "	Particle p3" << std::endl << p3 << std::endl;
+  std::cout << "Track Particle p3 " << std::endl <<"  "<< p3 << std::endl;
   
   KFParticle p4(p2, p3);
-  std::cout << "	Particle p4(p2,p3)" << std::endl << p4 << std::endl;
+  std::cout << "Particle p4(p2,p3)" << std::endl << "  " << p4 << std::endl;
 
   ///  *****************************************************************************************
-  std::cout << "4. Construction with constrained Mass or (and) vertex position values" << std::endl<< std::endl;
+  std::cout << std::endl << "4. Construction with constrained Mass or (and) vertex position values" << std::endl<< std::endl;
 
 /// This is the example of the KFParticleBase::Construct function usage.
 /// parameter 1 - array of the daughter particles
@@ -142,44 +142,44 @@ void KFParticleTest::RunTestSingle()
   KFParticle K0;
   K0.Construct(vDaughters,NDaughters,0,Mass,0);
   std::cout << "Dauthers" << std::endl
-	    << *vDaughters[0] << std::endl
-	    << *vDaughters[1] << std::endl
+	    << "  " << *vDaughters[0] << std::endl
+	    << "  " << *vDaughters[1] << std::endl
 	    << "Mass    " << Mass << std::endl;
-  std::cout << "	Particle K0" << std::endl << K0 << std::endl;
+  std::cout << "Particle K0" << std::endl << K0 << std::endl;
   K0.SetProductionVertex(pVertex);
   std::cout << " Add parent Vertex" << std::endl;
-  std::cout << " K0 with vertex" << K0 << std::endl;
-  std::cout << "4.2 Construction without constrained Mass, with vertex hypothesis " << std::endl<< std::endl;
+  std::cout << " K0 with vertex  " << K0 << std::endl;
+  std::cout << std::endl << "4.2 Construction without constrained Mass, with vertex hypothesis " << std::endl<< std::endl;
 /// we assume p1 to be the vertex of the constructed particle
   KFParticle K0_1;
   K0_1.Construct(vDaughters,NDaughters,&pVertex,-1,0);
 
   std::cout << "Dauthers" << std::endl
-	    << *vDaughters[0] << std::endl
-	    << *vDaughters[1] << std::endl
-	    << pVertex        << std::endl;
-  std::cout << "	Particle K0_1" << std::endl << K0_1 << std::endl;
-  std::cout << "4.3 Construction with constrained Mass, with vertex hypothesis " << std::endl<< std::endl;
+	    << "  " << *vDaughters[0] << std::endl
+	    << "  " << *vDaughters[1] << std::endl
+	    << "PV " << std::endl << "  " << pVertex        << std::endl;
+  std::cout << "K0_1" << std::endl <<"  " << K0_1 << std::endl;
+  std::cout << std::endl << "4.3 Construction with constrained Mass, with vertex hypothesis " << std::endl<< std::endl;
 ///we assume p1 to be the vertex of the constructed particle, Mass to be the mass of the constructed particle
   KFParticle K0_2;
   K0_2.Construct(vDaughters,NDaughters,&pVertex,Mass,0);
 
   std::cout << "Dauthers" << std::endl
-	    << *vDaughters[0] << std::endl
-	    << *vDaughters[1] << std::endl
-	    << pVertex        << std::endl
+	    << "  " << *vDaughters[0] << std::endl
+	    << "  " << *vDaughters[1] << std::endl
+	    << "PV " << std::endl << "  " << pVertex        << std::endl
 	    << "Mass    " << Mass << std::endl;
-  std::cout << "K0_2" << std::endl <<  K0_2 << std::endl;
+  std::cout << "K0_2" << std::endl <<  "  " << K0_2 << std::endl;
 
-  std::cout << "4.4 Construction K0_3(p2,p3) without constrained Mass, without vertex hypothesis " << std::endl<< std::endl;
+  std::cout << std::endl << "4.4 Construction K0_3(p2,p3) without constrained Mass, without vertex hypothesis " << std::endl<< std::endl;
 ///we assume p1 to be the vertex of the constructed particle, Mass to be the mass of the constructed particle
   KFParticle K0_3;
   K0_3.Construct(vDaughters,NDaughters,0,-1,0);
 
   std::cout << "Dauthers" << std::endl
-       << *vDaughters[0] << std::endl
-       << *vDaughters[1] << std::endl;
-  std::cout << "K0_3" << std::endl <<  K0_3 << std::endl;
+       << "  " << *vDaughters[0] << std::endl
+       << "  " << *vDaughters[1] << std::endl;
+  std::cout << "K0_3" << std::endl << "  " <<  K0_3 << std::endl;
 }
 
 void KFParticleTest::RunTestSIMD()
