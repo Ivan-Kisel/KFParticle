@@ -63,6 +63,7 @@ class KFParticle :public KFParticleBase
  //* Parameters, covariance matrix, charge and PID hypothesis should be provided 
 
   void Create( const float Param[], const float Cov[], Int_t Charge, float mass /*Int_t PID*/ );
+  void Create( const Double_t Param[], const Double_t Cov[], Int_t Charge, float mass /*Int_t PID*/ );
 
  //* Initialisation from ALICE track, PID hypothesis shoould be provided 
 

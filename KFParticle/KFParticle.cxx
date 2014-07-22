@@ -64,6 +64,30 @@ void KFParticle::Create( const float Param[], const float Cov[], Int_t Charge, f
   KFParticleBase::Initialize( Param, C, Charge, mass );
 }
 
+void KFParticle::Create( const Double_t Param[], const Double_t Cov[], Int_t Charge, float mass /*Int_t PID*/ )
+{
+  // Constructor from "cartesian" track, PID hypothesis should be provided
+  //
+  // Param[6] = { X, Y, Z, Px, Py, Pz } - position and momentum
+  // Cov [21] = lower-triangular part of the covariance matrix:
+  //
+  //                (  0  .  .  .  .  . )
+  //                (  1  2  .  .  .  . )
+  //  Cov. matrix = (  3  4  5  .  .  . ) - numbering of covariance elements in Cov[]
+  //                (  6  7  8  9  .  . )
+  //                ( 10 11 12 13 14  . )
+  //                ( 15 16 17 18 19 20 )
+  float P[6];
+  for(int i=0; i<6; i++ ) P[i] = Param[i];
+  float C[21];
+  for( int i=0; i<21; i++ ) C[i] = Cov[i];
+  
+//  TParticlePDG* particlePDG = TDatabasePDG::Instance()->GetParticle(PID);
+//  float mass = (particlePDG) ? particlePDG->Mass() :0.13957;
+  
+  KFParticleBase::Initialize( P, C, Charge, mass );
+}
+
 KFParticle::KFParticle( const KFPTrack &track, const int PID )
 {
   // Constructor from ALICE track, PID hypothesis should be provided
