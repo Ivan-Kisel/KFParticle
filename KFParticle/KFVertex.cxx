@@ -13,6 +13,10 @@
 #include "KFVertex.h"
 #include "iostream"
 
+#ifndef KFParticleStandalone
+ClassImp(KFVertex);
+#endif
+
 KFVertex::KFVertex( const KFPVertex &vertex ): fIsConstrained(0)
 {
   // Constructor from ALICE VVertex
