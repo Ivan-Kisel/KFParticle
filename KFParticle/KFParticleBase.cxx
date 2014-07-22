@@ -2904,8 +2904,8 @@ void KFParticleBase::SubtractFromParticle(  KFParticleBase &Vtx ) const
 {
   //* Subtract the particle from the mother particle  
 
-  Double_t m[8];
-  Double_t mV[36];
+  float m[8];
+  float mV[36];
 
   if( Vtx.fIsLinearized ){
     GetMeasurement( Vtx.fVtxGuess, m, mV );
@@ -2913,18 +2913,18 @@ void KFParticleBase::SubtractFromParticle(  KFParticleBase &Vtx ) const
     GetMeasurement( Vtx.fP, m, mV );
   }
 
-  Double_t mS[6]= { mV[0] - Vtx.fC[0],
+  float mS[6]= { mV[0] - Vtx.fC[0],
                 mV[1] - Vtx.fC[1], mV[2] - Vtx.fC[2],
                 mV[3] - Vtx.fC[3], mV[4] - Vtx.fC[4], mV[5] - Vtx.fC[5] };
   InvertCholetsky3(mS);
 
   //* Residual (measured - estimated)
 
-  Double_t zeta[3] = { m[0]-Vtx.fP[0], m[1]-Vtx.fP[1], m[2]-Vtx.fP[2] };    
+  float zeta[3] = { m[0]-Vtx.fP[0], m[1]-Vtx.fP[1], m[2]-Vtx.fP[2] };    
 
   //* CHt = CH' - D'
 
-  Double_t mCHt0[7], mCHt1[7], mCHt2[7];
+  float mCHt0[7], mCHt1[7], mCHt2[7];
 
   mCHt0[0]=mV[ 0] ;           mCHt1[0]=mV[ 1] ;           mCHt2[0]=mV[ 3] ;
   mCHt0[1]=mV[ 1] ;           mCHt1[1]=mV[ 2] ;           mCHt2[1]=mV[ 4] ;
@@ -2936,7 +2936,7 @@ void KFParticleBase::SubtractFromParticle(  KFParticleBase &Vtx ) const
 
   //* Kalman gain K = mCH'*S
     
-  Double_t k0[7], k1[7], k2[7];
+  float k0[7], k1[7], k2[7];
     
   for(Int_t i=0;i<7;++i){
     k0[i] = mCHt0[i]*mS[0] + mCHt1[i]*mS[1] + mCHt2[i]*mS[3];
@@ -2971,7 +2971,7 @@ void KFParticleBase::SubtractFromParticle(  KFParticleBase &Vtx ) const
 
     //* New covariance matrix C -= K*(mCH')'
 
-  Double_t ffC[28] = { -mV[ 0],
+  float ffC[28] = { -mV[ 0],
                    -mV[ 1], -mV[ 2],
                    -mV[ 3], -mV[ 4], -mV[ 5],
                     mV[ 6],  mV[ 7],  mV[ 8], Vtx.fC[ 9],
@@ -3563,6 +3563,61 @@ Bool_t KFParticleBase::InvertSym3( const float A[], float Ai[] )
   Ai[4] = ( a1*a3 - a0*A[4] )*det;
   Ai[5] = ( a0*a2 - a1*a1 )*det;
   return ret;
+}
+
+void KFParticleBase::InvertCholetsky3(float a[6])
+{
+  float d[3], uud, u[3][3];
+  for(int i=0; i<3; i++) 
+  {
+    d[i]=0;
+    for(int j=0; j<3; j++) 
+      u[i][j]=0;
+  }
+
+  for(int i=0; i<3 ; i++)
+  {
+    uud=0;
+    for(int j=0; j<i; j++) 
+      uud += u[j][i]*u[j][i]*d[j];
+    uud = a[i*(i+3)/2] - uud;
+
+    if(fabs(uud)<1.e-12f) uud = 1.e-12f;
+
+    d[i] = uud/fabs(uud);
+    u[i][i] = sqrt(fabs(uud));
+
+    for(int j=i+1; j<3; j++) 
+    {
+      uud = 0;
+      for(int k=0; k<i; k++)
+        uud += u[k][i]*u[k][j]*d[k];
+      uud = a[j*(j+1)/2+i] - uud;
+      u[i][j] = d[i]/u[i][i]*uud;
+    }
+  }
+
+  float u1[3];
+
+  for(int i=0; i<3; i++)
+  {
+    u1[i] = u[i][i];
+    u[i][i] = 1/u[i][i];
+  }
+  for(int i=0; i<2; i++)
+  {
+    u[i][i+1] = - u[i][i+1]*u[i][i]*u[i+1][i+1];
+  }
+  for(int i=0; i<1; i++)
+  {
+    u[i][i+2] = u[i][i+1]*u1[i+1]*u[i+1][i+2]-u[i][i+2]*u[i][i]*u[i+2][i+2];
+  }
+
+  for(int i=0; i<3; i++)
+    a[i+3] = u[i][2]*u[2][2]*d[2];
+  for(int i=0; i<2; i++)
+    a[i+1] = u[i][1]*u[1][1]*d[1] + u[i][2]*u[1][2]*d[2];
+  a[0] = u[0][0]*u[0][0]*d[0] + u[0][1]*u[0][1]*d[1] + u[0][2]*u[0][2]*d[2];
 }
 
 void KFParticleBase::MultQSQt( const float Q[], const float S[], float SOut[] )

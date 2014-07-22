@@ -337,7 +337,7 @@ class KFParticle :public KFParticleBase
   //* Subtract the particle from the vertex  
 
   void SubtractFromVertex( KFParticle &v ) const ;
-  void SubtractFromParticle( KFParticleBase &Vtx ) const;
+  void SubtractFromParticle( KFParticle &v ) const;
 
   //* Special method for creating gammas
 
@@ -941,6 +941,11 @@ inline float KFParticle::GetDeviationFromParticle( const KFParticle &p ) const
 inline void KFParticle::SubtractFromVertex( KFParticle &v ) const 
 {
   KFParticleBase::SubtractFromVertex( v );
+}
+
+inline void KFParticle::SubtractFromParticle( KFParticle &v ) const 
+{
+  KFParticleBase::SubtractFromParticle( v );
 }
 
 #ifdef HomogeneousField

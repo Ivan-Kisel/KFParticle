@@ -261,6 +261,7 @@ class KFParticleBase :public TObject {
   //* Subtract the particle from the vertex  
 
   void SubtractFromVertex( KFParticleBase &Vtx ) const;
+  void SubtractFromParticle( KFParticleBase &Vtx ) const;
 
   //* Special method for creating gammas
 
@@ -315,6 +316,7 @@ class KFParticleBase :public TObject {
   void GetDSIter(const KFParticleBase &p, float const &dS, float x[3], float dx[3], float ddx[3]) const;
 
   static Bool_t InvertSym3( const float A[], float Ainv[] );
+  static void InvertCholetsky3(float a[6]);
 
   static void MultQSQt( const float Q[], const float S[], 
                         float SOut[] );
