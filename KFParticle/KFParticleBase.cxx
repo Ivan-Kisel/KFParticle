@@ -25,6 +25,63 @@
 ClassImp(KFParticleBase)
 #endif
 
+#ifdef __ROOT__
+KFParticleBase::KFParticleBase() :fID(0), fParentID(0), fQ(0), fNDF(-3), fChi2(0), fSFromDecay(0), fIdTruth(0), fQuality(0), fIdParentMcVx(0), fAtProductionVertex(0), fIsLinearized(0), 
+          fPDG(0), fConstructMethod(0), SumDaughterMass(0), fMassHypo(-1), fId(-1), fDaughtersIds()
+{ 
+  static Bool_t first = kTRUE;
+  if (first) {
+    first = kFALSE;
+    KFParticleBase::Class()->IgnoreTObjectStreamer();
+  }
+  //* Constructor 
+  Clear();
+}
+
+void KFParticleBase::Clear(Option_t *option) {
+  Initialize();
+  fIdTruth = 0;
+  fQuality = 0;
+  fIdParentMcVx = 0;
+}
+
+void KFParticleBase::Print(Option_t *opt) const {
+  std::cout << *this << std::endl;
+  if (opt && (opt[0] == 'a' || opt[0] == 'A')) {
+    TRVector P(8,fP); std::cout << "par. " << P << std::endl;
+    TRSymMatrix C(8,fC); std::cout << "cov. " << C << std::endl;
+    
+  }
+}
+
+std::ostream&  operator<<(std::ostream& os, const KFParticleBase& particle) {
+  static const Char_t *vn[14] = {"x","y","z","px","py","pz","E","S","M","t","p","Q","Chi2","NDF"};
+  os << Form("p(%4i,%4i,%4i)",particle.GetID(),particle.GetParentID(),particle.IdParentMcVx());
+  for (Int_t i = 0; i < 8; i++) {
+    if (i == 6) continue;                                    // E
+    if (i == 7 && particle.GetParameter(i) <= 0.0) continue; // S
+    if (particle.GetParameter(i) == 0. && particle.GetCovariance(i,i) == 0) continue;
+    if (particle.GetCovariance(i,i) > 0) 
+      os << Form(" %s:%8.3f+/-%6.3f", vn[i], particle.GetParameter(i), TMath::Sqrt(particle.GetCovariance(i,i)));
+    else 
+      os << Form(" %s:%8.3f", vn[i], particle.GetParameter(i));
+  }
+  Double_t Mtp[3], MtpErr[3];
+  particle.GetMass(Mtp[0], MtpErr[0]);     if (MtpErr[0] < 1e-7 || MtpErr[0] > 1e10) MtpErr[0] = -13;
+  particle.GetLifeTime(Mtp[1], MtpErr[1]); if (MtpErr[1] <=   0 || MtpErr[1] > 1e10) MtpErr[1] = -13;
+  particle.GetMomentum(Mtp[2], MtpErr[2]); if (MtpErr[2] <=   0 || MtpErr[2] > 1e10) MtpErr[2] = -13;
+  for (Int_t i = 8; i < 11; i++) {
+    if (i == 9 && Mtp[i-8] <= 0.0) continue; // t
+    if (MtpErr[i-8] > 0 && MtpErr[i-8] < 1e10) os << Form(" %s:%8.3f+/-%7.3f", vn[i],Mtp[i-8],MtpErr[i-8]);
+    else                                       os << Form(" %s:%8.3f", vn[i],Mtp[i-8]);
+  }
+  os << Form(" pdg:%5i Q:%2i  chi2/NDF :%8.2f/%2i",particle.GetPDG(),particle.GetQ(),particle.GetChi2(),particle.GetNDF());
+  if (particle.IdTruth()) os << Form(" IdT:%4i/%3i",particle.IdTruth(),particle.QaTruth());
+  return os;
+}
+#endif
+
+#ifndef __ROOT__
 KFParticleBase::KFParticleBase() : fChi2(0), fSFromDecay(0), 
    SumDaughterMass(0), fMassHypo(-1), fNDF(-3), fId(-1), fAtProductionVertex(0),  fIsLinearized(0), fQ(0), fConstructMethod(2), fPDG(0), fDaughtersIds()
 { 
@@ -32,6 +89,7 @@ KFParticleBase::KFParticleBase() : fChi2(0), fSFromDecay(0),
 
   Initialize();
 }
+#endif
 
 void KFParticleBase::Initialize( const float Param[], const float Cov[], Int_t Charge, float Mass )
 {
@@ -3430,7 +3488,6 @@ void KFParticleBase::MultQSQt( const float Q[], const float S[], float SOut[] )
     }
   }
 }
-
 
 // 72-charachters line to define the printer border
 //3456789012345678901234567890123456789012345678901234567890123456789012

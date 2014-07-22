@@ -19,6 +19,10 @@
 #ifndef ALIKFPARTICLEBASE_H
 #define ALIKFPARTICLEBASE_H
 
+#ifdef __ROOT__ //for the STAR experiment
+#define HomogeneousField
+#endif
+
 #ifdef HLTCA_STANDALONE
 #include "RootTypesDef.h"
 #else
@@ -280,6 +284,17 @@ class KFParticleBase :public TObject {
   void SetPDG ( int pdg ) { fPDG = pdg; }
   int GetPDG () const { return fPDG; }
 
+#ifdef __ROOT__ //for the STAR experiment
+  virtual void Print(Option_t *opt="") const;
+  Int_t        IdTruth() const { return fIdTruth;}
+  Int_t        QaTruth() const { return fQuality; }
+  Int_t        IdParentMcVx() const {return fIdParentMcVx;}
+  Int_t        IdParentVx()   const {return IdParentMcVx();}
+  void         SetIdParentMcVx(Int_t id) {fIdParentMcVx = id;}
+  void         SetIdTruth(Int_t idtru,Int_t qatru=0) {fIdTruth = (UShort_t) idtru; fQuality = (UShort_t) qatru;}
+  virtual void Clear(Option_t * /*option*/ ="");
+#endif
+
  protected:
 
   static Int_t IJ( Int_t i, Int_t j ){ 
@@ -317,6 +332,11 @@ class KFParticleBase :public TObject {
   Int_t fNDF;   //* Number of degrees of freedom 
   int   fId;                   //* id of particle
 
+#ifdef __ROOT__ //for the STAR experiment
+  Short_t    fIdTruth; // MC track id 
+  Short_t    fQuality; // quality of this information (percentage of hits coming from the above MC track)
+  Short_t    fIdParentMcVx; // for track and McTrack for vertex
+#endif
 
   Bool_t fAtProductionVertex; //* Flag shows that the particle error along
                               //* its trajectory is taken from production vertex    
@@ -338,5 +358,9 @@ class KFParticleBase :public TObject {
   ClassDef( KFParticleBase, 1 )
 #endif
 };
+
+#ifdef __ROOT__ //for the STAR experiment
+std::ostream&  operator<<(std::ostream& os, KFParticleBase const & particle);
+#endif
 
 #endif 

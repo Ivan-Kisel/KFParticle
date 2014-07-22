@@ -19,6 +19,10 @@
 #ifndef KFParticleDef_H
 #define KFParticleDef_H
 
+#ifdef __ROOT__ //for the STAR experiment
+#define HomogeneousField
+#endif
+
 #ifdef HLTCA_STANDALONE
 #include "RootTypesDef.h"
 #else
