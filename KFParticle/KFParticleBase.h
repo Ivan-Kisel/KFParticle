@@ -290,6 +290,10 @@ class KFParticleBase :public TObject {
   Int_t        QaTruth() const { return fQuality; }
   Int_t        IdParentMcVx() const {return fIdParentMcVx;}
   Int_t        IdParentVx()   const {return IdParentMcVx();}
+  void SetID(Int_t id=0) {fId = id;}
+  void SetParentID(Int_t id=0) {fParentID = id;}
+  Int_t    GetID() const {return fId;}
+  Int_t    GetParentID() const {return fParentID;}
   void         SetIdParentMcVx(Int_t id) {fIdParentMcVx = id;}
   void         SetIdTruth(Int_t idtru,Int_t qatru=0) {fIdTruth = (UShort_t) idtru; fQuality = (UShort_t) qatru;}
   virtual void Clear(Option_t * /*option*/ ="");
@@ -333,6 +337,7 @@ class KFParticleBase :public TObject {
   int   fId;                   //* id of particle
 
 #ifdef __ROOT__ //for the STAR experiment
+  Short_t    fParentID;
   Short_t    fIdTruth; // MC track id 
   Short_t    fQuality; // quality of this information (percentage of hits coming from the above MC track)
   Short_t    fIdParentMcVx; // for track and McTrack for vertex

@@ -26,7 +26,7 @@ ClassImp(KFParticleBase)
 #endif
 
 #ifdef __ROOT__
-KFParticleBase::KFParticleBase() :fID(0), fParentID(0), fQ(0), fNDF(-3), fChi2(0), fSFromDecay(0), fIdTruth(0), fQuality(0), fIdParentMcVx(0), fAtProductionVertex(0), fIsLinearized(0), 
+KFParticleBase::KFParticleBase() :fParentID(0), fQ(0), fNDF(-3), fChi2(0), fSFromDecay(0), fIdTruth(0), fQuality(0), fIdParentMcVx(0), fAtProductionVertex(0), fIsLinearized(0), 
           fPDG(0), fConstructMethod(0), SumDaughterMass(0), fMassHypo(-1), fId(-1), fDaughtersIds()
 { 
   static Bool_t first = kTRUE;
@@ -43,6 +43,7 @@ void KFParticleBase::Clear(Option_t *option) {
   fIdTruth = 0;
   fQuality = 0;
   fIdParentMcVx = 0;
+  fParentID = 0;
 }
 
 void KFParticleBase::Print(Option_t *opt) const {
