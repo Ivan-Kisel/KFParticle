@@ -2900,6 +2900,100 @@ void KFParticleBase::SubtractFromVertex(  KFParticleBase &Vtx ) const
   Vtx.fChi2 -= dChi2;
 }
 
+void KFParticleBase::SubtractFromParticle(  KFParticleBase &Vtx ) const
+{
+  //* Subtract the particle from the mother particle  
+
+  Double_t m[8];
+  Double_t mV[36];
+
+  if( Vtx.fIsLinearized ){
+    GetMeasurement( Vtx.fVtxGuess, m, mV );
+  } else {
+    GetMeasurement( Vtx.fP, m, mV );
+  }
+
+  Double_t mS[6]= { mV[0] - Vtx.fC[0],
+                mV[1] - Vtx.fC[1], mV[2] - Vtx.fC[2],
+                mV[3] - Vtx.fC[3], mV[4] - Vtx.fC[4], mV[5] - Vtx.fC[5] };
+  InvertCholetsky3(mS);
+
+  //* Residual (measured - estimated)
+
+  Double_t zeta[3] = { m[0]-Vtx.fP[0], m[1]-Vtx.fP[1], m[2]-Vtx.fP[2] };    
+
+  //* CHt = CH' - D'
+
+  Double_t mCHt0[7], mCHt1[7], mCHt2[7];
+
+  mCHt0[0]=mV[ 0] ;           mCHt1[0]=mV[ 1] ;           mCHt2[0]=mV[ 3] ;
+  mCHt0[1]=mV[ 1] ;           mCHt1[1]=mV[ 2] ;           mCHt2[1]=mV[ 4] ;
+  mCHt0[2]=mV[ 3] ;           mCHt1[2]=mV[ 4] ;           mCHt2[2]=mV[ 5] ;
+  mCHt0[3]=Vtx.fC[ 6]-mV[ 6]; mCHt1[3]=Vtx.fC[ 7]-mV[ 7]; mCHt2[3]=Vtx.fC[ 8]-mV[ 8];
+  mCHt0[4]=Vtx.fC[10]-mV[10]; mCHt1[4]=Vtx.fC[11]-mV[11]; mCHt2[4]=Vtx.fC[12]-mV[12];
+  mCHt0[5]=Vtx.fC[15]-mV[15]; mCHt1[5]=Vtx.fC[16]-mV[16]; mCHt2[5]=Vtx.fC[17]-mV[17];
+  mCHt0[6]=Vtx.fC[21]-mV[21]; mCHt1[6]=Vtx.fC[22]-mV[22]; mCHt2[6]=Vtx.fC[23]-mV[23];
+
+  //* Kalman gain K = mCH'*S
+    
+  Double_t k0[7], k1[7], k2[7];
+    
+  for(Int_t i=0;i<7;++i){
+    k0[i] = mCHt0[i]*mS[0] + mCHt1[i]*mS[1] + mCHt2[i]*mS[3];
+    k1[i] = mCHt0[i]*mS[1] + mCHt1[i]*mS[2] + mCHt2[i]*mS[4];
+    k2[i] = mCHt0[i]*mS[3] + mCHt1[i]*mS[4] + mCHt2[i]*mS[5];
+  }
+
+    //* Add the daughter momentum to the particle momentum
+    
+  Vtx.fP[ 3] -= m[ 3];
+  Vtx.fP[ 4] -= m[ 4];
+  Vtx.fP[ 5] -= m[ 5];
+  Vtx.fP[ 6] -= m[ 6];
+  
+  Vtx.fC[ 9] -= mV[ 9];
+  Vtx.fC[13] -= mV[13];
+  Vtx.fC[14] -= mV[14];
+  Vtx.fC[18] -= mV[18];
+  Vtx.fC[19] -= mV[19];
+  Vtx.fC[20] -= mV[20];
+  Vtx.fC[24] -= mV[24];
+  Vtx.fC[25] -= mV[25];
+  Vtx.fC[26] -= mV[26];
+  Vtx.fC[27] -= mV[27];
+
+   //* New estimation of the vertex position r += K*zeta
+    
+  for(Int_t i=0;i<3;++i) 
+    Vtx.fP[i] = m[i] - (k0[i]*zeta[0] + k1[i]*zeta[1] + k2[i]*zeta[2]);
+  for(Int_t i=3;i<7;++i) 
+    Vtx.fP[i] = Vtx.fP[i] - (k0[i]*zeta[0] + k1[i]*zeta[1] + k2[i]*zeta[2]);
+
+    //* New covariance matrix C -= K*(mCH')'
+
+  Double_t ffC[28] = { -mV[ 0],
+                   -mV[ 1], -mV[ 2],
+                   -mV[ 3], -mV[ 4], -mV[ 5],
+                    mV[ 6],  mV[ 7],  mV[ 8], Vtx.fC[ 9],
+                    mV[10],  mV[11],  mV[12], Vtx.fC[13], Vtx.fC[14],
+                    mV[15],  mV[16],  mV[17], Vtx.fC[18], Vtx.fC[19], Vtx.fC[20],
+                    mV[21],  mV[22],  mV[23], Vtx.fC[24], Vtx.fC[25], Vtx.fC[26], Vtx.fC[27] };
+
+  for(Int_t i=0, k=0;i<7;++i){
+    for(Int_t j=0;j<=i;++j,++k){
+      Vtx.fC[k] = ffC[k] + (k0[i]*mCHt0[j] + k1[i]*mCHt1[j] + k2[i]*mCHt2[j] );
+    }
+  }
+
+    //* Calculate Chi^2 
+  Vtx.fNDF  -= 2;
+  Vtx.fQ    -= GetQ();
+  Vtx.fSFromDecay = 0;    
+  Vtx.fChi2 -= ((mS[0]*zeta[0] + mS[1]*zeta[1] + mS[3]*zeta[2])*zeta[0]
+               +(mS[1]*zeta[0] + mS[2]*zeta[1] + mS[4]*zeta[2])*zeta[1]
+               +(mS[3]*zeta[0] + mS[4]*zeta[1] + mS[5]*zeta[2])*zeta[2]);     
+}
+
 void KFParticleBase::TransportLine( float dS, 
 				       float P[], float C[] ) const 
 {

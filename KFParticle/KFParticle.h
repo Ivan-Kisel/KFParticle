@@ -337,6 +337,7 @@ class KFParticle :public KFParticleBase
   //* Subtract the particle from the vertex  
 
   void SubtractFromVertex( KFParticle &v ) const ;
+  void SubtractFromParticle( KFParticleBase &Vtx ) const;
 
   //* Special method for creating gammas
 
