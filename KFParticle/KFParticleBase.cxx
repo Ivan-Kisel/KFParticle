@@ -29,8 +29,9 @@ ClassImp(KFParticleBase)
 #include "TClass.h"
 #include "TRSymMatrix.h"
 #include "TRVector.h"
-KFParticleBase::KFParticleBase() :fParentID(0), fQ(0), fNDF(-3), fChi2(0), fSFromDecay(0), fIdTruth(0), fQuality(0), fIdParentMcVx(0), fAtProductionVertex(0), fIsLinearized(0), 
-          fPDG(0), fConstructMethod(0), SumDaughterMass(0), fMassHypo(-1), fId(-1), fDaughtersIds()
+KFParticleBase::KFParticleBase() :fChi2(0), fSFromDecay(0), SumDaughterMass(0), fMassHypo(-1), fNDF(-3), 
+                                  fId(-1), fParentID(0), fIdTruth(0), fQuality(0), fIdParentMcVx(0), fAtProductionVertex(0),  
+                                  fIsLinearized(0), fQ(0), fConstructMethod(2), fPDG(0), fDaughtersIds()
 { 
   static Bool_t first = kTRUE;
   if (first) {
