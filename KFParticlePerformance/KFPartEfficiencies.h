@@ -515,12 +515,12 @@ class KFPartEfficiencies: public TNamed
     partDaughterPdg[curPart].push_back(  111);
     curPart++;
     
-    partDaughterPdg[curPart].push_back(  321); //K*+ -> K+ pi0
-    partDaughterPdg[curPart].push_back(  111);
+    partDaughterPdg[curPart].push_back(  111); //K*+ -> K+ pi0
+    partDaughterPdg[curPart].push_back(  321);
     curPart++;
     
-    partDaughterPdg[curPart].push_back( -321); //K*- -> K- pi0
-    partDaughterPdg[curPart].push_back(  111);
+    partDaughterPdg[curPart].push_back(  111); //K*- -> K- pi0
+    partDaughterPdg[curPart].push_back( -321);
     curPart++;
     
     partDaughterPdg[curPart].push_back( 3122); //Sigma+ -> Lambda pi+
