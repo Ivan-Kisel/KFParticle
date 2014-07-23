@@ -2689,7 +2689,7 @@ float KFParticleBase::GetDeviationFromVertex( const float v[], const float Cv[] 
                              (mP[3]*mP[3]+mP[4]*mP[4]+mP[5]*mP[5])  );
 
    
-  float h[3] = { mP[3]*sigmaS*0, mP[4]*sigmaS*0, mP[5]*sigmaS*0 };       
+  float h[3] = { mP[3]*sigmaS, mP[4]*sigmaS, mP[5]*sigmaS };       
   
   float mSi[6] = 
     { mC[0] +h[0]*h[0], 
