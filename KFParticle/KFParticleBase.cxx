@@ -538,28 +538,10 @@ void KFParticleBase::AddDaughterWithEnergyFit( const KFParticleBase &Daughter )
     }
     //*
 
-    float mS[6];
-    {
-      float mSi[6] = { ffC[0]+mV[0], 
-			  ffC[1]+mV[1], ffC[2]+mV[2], 
-			  ffC[3]+mV[3], ffC[4]+mV[4], ffC[5]+mV[5] };
-
-      mS[0] = mSi[2]*mSi[5] - mSi[4]*mSi[4];
-      mS[1] = mSi[3]*mSi[4] - mSi[1]*mSi[5];
-      mS[2] = mSi[0]*mSi[5] - mSi[3]*mSi[3];
-      mS[3] = mSi[1]*mSi[4] - mSi[2]*mSi[3];
-      mS[4] = mSi[1]*mSi[3] - mSi[0]*mSi[4];
-      mS[5] = mSi[0]*mSi[2] - mSi[1]*mSi[1];	 
-
-      float s = ( mSi[0]*mS[0] + mSi[1]*mS[1] + mSi[3]*mS[3] );      
-      s = ( fabs(s) > 1.E-20 )  ?1./s :0;	  
-      mS[0]*=s;
-      mS[1]*=s;
-      mS[2]*=s;
-      mS[3]*=s;
-      mS[4]*=s;
-      mS[5]*=s;
-    }
+    float mS[6]= { ffC[0]+mV[0], 
+                   ffC[1]+mV[1], ffC[2]+mV[2], 
+                   ffC[3]+mV[3], ffC[4]+mV[4], ffC[5]+mV[5] };
+    InvertCholetsky3(mS);
     //* Residual (measured - estimated)
 
     float zeta[3] = { m[0]-ffP[0], m[1]-ffP[1], m[2]-ffP[2] };    
@@ -699,29 +681,10 @@ void KFParticleBase::AddDaughterWithEnergyCalc( const KFParticleBase &Daughter )
 
     //*
 
-    float mS[6];
-    {
-      float mSi[6] = { ffC[0]+mV[0], 
-			  ffC[1]+mV[1], ffC[2]+mV[2], 
-			  ffC[3]+mV[3], ffC[4]+mV[4], ffC[5]+mV[5] };
-
-      mS[0] = mSi[2]*mSi[5] - mSi[4]*mSi[4];
-      mS[1] = mSi[3]*mSi[4] - mSi[1]*mSi[5];
-      mS[2] = mSi[0]*mSi[5] - mSi[3]*mSi[3];
-      mS[3] = mSi[1]*mSi[4] - mSi[2]*mSi[3];
-      mS[4] = mSi[1]*mSi[3] - mSi[0]*mSi[4];
-      mS[5] = mSi[0]*mSi[2] - mSi[1]*mSi[1];	 
-
-      float s = ( mSi[0]*mS[0] + mSi[1]*mS[1] + mSi[3]*mS[3] );      
-
-      s = ( s > 1.E-20 )  ?1./s :0;	  
-      mS[0]*=s;
-      mS[1]*=s;
-      mS[2]*=s;
-      mS[3]*=s;
-      mS[4]*=s;
-      mS[5]*=s;
-    }
+    float mS[6]= { ffC[0]+mV[0], 
+                   ffC[1]+mV[1], ffC[2]+mV[2], 
+                   ffC[3]+mV[3], ffC[4]+mV[4], ffC[5]+mV[5] };
+    InvertCholetsky3(mS);
 
     //* Residual (measured - estimated)
 
@@ -1005,29 +968,10 @@ void KFParticleBase::AddDaughterWithEnergyFitMC( const KFParticleBase &Daughter 
     }
     //*
 
-    float mS[6];
-    {
-      float mSi[6] = { ffC[0]+mV[0], 
-			  ffC[1]+mV[1], ffC[2]+mV[2], 
-			  ffC[3]+mV[3], ffC[4]+mV[4], ffC[5]+mV[5] };
-     
-      mS[0] = mSi[2]*mSi[5] - mSi[4]*mSi[4];
-      mS[1] = mSi[3]*mSi[4] - mSi[1]*mSi[5];
-      mS[2] = mSi[0]*mSi[5] - mSi[3]*mSi[3];
-      mS[3] = mSi[1]*mSi[4] - mSi[2]*mSi[3];
-      mS[4] = mSi[1]*mSi[3] - mSi[0]*mSi[4];
-      mS[5] = mSi[0]*mSi[2] - mSi[1]*mSi[1];	 
-      
-      float s = ( mSi[0]*mS[0] + mSi[1]*mS[1] + mSi[3]*mS[3] );      
-
-      s = ( s > 1.E-20 )  ?1./s :0;	  
-      mS[0]*=s;
-      mS[1]*=s;
-      mS[2]*=s;
-      mS[3]*=s;
-      mS[4]*=s;
-      mS[5]*=s;
-    }
+    float mS[6]= { ffC[0]+mV[0], 
+                   ffC[1]+mV[1], ffC[2]+mV[2], 
+                   ffC[3]+mV[3], ffC[4]+mV[4], ffC[5]+mV[5] };
+    InvertCholetsky3(mS);
     //* Residual (measured - estimated)
     
     float zeta[3] = { m[0]-ffP[0], m[1]-ffP[1], m[2]-ffP[2] };    
@@ -1232,7 +1176,8 @@ void KFParticleBase::SetProductionVertex( const KFParticleBase &Vtx )
 
   float mAi[6];
 
-  InvertSym3( fC, mAi );
+  for(int i=0; i<6; i++) mAi[i] = fC[i];
+  InvertCholetsky3(mAi);
 
   float mB[5][3];
 
@@ -1260,18 +1205,19 @@ void KFParticleBase::SetProductionVertex( const KFParticleBase &Vtx )
 
   {
     float mAVi[6] = { fC[0]-mV[0], fC[1]-mV[1], fC[2]-mV[2], 
-			fC[3]-mV[3], fC[4]-mV[4], fC[5]-mV[5] };
+                        fC[3]-mV[3], fC[4]-mV[4], fC[5]-mV[5] };
     
-    if( !InvertSym3( mAVi, mAVi ) ){
+    InvertCholetsky3( mAVi);
+    {
 
       float dChi2 = ( +(mAVi[0]*z[0] + mAVi[1]*z[1] + mAVi[3]*z[2])*z[0]
-			 +(mAVi[1]*z[0] + mAVi[2]*z[1] + mAVi[4]*z[2])*z[1]
-			 +(mAVi[3]*z[0] + mAVi[4]*z[1] + mAVi[5]*z[2])*z[2] );
+                      +(mAVi[1]*z[0] + mAVi[2]*z[1] + mAVi[4]*z[2])*z[1]
+                      +(mAVi[3]*z[0] + mAVi[4]*z[1] + mAVi[5]*z[2])*z[2] );
       
       // Take Abs(dChi2) here. Negative value of 'det' or 'dChi2' shows that the particle 
       // was not used in the production vertex fit
       
-      fChi2+= fabs( dChi2 );
+      fChi2+= TMath::Abs( dChi2 );
     }
     fNDF  += 2;
   }
@@ -2731,13 +2677,19 @@ float KFParticleBase::GetDeviationFromVertex( const float v[], const float Cv[] 
   
   Transport( GetDStoPoint(v), mP, mC );  
 
+// for(int i=0; i<8; i++)
+// mP[i] = fP[i];
+// 
+// for(int i=0; i<36; i++)
+// mC[i] = fC[i];
+
   float d[3]={ v[0]-mP[0], v[1]-mP[1], v[2]-mP[2]};
 
-  float sigmaS = .1+10.*sqrt( (d[0]*d[0]+d[1]*d[1]+d[2]*d[2])/
-				 (mP[3]*mP[3]+mP[4]*mP[4]+mP[5]*mP[5])  );
+  float sigmaS = .1f+10.f*sqrt( (d[0]*d[0]+d[1]*d[1]+d[2]*d[2])/
+                             (mP[3]*mP[3]+mP[4]*mP[4]+mP[5]*mP[5])  );
 
    
-  float h[3] = { mP[3]*sigmaS, mP[4]*sigmaS, mP[5]*sigmaS };       
+  float h[3] = { mP[3]*sigmaS*0, mP[4]*sigmaS*0, mP[5]*sigmaS*0 };       
   
   float mSi[6] = 
     { mC[0] +h[0]*h[0], 
@@ -2753,21 +2705,26 @@ float KFParticleBase::GetDeviationFromVertex( const float v[], const float Cv[] 
     mSi[5]+=Cv[5];
   }
   
-  float mS[6];
+//   float mS[6];
+// 
+//   mS[0] = mSi[2]*mSi[5] - mSi[4]*mSi[4];
+//   mS[1] = mSi[3]*mSi[4] - mSi[1]*mSi[5];
+//   mS[2] = mSi[0]*mSi[5] - mSi[3]*mSi[3];
+//   mS[3] = mSi[1]*mSi[4] - mSi[2]*mSi[3];
+//   mS[4] = mSi[1]*mSi[3] - mSi[0]*mSi[4];
+//   mS[5] = mSi[0]*mSi[2] - mSi[1]*mSi[1];      
+//       
+//   float s = ( mSi[0]*mS[0] + mSi[1]*mS[1] + mSi[3]*mS[3] );
+//   s = if3( float( abs(s) > 1.E-8 )  , 1.f/s , 0.f);
+// 
+//   return sqrt( abs(s*( ( mS[0]*d[0] + mS[1]*d[1] + mS[3]*d[2])*d[0]
+//                 +(mS[1]*d[0] + mS[2]*d[1] + mS[4]*d[2])*d[1]
+//                 +(mS[3]*d[0] + mS[4]*d[1] + mS[5]*d[2])*d[2] ))/2);
 
-  mS[0] = mSi[2]*mSi[5] - mSi[4]*mSi[4];
-  mS[1] = mSi[3]*mSi[4] - mSi[1]*mSi[5];
-  mS[2] = mSi[0]*mSi[5] - mSi[3]*mSi[3];
-  mS[3] = mSi[1]*mSi[4] - mSi[2]*mSi[3];
-  mS[4] = mSi[1]*mSi[3] - mSi[0]*mSi[4];
-  mS[5] = mSi[0]*mSi[2] - mSi[1]*mSi[1];	 
-      
-  float s = ( mSi[0]*mS[0] + mSi[1]*mS[1] + mSi[3]*mS[3] );
-  s = ( s > 1.E-20 )  ?1./s :0;	  
-
-  return sqrt( fabs(s*( ( mS[0]*d[0] + mS[1]*d[1] + mS[3]*d[2])*d[0]
-		   +(mS[1]*d[0] + mS[2]*d[1] + mS[4]*d[2])*d[1]
-		   +(mS[3]*d[0] + mS[4]*d[1] + mS[5]*d[2])*d[2] ))/2);
+  InvertCholetsky3(mSi);
+  return sqrt( ( ( mSi[0]*d[0] + mSi[1]*d[1] + mSi[3]*d[2])*d[0]
+                     +(mSi[1]*d[0] + mSi[2]*d[1] + mSi[4]*d[2])*d[1]
+                     +(mSi[3]*d[0] + mSi[4]*d[1] + mSi[5]*d[2])*d[2] ));
 }
 
 
@@ -2831,28 +2788,10 @@ void KFParticleBase::SubtractFromVertex(  KFParticleBase &Vtx ) const
      
   //* 
 	    
-  float mS[6];
-  {
-    float mSi[6] = { mV[0]-Vtx.fC[0], 
-			mV[1]-Vtx.fC[1], mV[2]-Vtx.fC[2], 
-			mV[3]-Vtx.fC[3], mV[4]-Vtx.fC[4], mV[5]-Vtx.fC[5] };
-    
-    mS[0] = mSi[2]*mSi[5] - mSi[4]*mSi[4];
-    mS[1] = mSi[3]*mSi[4] - mSi[1]*mSi[5];
-    mS[2] = mSi[0]*mSi[5] - mSi[3]*mSi[3];
-    mS[3] = mSi[1]*mSi[4] - mSi[2]*mSi[3];
-    mS[4] = mSi[1]*mSi[3] - mSi[0]*mSi[4];
-    mS[5] = mSi[0]*mSi[2] - mSi[1]*mSi[1];	 
-    
-    float s = ( mSi[0]*mS[0] + mSi[1]*mS[1] + mSi[3]*mS[3] );
-    s = ( s > 1.E-20 )  ?1./s :0;	  
-    mS[0]*=s;
-    mS[1]*=s;
-    mS[2]*=s;
-    mS[3]*=s;
-    mS[4]*=s;
-    mS[5]*=s;
-  }
+  float mS[6] = { mV[0]-Vtx.fC[0], 
+                  mV[1]-Vtx.fC[1], mV[2]-Vtx.fC[2], 
+                  mV[3]-Vtx.fC[3], mV[4]-Vtx.fC[4], mV[5]-Vtx.fC[5] };
+  InvertCholetsky3(mS);   
     
   //* Residual (measured - estimated)
     
@@ -2914,8 +2853,8 @@ void KFParticleBase::SubtractFromParticle(  KFParticleBase &Vtx ) const
   }
 
   float mS[6]= { mV[0] - Vtx.fC[0],
-                mV[1] - Vtx.fC[1], mV[2] - Vtx.fC[2],
-                mV[3] - Vtx.fC[3], mV[4] - Vtx.fC[4], mV[5] - Vtx.fC[5] };
+                 mV[1] - Vtx.fC[1], mV[2] - Vtx.fC[2],
+                 mV[3] - Vtx.fC[3], mV[4] - Vtx.fC[4], mV[5] - Vtx.fC[5] };
   InvertCholetsky3(mS);
 
   //* Residual (measured - estimated)
@@ -3123,8 +3062,9 @@ void KFParticleBase::ConstructGammaBz( const KFParticleBase &daughter1,
 	daughters[id]->GetMeasurement( v0, p, mC );
 	
 	float mAi[6];
-	InvertSym3(mC, mAi );
-	
+        for(int i=0; i<6; i++) mAi[i] = mC[i];
+        InvertCholetsky3(mAi);	
+        
 	float mB[3][3];
 	
 	mB[0][0] = mC[ 6]*mAi[0] + mC[ 7]*mAi[1] + mC[ 8]*mAi[3];
@@ -3277,7 +3217,7 @@ void KFParticleBase::ConstructGammaBz( const KFParticleBase &daughter1,
 			   mHCHt[3]+mV[3], mHCHt[4]+mV[4], mHCHt[5]+mV[5]    };	
       
 
-	InvertSym3(mS,mS);
+	InvertCholetsky3(mS);
 	
 	//* Residual (measured - estimated)
     
@@ -3346,8 +3286,9 @@ void KFParticleBase::ConstructGammaBz( const KFParticleBase &daughter1,
     const float *m = fP, *mV = fC;
     
     float mAi[6];
-    InvertSym3(mC, mAi );
-
+    for(int i=0; i<6; i++) mAi[i] = mC[i];
+    InvertCholetsky3(mAi);
+    
     float mB[4][3];
 
     mB[0][0] = mC[ 6]*mAi[0] + mC[ 7]*mAi[1] + mC[ 8]*mAi[3];
