@@ -1217,7 +1217,7 @@ void KFParticleBase::SetProductionVertex( const KFParticleBase &Vtx )
       // Take Abs(dChi2) here. Negative value of 'det' or 'dChi2' shows that the particle 
       // was not used in the production vertex fit
       
-      fChi2+= TMath::Abs( dChi2 );
+      fChi2+= fabs( dChi2 );
     }
     fNDF  += 2;
   }
