@@ -31,7 +31,7 @@ ClassImp(KFParticle);
 float KFParticle::fgBz = -5.;  //* Bz compoment of the magnetic field
 #endif
 
-KFParticle::KFParticle( const KFParticle &d1, const KFParticle &d2, Bool_t gamma )
+KFParticle::KFParticle( const KFParticle &d1, const KFParticle &d2, Bool_t gamma ): KFParticleBase()
 {
   if (!gamma) {
     KFParticle mother;
@@ -88,7 +88,7 @@ void KFParticle::Create( const Double_t Param[], const Double_t Cov[], Int_t Cha
   KFParticleBase::Initialize( P, C, Charge, mass );
 }
 
-KFParticle::KFParticle( const KFPTrack &track, const int PID )
+KFParticle::KFParticle( const KFPTrack &track, const int PID ): KFParticleBase()
 {
   // Constructor from ALICE track, PID hypothesis should be provided
 
@@ -104,7 +104,7 @@ KFParticle::KFParticle( const KFPTrack &track, const int PID )
   fNDF = track.GetNDF();
 }
 
-KFParticle::KFParticle( const KFPVertex &vertex )
+KFParticle::KFParticle( const KFPVertex &vertex ): KFParticleBase()
 {
   // Constructor from ALICE vertex
 

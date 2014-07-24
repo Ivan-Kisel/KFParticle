@@ -407,7 +407,7 @@ float KFParticleBase::GetSCorrection( const float Part[], const float XYZ[] )
   float d[3] = { XYZ[0]-Part[0], XYZ[1]-Part[1], XYZ[2]-Part[2] };
   float p2 = Part[3]*Part[3]+Part[4]*Part[4]+Part[5]*Part[5];
 //  float sigmaS = (p2>1.e-4) ? ( 10.1+3.*sqrt( d[0]*d[0]+d[1]*d[1]+d[2]*d[2]) )/sqrt(p2) : 1.;
-  float sigmaS = (p2>1.e-4) ?  0.1+10.*sqrt( (d[0]*d[0]+d[1]*d[1]+d[2]*d[2])/sqrt(p2) ): 0.;
+  float sigmaS = (p2>1.e-4) ?   0.1f+10.f*sqrt( (d[0]*d[0]+d[1]*d[1]+d[2]*d[2])/p2 ) : 0.;
   return sigmaS;
 }
 
@@ -2705,26 +2705,26 @@ float KFParticleBase::GetDeviationFromVertex( const float v[], const float Cv[] 
     mSi[5]+=Cv[5];
   }
   
-//   float mS[6];
+//   float mS[6]; 
 // 
-//   mS[0] = mSi[2]*mSi[5] - mSi[4]*mSi[4];
-//   mS[1] = mSi[3]*mSi[4] - mSi[1]*mSi[5];
-//   mS[2] = mSi[0]*mSi[5] - mSi[3]*mSi[3];
-//   mS[3] = mSi[1]*mSi[4] - mSi[2]*mSi[3];
-//   mS[4] = mSi[1]*mSi[3] - mSi[0]*mSi[4];
-//   mS[5] = mSi[0]*mSi[2] - mSi[1]*mSi[1];      
-//       
-//   float s = ( mSi[0]*mS[0] + mSi[1]*mS[1] + mSi[3]*mS[3] );
-//   s = if3( float( abs(s) > 1.E-8 )  , 1.f/s , 0.f);
+//   mS[0] = mSi[2]*mSi[5] - mSi[4]*mSi[4]; 
+//   mS[1] = mSi[3]*mSi[4] - mSi[1]*mSi[5]; 
+//   mS[2] = mSi[0]*mSi[5] - mSi[3]*mSi[3]; 
+//   mS[3] = mSi[1]*mSi[4] - mSi[2]*mSi[3]; 
+//   mS[4] = mSi[1]*mSi[3] - mSi[0]*mSi[4]; 
+//   mS[5] = mSi[0]*mSi[2] - mSi[1]*mSi[1];          
 // 
-//   return sqrt( abs(s*( ( mS[0]*d[0] + mS[1]*d[1] + mS[3]*d[2])*d[0]
-//                 +(mS[1]*d[0] + mS[2]*d[1] + mS[4]*d[2])*d[1]
-//                 +(mS[3]*d[0] + mS[4]*d[1] + mS[5]*d[2])*d[2] ))/2);
+//   float s = ( mSi[0]*mS[0] + mSi[1]*mS[1] + mSi[3]*mS[3] ); 
+//   s = ( s > 1.E-20 )  ?1./s :0;    
+// 
+//   return sqrt( fabs(s*( ( mS[0]*d[0] + mS[1]*d[1] + mS[3]*d[2])*d[0] 
+//                        +( mS[1]*d[0] + mS[2]*d[1] + mS[4]*d[2])*d[1] 
+//                        +( mS[3]*d[0] + mS[4]*d[1] + mS[5]*d[2])*d[2] ))/2);
 
   InvertCholetsky3(mSi);
   return sqrt( ( ( mSi[0]*d[0] + mSi[1]*d[1] + mSi[3]*d[2])*d[0]
                      +(mSi[1]*d[0] + mSi[2]*d[1] + mSi[4]*d[2])*d[1]
-                     +(mSi[3]*d[0] + mSi[4]*d[1] + mSi[5]*d[2])*d[2] ));
+                     +(mSi[3]*d[0] + mSi[4]*d[1] + mSi[5]*d[2])*d[2] )/2);
 }
 
 
