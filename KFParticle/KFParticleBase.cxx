@@ -2721,9 +2721,14 @@ float KFParticleBase::GetDeviationFromVertex( const float v[], const float Cv[] 
 //                        +( mS[3]*d[0] + mS[4]*d[1] + mS[5]*d[2])*d[2] ))/2);
 
   InvertCholetsky3(mSi);
-  return sqrt( ( ( mSi[0]*d[0] + mSi[1]*d[1] + mSi[3]*d[2])*d[0]
-                     +(mSi[1]*d[0] + mSi[2]*d[1] + mSi[4]*d[2])*d[1]
-                     +(mSi[3]*d[0] + mSi[4]*d[1] + mSi[5]*d[2])*d[2] )/2);
+  
+  float chi2 = ( ( mSi[0]*d[0] + mSi[1]*d[1] + mSi[3]*d[2])*d[0]
+                +( mSi[1]*d[0] + mSi[2]*d[1] + mSi[4]*d[2])*d[1]
+                +( mSi[3]*d[0] + mSi[4]*d[1] + mSi[5]*d[2])*d[2] );
+  if(chi2>=0)
+    return sqrt(chi2/2);
+  else
+    return -sqrt(fabs(chi2)/2);
 }
 
 
