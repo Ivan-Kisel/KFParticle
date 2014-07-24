@@ -432,12 +432,12 @@ void KFParticleBase::GetMeasurement( const float XYZ[], float m[], float V[] ) c
   h[3] = ( h[1]*b[2]-h[2]*b[1] )*GetQ();
   h[4] = ( h[2]*b[0]-h[0]*b[2] )*GetQ();
   h[5] = ( h[0]*b[1]-h[1]*b[0] )*GetQ();
-    
+  
   V[ 0]+= h[0]*h[0];
-  V[ 1]+= h[1]*h[0];
+//  V[ 1]+= h[1]*h[0];
   V[ 2]+= h[1]*h[1];
-  V[ 3]+= h[2]*h[0];
-  V[ 4]+= h[2]*h[1];
+//  V[ 3]+= h[2]*h[0];
+//  V[ 4]+= h[2]*h[1];
   V[ 5]+= h[2]*h[2];
 
   V[ 6]+= h[3]*h[0];
@@ -489,7 +489,7 @@ void KFParticleBase::AddDaughterWithEnergyFit( const KFParticleBase &Daughter )
 
   //* Add daughter 
 
-  TransportToDecayVertex();
+//   TransportToDecayVertex();
 
   float b[3]; 
   Int_t maxIter = 1;
@@ -537,7 +537,7 @@ void KFParticleBase::AddDaughterWithEnergyFit( const KFParticleBase &Daughter )
       for( Int_t i=0; i<36; i++ ) mV[i] = Daughter.fC[i];
     }
     //*
-
+    
     float mS[6]= { ffC[0]+mV[0], 
                    ffC[1]+mV[1], ffC[2]+mV[2], 
                    ffC[3]+mV[3], ffC[4]+mV[4], ffC[5]+mV[5] };
@@ -547,7 +547,6 @@ void KFParticleBase::AddDaughterWithEnergyFit( const KFParticleBase &Daughter )
     float zeta[3] = { m[0]-ffP[0], m[1]-ffP[1], m[2]-ffP[2] };    
 
     //* CHt = CH' - D'
-
     float mCHt0[7], mCHt1[7], mCHt2[7];
 
     mCHt0[0]=ffC[ 0] ;       mCHt1[0]=ffC[ 1] ;       mCHt2[0]=ffC[ 3] ;
@@ -609,7 +608,7 @@ void KFParticleBase::AddDaughterWithEnergyFit( const KFParticleBase &Daughter )
 	fC[k] = ffC[k] - (k0[i]*mCHt0[j] + k1[i]*mCHt1[j] + k2[i]*mCHt2[j] );
       }
     }
-  
+
     //* Calculate Chi^2 
 
     fNDF  += 2;
@@ -628,7 +627,7 @@ void KFParticleBase::AddDaughterWithEnergyCalc( const KFParticleBase &Daughter )
 
   //* Add daughter 
 
-  TransportToDecayVertex();
+//   TransportToDecayVertex();
 
   float b[3]; 
   Int_t maxIter = 1;
@@ -920,7 +919,7 @@ void KFParticleBase::AddDaughterWithEnergyFitMC( const KFParticleBase &Daughter 
 
   //* Add daughter 
 
-  TransportToDecayVertex();
+//   TransportToDecayVertex();
 
   float b[3]; 
   Int_t maxIter = 1;
