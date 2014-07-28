@@ -15,10 +15,6 @@
 #include "KFParticle.h"
 #include "KFParticleDatabase.h"
 
-#ifdef NonhomogeneousField
-#include "CbmKFTrack.h"
-#endif
-
 #ifdef HomogeneousField
 float_v KFParticleSIMD::fgBz = -5.f;  //* Bz compoment of the magnetic field
 #endif
