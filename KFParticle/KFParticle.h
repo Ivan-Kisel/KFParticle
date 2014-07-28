@@ -964,7 +964,10 @@ inline void KFParticle::GetFieldValue( const float * /*xyz*/, float B[] ) const
 #endif
 
 #ifdef NonhomogeneousField
+
+#ifndef KFParticleStandalone
 #include "CbmKF.h"
+#endif
 
 inline void KFParticle::GetFieldValue( const float xyz[], float B[] ) const 
 {
