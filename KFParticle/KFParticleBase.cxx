@@ -838,7 +838,7 @@ void KFParticleBase::AddDaughterWithEnergyCalc( const KFParticleBase &Daughter )
 
     //float Dvv[3][3]; do not need this
     float mDvp[3][3];
-    float mDpv[3][3];
+//     float mDpv[3][3];
     float mDpp[3][3];
     float mDe[7];
 
@@ -847,7 +847,7 @@ void KFParticleBase::AddDaughterWithEnergyCalc( const KFParticleBase &Daughter )
       for(int j=0; j<3; j++)
       {
         mDvp[i][j] = km0[i+3]*mCCHt0[j] + km1[i+3]*mCCHt1[j] + km2[i+3]*mCCHt2[j];
-        mDpv[i][j] = km0[i]*mCCHt0[j+3] + km1[i]*mCCHt1[j+3] + km2[i]*mCCHt2[j+3];
+//         mDpv[i][j] = km0[i]*mCCHt0[j+3] + km1[i]*mCCHt1[j+3] + km2[i]*mCCHt2[j+3];
         mDpp[i][j] = km0[i+3]*mCCHt0[j+3] + km1[i+3]*mCCHt1[j+3] + km2[i+3]*mCCHt2[j+3];
       }
     }
@@ -3402,10 +3402,10 @@ void KFParticleBase::GetArmenterosPodolanski(KFParticleBase& positive, KFParticl
   float spz = positive.GetPz() + negative.GetPz();
   float sp  = sqrt(spx*spx + spy*spy + spz*spz);
   if( sp == 0.0) return;
-  float pn, pp, pln, plp;
+  float pn, pln, plp;
 
   pn = sqrt(negative.GetPx()*negative.GetPx() + negative.GetPy()*negative.GetPy() + negative.GetPz()*negative.GetPz());
-  pp = sqrt(positive.GetPx()*positive.GetPx() + positive.GetPy()*positive.GetPy() + positive.GetPz()*positive.GetPz());
+//   pp = sqrt(positive.GetPx()*positive.GetPx() + positive.GetPy()*positive.GetPy() + positive.GetPz()*positive.GetPz());
   pln  = (negative.GetPx()*spx+negative.GetPy()*spy+negative.GetPz()*spz)/sp;
   plp  = (positive.GetPx()*spx+positive.GetPy()*spy+positive.GetPz()*spz)/sp;
 

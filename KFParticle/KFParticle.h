@@ -968,11 +968,13 @@ inline void KFParticle::GetFieldValue( const float * /*xyz*/, float B[] ) const
 
 inline void KFParticle::GetFieldValue( const float xyz[], float B[] ) const 
 {
+#ifndef KFParticleStandalone
   FairField *MF = CbmKF::Instance()->GetMagneticField();
   const Double_t xyzDouble[3] = {xyz[0], xyz[1], xyz[2]};
   Double_t BDouble[3]={0.};
   MF->GetFieldValue( xyzDouble, BDouble );
   B[0] = BDouble[0]; B[1] = BDouble[1]; B[2] = BDouble[2];
+#endif
 }
 #endif
 
