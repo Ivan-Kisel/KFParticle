@@ -1076,6 +1076,10 @@ inline void KFParticleSIMD::ConstructGamma( const KFParticleSIMD &daughter1,
 #ifdef HomogeneousField
   KFParticleBaseSIMD::ConstructGammaBz( daughter1, daughter2, GetFieldAlice() );
 #endif
+#ifdef NonhomogeneousField
+  const KFParticleSIMD* daughters[2] = {&daughter1, &daughter2};
+  Construct(daughters,2);
+#endif
 }
 
 #endif 
