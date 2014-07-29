@@ -78,16 +78,16 @@ class KFParticleSIMD :public KFParticleBaseSIMD
 
   KFParticleSIMD( const KFPTrack &track, Int_t PID );
   KFParticleSIMD( const KFPTrack *track, Int_t PID );
-  KFParticleSIMD( KFPTrack* Track[], int NTracks, Int_t *qHypo=0, const Int_t *pdg=0 );
+  KFParticleSIMD( KFPTrack* Track[], int NTracks, const Int_t *pdg=0 );
   KFParticleSIMD( KFPTrackVector &track, uint_v& index, const int_v& pdg );
 
-  void Create(KFPTrack* Track[], int NTracks, Int_t *qHypo=0, const Int_t *pdg=0);
+  void Create(KFPTrack* Track[], int NTracks, const Int_t *pdg=0);
   void Create(KFPTrackVector &track, uint_v& index, const int_v& pdg);
   void Load(KFPTrackVector &track, int index, const int_v& pdg);
   void Rotate();
 
-  KFParticleSIMD(KFPTrack &Track, Int_t *qHypo=0, const Int_t *pdg=0);
-  KFParticleSIMD(KFPTrackVector &track, int n, Int_t *qHypo=0, const Int_t *pdg=0);
+  KFParticleSIMD(KFPTrack &Track, const Int_t *pdg=0);
+  KFParticleSIMD(KFPTrackVector &track, int n, const Int_t *pdg=0);
 
   //* Initialisation from VVertex 
 
@@ -877,30 +877,33 @@ inline void KFParticleSIMD::Construct( const KFParticleSIMD *vDaughters[], int n
                                        const KFParticleSIMD *ProdVtx,   Float_t Mass, Bool_t IsConstrained,
                                        Bool_t isAtVtxGuess  )
 {
+#ifdef NonhomogeneousField
+  fField = vDaughters[0]->fField;
+#endif
   KFParticleBaseSIMD::Construct( ( const KFParticleBaseSIMD**)vDaughters, nDaughters, 
                                  ( const KFParticleBaseSIMD*)ProdVtx, Mass, IsConstrained, isAtVtxGuess );
 
-  #ifdef NonhomogeneousField
-  // calculate a field region for the constructed particle
-  KFParticleFieldValue field[3];
-  float_v zField[3] = {0.f, fP[2]/2, fP[2]};
-
-  for(int iPoint=0; iPoint<3; iPoint++)
-  {
-    for(int iD=0; iD<nDaughters; ++iD)
-    {
-      KFParticleFieldValue b = const_cast<KFParticleSIMD *>(vDaughters[iD])->fField.Get(zField[iPoint]);
-      field[iPoint].x += b.x;
-      field[iPoint].y += b.y;
-      field[iPoint].z += b.z;
-    }
-    field[iPoint].x /= nDaughters;
-    field[iPoint].y /= nDaughters;
-    field[iPoint].z /= nDaughters;
-  }
-
-  fField.Set( field[2], zField[2], field[1], zField[1], field[0], zField[0] );
-  #endif
+//   #ifdef NonhomogeneousField
+//   // calculate a field region for the constructed particle
+//   KFParticleFieldValue field[3];
+//   float_v zField[3] = {0.f, fP[2]/2, fP[2]};
+// 
+//   for(int iPoint=0; iPoint<3; iPoint++)
+//   {
+//     for(int iD=0; iD<nDaughters; ++iD)
+//     {
+//       KFParticleFieldValue b = const_cast<KFParticleSIMD *>(vDaughters[iD])->fField.Get(zField[iPoint]);
+//       field[iPoint].x += b.x;
+//       field[iPoint].y += b.y;
+//       field[iPoint].z += b.z;
+//     }
+//     field[iPoint].x /= nDaughters;
+//     field[iPoint].y /= nDaughters;
+//     field[iPoint].z /= nDaughters;
+//   }
+// 
+//   fField.Set( field[2], zField[2], field[1], zField[1], field[0], zField[0] );
+//   #endif
 }
 
 inline void KFParticleSIMD::TransportToDecayVertex()

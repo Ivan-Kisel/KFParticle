@@ -32,7 +32,7 @@ class KFParticleFieldRegion{
 
   public:
     KFParticleFieldRegion() {};
-    KFParticleFieldRegion(float field[10])
+    KFParticleFieldRegion(const float field[10])
     {
       for(int i=0; i<10; i++)
         fField[i] = field[i];
@@ -97,7 +97,7 @@ class KFParticleFieldRegion{
       fField[2] = fField[5] = fField[8] = 0.f;
     }
     
-    void SetOneEntry( float* field, int iEntry=0 )
+    void SetOneEntry( const float* field, int iEntry=0 )
     {
       for(int i=0; i<10; i++)
         fField[i][iEntry] = field[i];

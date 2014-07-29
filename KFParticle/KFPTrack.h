@@ -132,6 +132,10 @@ public:
   int Id() const { return fId; };
   void SetId( int id ){ fId = id; };
 
+#ifdef NonhomogeneousField
+  const float* GetFieldCoeff() const { return fieldRegion; }
+  void SetFieldCoeff(float c, int i) { fieldRegion[i] = c; }
+#endif
  private:
 
   float fP[6];  //coordinates of the vertex
@@ -141,6 +145,10 @@ public:
   short fNDF;  //degree of freedom number
 
   short fId;
+  
+#ifdef NonhomogeneousField
+  float fieldRegion[10];
+#endif
 };
 
 #endif

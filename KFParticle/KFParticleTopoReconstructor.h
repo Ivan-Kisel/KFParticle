@@ -55,7 +55,7 @@ class KFParticleTopoReconstructor{
   void Init(AliHLTTPCCAGBTracker* tracker, vector<int>* pdg=0); // init array of particles
 #endif
   void Init(vector<KFParticle> &particles, vector<int>* pdg=0);
-  void Init(const KFPTrackVector *particles, const std::vector<KFParticle>& pv, const std::vector<short int> clusterPV);
+  void Init(const KFPTrackVector *particles, const std::vector<KFParticle>& pv);
   void Init(KFPTrackVector &tracks);
   
   void DeInit() { fTracks = 0; }

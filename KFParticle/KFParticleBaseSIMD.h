@@ -234,7 +234,7 @@ class KFParticleBaseSIMD {
   float_v GetDStoPointBz( float_v Bz, const float_v xyz[], const float_v* param = 0 ) const;
   float_v GetDStoPointBy( float_v By, const float_v xyz[] ) const;
 
-  void GetMaxDistanceToParticleBz(const float_v& B, const KFParticleBaseSIMD &p, float_v &r ) const;
+  void GetMaxDistanceToParticleBz(const float_v& B, const KFParticleBaseSIMD &p/*, float_v &r*/ ) const;
   
   void GetDStoParticleBz( float_v Bz, const KFParticleBaseSIMD &p, float_v &dS, float_v &dS1, const float_v* param1 =0, const float_v* param2 =0  ) const ;
   void GetDStoParticleBy( float_v B, const KFParticleBaseSIMD &p, float_v &dS, float_v &dS1 ) const ;

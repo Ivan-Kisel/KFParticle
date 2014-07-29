@@ -183,6 +183,11 @@ void KFPTrackVector::GetTrack(KFPTrack& track, const int n)
 //     track.SetNDF(fNDF[n]);
   track.SetId(fId[n]);
   track.SetCharge(fQ[n]);
+  
+#ifdef NonhomogeneousField
+    for(int i=0; i<10; i++)
+      track.SetFieldCoeff( fField[i][n], i);
+#endif
 }
 
 

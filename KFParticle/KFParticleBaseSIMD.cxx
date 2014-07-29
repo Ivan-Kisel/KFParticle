@@ -1772,7 +1772,7 @@ float_v KFParticleBaseSIMD::GetDStoPointBy( float_v By, const float_v xyz[] )
   return GetDStoPointBz(By, point, param);
 }
 
-void KFParticleBaseSIMD::GetMaxDistanceToParticleBz(const float_v& B, const KFParticleBaseSIMD &p, float_v &r ) const
+void KFParticleBaseSIMD::GetMaxDistanceToParticleBz(const float_v& B, const KFParticleBaseSIMD &p/*, float_v &r*/ ) const
 {
   //* Get maxium distance between to particles in XY plane
   const float_v kCLight = 0.000299792458f;

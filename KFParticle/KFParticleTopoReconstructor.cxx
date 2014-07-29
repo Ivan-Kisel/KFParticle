@@ -271,7 +271,7 @@ void KFParticleTopoReconstructor::Init(KFPTrackVector &tracks)
 #endif /// USE_TIMERS
 }
 
-void KFParticleTopoReconstructor::Init(const KFPTrackVector *particles, const vector<KFParticle>& pv, const std::vector<short int> clusterPV)
+void KFParticleTopoReconstructor::Init(const KFPTrackVector *particles, const vector<KFParticle>& pv)
 {
 #ifdef USE_TIMERS
   timer.Start();

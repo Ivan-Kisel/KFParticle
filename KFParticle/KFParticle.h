@@ -109,7 +109,7 @@ class KFParticle :public KFParticleBase
   void SetAtProductionVertex(Bool_t b) { fAtProductionVertex = b; }
 
 #ifdef NonhomogeneousField
-  float* GetFieldCoeff() { return fieldRegion; }
+  const float* GetFieldCoeff() const { return fieldRegion; }
   void SetFieldCoeff(float c, int i) { fieldRegion[i] = c; }
 #endif
 
@@ -843,6 +843,10 @@ inline void KFParticle::SetNoDecayLength()
 inline void KFParticle::Construct( const KFParticle *vDaughters[], int nDaughters, 
 			       const KFParticle *ProdVtx,   float Mass, Bool_t IsConstrained  )
 {    
+#ifdef NonhomogeneousField
+  for(int i=0; i<10; i++)
+    SetFieldCoeff(vDaughters[0]->GetFieldCoeff()[i], i);
+#endif
   KFParticleBase::Construct( ( const KFParticleBase**)vDaughters, nDaughters, 
 			 ( const KFParticleBase*)ProdVtx, Mass, IsConstrained );
 }
@@ -977,6 +981,13 @@ inline void KFParticle::GetFieldValue( const float xyz[], float B[] ) const
   Double_t BDouble[3]={0.};
   MF->GetFieldValue( xyzDouble, BDouble );
   B[0] = BDouble[0]; B[1] = BDouble[1]; B[2] = BDouble[2];
+#else
+  const float dz = (fieldRegion[9]-xyz[2]);
+  const float dz2 = dz*dz;
+
+  B[0] = fieldRegion[0] + fieldRegion[1]*dz + fieldRegion[2]*dz2;
+  B[1] = fieldRegion[3] + fieldRegion[4]*dz + fieldRegion[5]*dz2;
+  B[2] = fieldRegion[6] + fieldRegion[7]*dz + fieldRegion[8]*dz2;
 #endif
 }
 #endif
@@ -1014,6 +1025,10 @@ inline void KFParticle::ConstructGamma( const KFParticle &daughter1,
 {
 #ifdef HomogeneousField
   KFParticleBase::ConstructGammaBz( daughter1, daughter2, GetFieldAlice() );
+#endif
+#ifdef NonhomogeneousField
+  const KFParticle* daughters[2] = {&daughter1, &daughter2};
+  Construct(daughters,2);
 #endif
 }
 

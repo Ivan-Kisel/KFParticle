@@ -84,7 +84,7 @@ KFParticleSIMD::KFParticleSIMD( const KFPTrack *track, Int_t PID )
   }
 }
 
-KFParticleSIMD::KFParticleSIMD(KFPTrack &Track, Int_t *qHypo, const Int_t *pdg)
+KFParticleSIMD::KFParticleSIMD(KFPTrack &Track, const Int_t *pdg)
 {
   Double_t r[3];
   Double_t C[21];
@@ -107,7 +107,7 @@ KFParticleSIMD::KFParticleSIMD(KFPTrack &Track, Int_t *qHypo, const Int_t *pdg)
   fNDF = Track.GetNDF();
 }
 
-KFParticleSIMD::KFParticleSIMD(KFPTrackVector &track, int n, Int_t *qHypo, const Int_t *pdg)
+KFParticleSIMD::KFParticleSIMD(KFPTrackVector &track, int n, const Int_t *pdg)
 {
   for(int i=0; i<6; i++)
     fP[i] = track.Parameter(i)[n];
@@ -124,12 +124,12 @@ KFParticleSIMD::KFParticleSIMD(KFPTrackVector &track, int n, Int_t *qHypo, const
 }
 
   
-KFParticleSIMD::KFParticleSIMD(KFPTrack* Track[], int NTracks, Int_t *qHypo, const Int_t *pdg)
+KFParticleSIMD::KFParticleSIMD(KFPTrack* Track[], int NTracks, const Int_t *pdg)
 {
-  Create(Track, NTracks, qHypo, pdg);
+  Create(Track, NTracks, pdg);
 }
 
-void KFParticleSIMD::Create(KFPTrack* Track[], int NTracks, Int_t *qHypo, const Int_t *pdg)
+void KFParticleSIMD::Create(KFPTrack* Track[], int NTracks, const Int_t *pdg)
 {
   Double_t r[3];
   Double_t C[21];
