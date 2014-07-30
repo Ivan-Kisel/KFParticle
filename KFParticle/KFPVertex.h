@@ -15,7 +15,7 @@
 class KFPVertex
 {
  public:
-  KFPVertex() { }
+  KFPVertex():fChi2(-1.f), fNContributors(0), fNDF(-1)  { }
   ~KFPVertex() { }
 
 /*  KFPVertex(const KFPVertex& vVert); 

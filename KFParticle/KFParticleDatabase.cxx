@@ -13,7 +13,13 @@
 
 KFParticleDatabase* KFParticleDatabase::fDatabase = 0;
 
-KFParticleDatabase::KFParticleDatabase()
+KFParticleDatabase::KFParticleDatabase():
+  fMassPi0PDG(0.13498),
+  fMassPi0PDGSigma(0.006),
+  fMassD0PDG(1.86484),
+  fMassD0PDGSigma(0.0145),
+  fMassDPlusPDG(1.86962),
+  fMassDPlusPDGSigma(0.0145)
 {
   fMass[0] = 0.000510999;
   fMass[1] = 0.105658;
@@ -49,14 +55,6 @@ KFParticleDatabase::KFParticleDatabase()
 #endif
   fMassSecPDGSigma[3]=6.0e-3; //TODO tune //Gamma
 
-  fMassPi0PDG = 0.13498;
-  fMassPi0PDGSigma = 0.006;
-  
-  fMassD0PDG = 1.86484;
-  fMassD0PDGSigma = 0.0145;
-  fMassDPlusPDG = 1.86962;
-  fMassDPlusPDGSigma = 0.0145;
-  
   fDatabase = this;
 }
 

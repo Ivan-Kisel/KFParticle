@@ -39,9 +39,9 @@ class AliHLTTPCCAGBTracker;
 
 class KFParticleTopoReconstructor{
  public:
-  KFParticleTopoReconstructor():fKFParticlePVReconstructor(0),fTracks(0),fNThreads(1)
+  KFParticleTopoReconstructor():fKFParticlePVReconstructor(0),fTracks(0), fParticles(0), fPV(0), fNThreads(1)
 #ifdef USE_TIMERS
-  ,fTime(0.)
+  ,fTime(0.),timer()
 #endif
   {
 #ifdef USE_TIMERS

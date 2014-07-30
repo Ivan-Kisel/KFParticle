@@ -30,7 +30,7 @@ class KFParticle;
 
 class KFParticlePVReconstructor{
  public:
-  KFParticlePVReconstructor():fNParticles(0),fIsBeamLine(0) {};
+  KFParticlePVReconstructor():fParticles(0), fNParticles(0), fWeight(0.f), fBeamLine(), fIsBeamLine(0), fClusters(0), fPrimVertices(0) {};
   ~KFParticlePVReconstructor(){};
   
   void Init(KFPTrackVector *tracks, int nParticles); // init array of particles
@@ -66,6 +66,7 @@ class KFParticlePVReconstructor{
   bool fIsBeamLine;
   
   struct KFParticleCluster {
+    KFParticleCluster():fTracks(0) {};
     vector<short int> fTracks;
     float fP[3];
     float fC[6];

@@ -22,7 +22,7 @@ float_v KFParticleSIMD::fgBz = -5.f;  //* Bz compoment of the magnetic field
 static const float_v Zero = 0.f;
 static const float_v One = 1.f;
 
-KFParticleSIMD::KFParticleSIMD( const KFParticleSIMD &d1, const KFParticleSIMD &d2, Bool_t gamma )
+KFParticleSIMD::KFParticleSIMD( const KFParticleSIMD &d1, const KFParticleSIMD &d2, Bool_t gamma ): KFParticleBaseSIMD(), fField()
 {
   if (!gamma) {
     KFParticleSIMD mother;
@@ -55,7 +55,7 @@ void KFParticleSIMD::Create( const float_v Param[], const float_v Cov[], float_v
   KFParticleBaseSIMD::Initialize( Param, C, Charge, mass );
 }
 
-KFParticleSIMD::KFParticleSIMD( const KFPTrack *track, Int_t PID )
+KFParticleSIMD::KFParticleSIMD( const KFPTrack *track, Int_t PID ): KFParticleBaseSIMD(), fField()
 {
   Double_t r[3];
   Double_t C[21];
@@ -84,7 +84,7 @@ KFParticleSIMD::KFParticleSIMD( const KFPTrack *track, Int_t PID )
   }
 }
 
-KFParticleSIMD::KFParticleSIMD(KFPTrack &Track, const Int_t *pdg)
+KFParticleSIMD::KFParticleSIMD(KFPTrack &Track, const Int_t *pdg): KFParticleBaseSIMD(), fField()
 {
   Double_t r[3];
   Double_t C[21];
@@ -107,7 +107,7 @@ KFParticleSIMD::KFParticleSIMD(KFPTrack &Track, const Int_t *pdg)
   fNDF = Track.GetNDF();
 }
 
-KFParticleSIMD::KFParticleSIMD(KFPTrackVector &track, int n, const Int_t *pdg)
+KFParticleSIMD::KFParticleSIMD(KFPTrackVector &track, int n, const Int_t *pdg): KFParticleBaseSIMD(), fField()
 {
   for(int i=0; i<6; i++)
     fP[i] = track.Parameter(i)[n];
@@ -124,7 +124,7 @@ KFParticleSIMD::KFParticleSIMD(KFPTrackVector &track, int n, const Int_t *pdg)
 }
 
   
-KFParticleSIMD::KFParticleSIMD(KFPTrack* Track[], int NTracks, const Int_t *pdg)
+KFParticleSIMD::KFParticleSIMD(KFPTrack* Track[], int NTracks, const Int_t *pdg): KFParticleBaseSIMD(), fField()
 {
   Create(Track, NTracks, pdg);
 }
@@ -160,7 +160,7 @@ void KFParticleSIMD::Create(KFPTrack* Track[], int NTracks, const Int_t *pdg)
   }
 }
 
-KFParticleSIMD::KFParticleSIMD(KFPTrackVector &track, uint_v& index, const int_v& pdg)
+KFParticleSIMD::KFParticleSIMD(KFPTrackVector &track, uint_v& index, const int_v& pdg): KFParticleBaseSIMD(), fField()
 {
   Create(track, index, pdg);
 }
@@ -214,7 +214,7 @@ void KFParticleSIMD::Rotate()
   fQ = fQ.rotated(1);
 }
 
-KFParticleSIMD::KFParticleSIMD( const KFPVertex &vertex )
+KFParticleSIMD::KFParticleSIMD( const KFPVertex &vertex ): KFParticleBaseSIMD(), fField()
 {
   // Constructor from ALICE vertex
 
@@ -265,7 +265,7 @@ void KFParticleSIMD::SetOneEntry(int iEntry, KFParticleSIMD& part, int iEntryPar
 #endif
 }
 
-KFParticleSIMD::KFParticleSIMD(KFParticle* parts[], const int nPart)
+KFParticleSIMD::KFParticleSIMD(KFParticle* parts[], const int nPart): KFParticleBaseSIMD(), fField()
 {
   { // check
     bool ok = 1;
@@ -308,7 +308,7 @@ KFParticleSIMD::KFParticleSIMD(KFParticle* parts[], const int nPart)
   }
 }
 
-KFParticleSIMD::KFParticleSIMD( KFParticle &part)
+KFParticleSIMD::KFParticleSIMD( KFParticle &part): KFParticleBaseSIMD(), fField()
 {
 
  fId = part.Id();

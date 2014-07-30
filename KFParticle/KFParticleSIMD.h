@@ -55,7 +55,7 @@ class KFParticleSIMD :public KFParticleBaseSIMD
 #endif
   //* Constructor (empty)
 
-  KFParticleSIMD():KFParticleBaseSIMD(){ ; }
+  KFParticleSIMD():KFParticleBaseSIMD(), fField() { ; }
 
   //* Destructor (empty)
 
@@ -410,8 +410,8 @@ inline void KFParticleSIMD::SetField( float_v Bz )
 #endif
 
 inline KFParticleSIMD::KFParticleSIMD( const KFParticleSIMD &d1, 
-                                   const KFParticleSIMD &d2, 
-                                   const KFParticleSIMD &d3 )
+                                       const KFParticleSIMD &d2, 
+                                       const KFParticleSIMD &d3 ): KFParticleBaseSIMD(), fField()
 {
   KFParticleSIMD mother;
   mother+= d1;
@@ -423,7 +423,7 @@ inline KFParticleSIMD::KFParticleSIMD( const KFParticleSIMD &d1,
 inline KFParticleSIMD::KFParticleSIMD( const KFParticleSIMD &d1, 
                                const KFParticleSIMD &d2, 
                                const KFParticleSIMD &d3, 
-                               const KFParticleSIMD &d4 )
+                               const KFParticleSIMD &d4 ): KFParticleBaseSIMD(), fField()
 {
   KFParticleSIMD mother;
   mother+= d1;

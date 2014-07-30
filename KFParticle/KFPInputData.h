@@ -40,7 +40,7 @@ struct KFPTrackIndex
 class KFPInputData
 {
  public:
-  KFPInputData() {};
+  KFPInputData():fPV(0),fCluster(0),fBz(0.f) {};
   ~KFPInputData() {};
 
   bool ReadDataFromFile( string prefix )
@@ -140,6 +140,17 @@ class KFPInputData
   float GetBz() const { return fBz; }
   const std::vector<KFParticle>& GetPV() const { return fPV; }
   const std::vector<short int>& GetCluster() const { return fCluster; }
+
+  const KFPInputData& operator = (const KFPInputData& data)
+  {
+    for(int i=0; i<4; i++)
+      fTracks[i] = data.fTracks[i];
+    fPV = data.fPV;
+    fCluster = data.fCluster;
+    fBz = fBz;
+    
+    return *this;
+  }
   
  protected:
   KFPTrackVector fTracks[4]; //0 - pos sec, 1 - neg sec, 2 - pos prim, 3 - neg prim

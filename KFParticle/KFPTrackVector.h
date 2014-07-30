@@ -21,7 +21,7 @@
 class KFPTrackVector
 {
  public:
-  KFPTrackVector():fNE(0), fNMu(0), fNPi(0), fNK(0), fNP(0) { }
+  KFPTrackVector():fId(), fPDG(), fQ(), fPVIndex(), fNE(0), fNMu(0), fNPi(0), fNK(0), fNP(0) { }
   ~KFPTrackVector() { }
 
   int Size() const { return fP[0].size(); }
@@ -167,7 +167,7 @@ class KFPTrackVector
     fNK = track.fNK;
     fNP = track.fNP;
     
-    return track;
+    return *this;
   }
   
  private:  
