@@ -18,8 +18,8 @@
 //#define NonhomogeneousField
 // #define HomogeneousField
 
-#ifndef ALIKFPARTICLE_H
-#define ALIKFPARTICLE_H
+#ifndef KFPARTICLE_H
+#define KFPARTICLE_H
 
 #include "KFParticleBase.h"
 // #include "TMath.h"

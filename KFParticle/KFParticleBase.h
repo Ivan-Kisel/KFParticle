@@ -16,8 +16,8 @@
 //_________________________________________________________________________________
 
 
-#ifndef ALIKFPARTICLEBASE_H
-#define ALIKFPARTICLEBASE_H
+#ifndef KFPARTICLEBASE_H
+#define KFPARTICLEBASE_H
 
 #ifdef __ROOT__ //for the STAR experiment
 #define HomogeneousField
