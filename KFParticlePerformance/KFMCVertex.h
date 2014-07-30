@@ -9,8 +9,8 @@
 //  -= Copyright &copy ALICE HLT and CBM L1 Groups =-
 //____________________________________________________________________________
 
-#ifndef ALIHLTTPCCAMCVERTEX_H
-#define ALIHLTTPCCAMCVERTEX_H
+#ifndef KFMCVERTEX_H
+#define KFMCVERTEX_H
 
 #include <iostream>
 #include <vector>
