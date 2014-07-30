@@ -11,7 +11,7 @@
 
 #include "KFMCVertex.h"
 
-KFMCVertex::KFMCVertex():fIsReconstructable(0),fIsMCReconstructable(0),fIsReconstructed(0),fNReconstructedDaughters(0),fIsTriggerPV(0)
+KFMCVertex::KFMCVertex():fDaughterTracks(0),fIsReconstructable(0),fIsMCReconstructable(0),fIsReconstructed(0),fNReconstructedDaughters(0),fIsTriggerPV(0)
 {
   for( int i = 0; i < 3; i++) fPar[i] = 0;
 }

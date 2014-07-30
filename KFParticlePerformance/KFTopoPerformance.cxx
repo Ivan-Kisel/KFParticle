@@ -38,7 +38,9 @@
 #include <algorithm>
 using std::sort;
 
-KFTopoPerformance::KFTopoPerformance():fTopoReconstructor(0),fPrimVertices(),fPrintEffFrequency(1)
+KFTopoPerformance::KFTopoPerformance():KFParticlePerformanceBase(),fTopoReconstructor(0),fPrimVertices(0), fMCTrackToMCPVMatch(0), 
+  fPVPurity(0), fNCorrectPVTracks(0), fTrackMatch(0), vMCTracks(0), vMCParticles(0), MCtoRParticleId(0), RtoMCParticleId(0), 
+  MCtoRPVId(0), RtoMCPVId(0), fPrintEffFrequency(1)
 {
 }
 

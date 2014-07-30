@@ -23,8 +23,8 @@ struct KFMCCounter // counters for different tracks categories
   
   std::vector<T> counters;
 
-  KFMCCounter():NCounters(0){ counters.clear(); };
-  KFMCCounter(int nCounters):NCounters(nCounters){ counters.resize( NCounters, T(0)); };
+  KFMCCounter():NCounters(0),counters(0) { };
+  KFMCCounter(int nCounters):NCounters(nCounters), counters(nCounters,T(0)) { };
 
   void AddCounter(){ NCounters++; counters.push_back(T(0)); };
   void AddCounters(int nCounters){ NCounters += nCounters; counters.resize( NCounters, T(0)); };

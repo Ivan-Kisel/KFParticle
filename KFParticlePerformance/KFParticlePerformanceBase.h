@@ -73,6 +73,8 @@ class KFParticlePerformanceBase
   KFPVEfficiencies fPVeff;
   KFPVEfficiencies fPVeffMCReconstructable;
   
+  const KFParticlePerformanceBase& operator = (const KFParticlePerformanceBase& perf) { return *this; }
+  
  protected:
 
   virtual void FillHistos();

@@ -25,8 +25,10 @@ class KFPartEfficiencies: public TNamed
  public:
 
   KFPartEfficiencies():
+    partDaughterPdg(0),
     names(),
     indices(),
+    fPdgToIndex(),
     ratio_reco1(),
     ratio_reco2(),
     ratio_reco3(),

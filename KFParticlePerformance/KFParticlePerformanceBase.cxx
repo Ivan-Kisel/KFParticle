@@ -23,7 +23,11 @@
 #include "TStyle.h"
 
 
-KFParticlePerformanceBase::KFParticlePerformanceBase():fNEvents(0)
+KFParticlePerformanceBase::KFParticlePerformanceBase():
+  fParticles(0), fPV(0), outfileName(), histodir(0), fNEvents(0)
+#ifndef KFPWITHTRACKER
+  ,fHistoDir(0), fIsHistoCreated(0)
+#endif
 {
 }
 
