@@ -454,7 +454,6 @@ void KFParticleTopoReconstructor::TransportPVTracksToPrimVertex()
     unsigned int NTr = fTracks[iTV].Size(); 
     for(unsigned int iTr=0; iTr < NTr; iTr += float_vLen) 
     { 
-      uint_v trackIndex = iTr + uint_v::IndexesFromZero();
       const int_v& pdg = reinterpret_cast<const int_v&>(fTracks[iTV].PDG()[iTr]);
       const int_v& pvIndex = reinterpret_cast<const int_v&>(fTracks[iTV].PVIndex()[iTr]);
       

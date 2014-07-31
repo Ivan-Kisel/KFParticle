@@ -164,9 +164,7 @@ float_m KFParticleBaseSIMD::GetEta( float_v &eta, float_v &error )  const
 {
   //* Calculate particle pseudorapidity
 
-  float_v ret = 0.f;
-
-  const float_v BIG = 1.e10f;
+  const float_v BIG = 1.e8f;
   const float_v LocalSmall = 1.e-8f;
 
   float_v px = fP[3];
@@ -237,10 +235,8 @@ float_m KFParticleBaseSIMD::GetMass( float_v &m, float_v &error ) const
   
   // s = sigma^2 of m2/2
 
-  const float_v BIG = 1.e20f;
-  const float_v LocalSmall = 1.e-10f;
-
-  float_v ret = 0.f;
+  const float_v BIG = 1.e8f;
+  const float_v LocalSmall = 1.e-8f;
 
   float_v s = (  fP[3]*fP[3]*fC[9] + fP[4]*fP[4]*fC[14] + fP[5]*fP[5]*fC[20] 
 		  + fP[6]*fP[6]*fC[27] 
@@ -300,9 +296,7 @@ float_m KFParticleBaseSIMD::GetDecayLengthXY( float_v &l, float_v &error ) const
 {
   //* Calculate particle decay length in XY projection [cm]
 
-  const float_v BIG = 1.e20f;
-  float_v ret = 0.f;
-
+  const float_v BIG = 1.e8f;
   float_v x = fP[3];
   float_v y = fP[4];
   float_v t = fP[7];
@@ -2011,8 +2005,8 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
     float_v sz2(Vc::Zero);
     sz2( abs(delta) > 1.e-16f )= -cz*(pz2*bq1*kz11 - pz1*bq2*kz21) / delta;
 
-    float_v eq1 = -ar1*sz1 + br*bq1*sz1 - br*bq2*sz2 + bq2*cz*pz1 + bq2*sz1*pz1*pz1 - bq2*pz1*pz2*sz2;
-    float_v eq2 = -ar2*sz2 + br*bq1*sz1 - br*bq2*sz2 + bq1*cz*pz2 + bq1*pz1*pz2*sz1 - bq1*pz2*pz2*sz2;
+//     float_v eq1 = -ar1*sz1 + br*bq1*sz1 - br*bq2*sz2 + bq2*cz*pz1 + bq2*sz1*pz1*pz1 - bq2*pz1*pz2*sz2;
+//     float_v eq2 = -ar2*sz2 + br*bq1*sz1 - br*bq2*sz2 + bq1*cz*pz2 + bq1*pz1*pz2*sz1 - bq1*pz2*pz2*sz2;
 //     std::cout << "!!! eq1 " << eq1 << std::endl;
 //     std::cout << "!!! eq2 " << eq2 << std::endl;
 //     std::cout << "sz1 " << sz1 << std::endl;
@@ -2445,7 +2439,7 @@ void KFParticleBaseSIMD::TransportBz( float_v b, float_v t,
   float_v bs= b*t;
   float_v s = KFPMath::Sin(bs), c = KFPMath::Cos(bs);
 
-  float_v sB, cB;
+  float_v sB(Vc::Zero), cB(Vc::Zero);
 
   const float_v kOvSqr6 = 1.f/sqrt(float_v(6.f));
   const float_v LocalSmall = 1.e-10f;
