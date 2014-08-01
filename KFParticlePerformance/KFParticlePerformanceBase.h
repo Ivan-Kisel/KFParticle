@@ -72,9 +72,7 @@ class KFParticlePerformanceBase
   KFPartEfficiencies fParteff;
   KFPVEfficiencies fPVeff;
   KFPVEfficiencies fPVeffMCReconstructable;
-  
-  const KFParticlePerformanceBase& operator = (const KFParticlePerformanceBase& perf) { return *this; }
-  
+    
  protected:
 
   virtual void FillHistos();
@@ -146,6 +144,10 @@ class KFParticlePerformanceBase
   bool fIsHistoCreated;
   void SetHistoCreated(bool v = 1) { fIsHistoCreated = v; }
 #endif
+
+ private:
+  const KFParticlePerformanceBase& operator = (const KFParticlePerformanceBase&);
+  KFParticlePerformanceBase(const KFParticlePerformanceBase&);
 };
 
 #endif

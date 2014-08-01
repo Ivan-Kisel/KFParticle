@@ -84,11 +84,12 @@ class KFTopoPerformance: public KFParticlePerformanceBase
   
   const KFPartEfficiencies GetEfficiency() const { return fParteff; }
   void SetPrintEffFrequency(int n) { fPrintEffFrequency = n;}
-  
-  const KFTopoPerformance& operator = (const KFTopoPerformance& perf) { return *this; }
 
  private:
 
+  const KFTopoPerformance& operator = (const KFTopoPerformance&);
+  KFTopoPerformance(const KFTopoPerformance&);
+   
   void GetMCParticles();
   void MatchParticles();
   void MatchPV();
