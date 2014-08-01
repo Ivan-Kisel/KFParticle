@@ -154,8 +154,8 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
                                                     "chi2/ndf","prob","#theta [rad]",
                                                     "phi [rad]","x [cm]","y [cm]","z [cm]","Rxy [cm]", "L [cm]", "L/dL","Multiplicity"};
             int nBins[nHistoPartParam] = {1000,100,100,100,100,100,100,100,100,100,100,1000,1000,1000,1000,1000, fParteff.partMaxMult[iPart]+1};
-            float xMin[nHistoPartParam] = {fParteff.partMHistoMin[iPart],  0., 0.,-6., -5.,  0.,  0., 0., -2., -2., -200., -200., -200.,   0.,   0., -1., -0.5};
-            float xMax[nHistoPartParam] = {fParteff.partMHistoMax[iPart], 10., 3., 6., 55., 30., 20., 1.,  2.,  2.,  200.,  200.,  200., 200., 400., 35., float(fParteff.partMaxMult[iPart])+0.5};
+            float xMin[nHistoPartParam] = {fParteff.partMHistoMin[iPart],  0.f, 0.f,-6.f, -5.f,  0.f,  0.f, 0.f, -2.f, -2.f, -200.f, -200.f, -200.f,   0.f,   0.f, -1.f, -0.5f};
+            float xMax[nHistoPartParam] = {fParteff.partMHistoMax[iPart], 10.f, 3.f, 6.f, 55.f, 30.f, 20.f, 1.f,  2.f,  2.f,  200.f,  200.f,  200.f, 200.f, 400.f, 35.f, float(fParteff.partMaxMult[iPart])+0.5f};
                         
             for(int iH=0; iH<nHistoPartParam; iH++)
             {
