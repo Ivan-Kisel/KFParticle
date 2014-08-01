@@ -151,6 +151,14 @@ class KFPInputData
     
     return *this;
   }
+  KFPInputData(const KFPInputData& data):fPV(0),fCluster(0),fBz(0.f)
+  {
+    for(int i=0; i<4; i++)
+      fTracks[i] = data.fTracks[i];
+    fPV = data.fPV;
+    fCluster = data.fCluster;
+    fBz = fBz;
+  }
   
  protected:
   KFPTrackVector fTracks[4]; //0 - pos sec, 1 - neg sec, 2 - pos prim, 3 - neg prim
@@ -164,6 +172,10 @@ struct KFPInputDataArray{
   ~KFPInputDataArray() { if(fInput) delete [] fInput; }
 
   KFPInputData *fInput;
+  
+ private:
+   const KFPInputDataArray& operator = (const KFPInputDataArray&);
+   KFPInputDataArray(const KFPInputDataArray&);
 };
 
 #endif
