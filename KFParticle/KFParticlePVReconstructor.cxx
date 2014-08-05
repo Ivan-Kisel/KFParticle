@@ -10,6 +10,7 @@
 //____________________________________________________________________________
 
 #include "KFParticlePVReconstructor.h"
+#include "KFPTrackVector.h"
 #include "KFParticle.h"
 
 #include <iostream>

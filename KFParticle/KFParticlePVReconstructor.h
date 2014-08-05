@@ -21,12 +21,12 @@
 #include "assert.h"
 
 #include "KFPTrack.h"
-#include "KFPTrackVector.h"
 
 #include <vector>
 using std::vector;
 
 class KFParticle;
+class KFPTrackVector;
 
 class KFParticlePVReconstructor{
  public:
