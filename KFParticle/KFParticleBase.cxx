@@ -1669,106 +1669,110 @@ float KFParticleBase::GetDStoPointLine( const float xyz[] ) const
 }
 
 
-float KFParticleBase::GetDStoPointBz( float B, const float xyz[] ) 
-  const
+float KFParticleBase::GetDStoPointBz( float B, const float xyz[], const float* param) const
 { 
   
+  if(!param)
+    param = fP;
   //* Get dS to a certain space point for Bz field
-  const float kCLight = 0.000299792458;
+  const float kCLight = 0.000299792458f;
   float bq = B*fQ*kCLight;
-  float pt2 = fP[3]*fP[3] + fP[4]*fP[4];
-  if( pt2<1.e-4 ) return 0;
-  float dx = xyz[0] - fP[0];
-  float dy = xyz[1] - fP[1]; 
-  float a = dx*fP[3]+dy*fP[4];
-  float dS;
-
-  if( fabs(bq)<1.e-8 ) dS = a/pt2;  
-  else dS =  atan2( bq*a, pt2 + bq*(dy*fP[3] -dx*fP[4]) )/bq;
-
-  if(0){
-
-    float px = fP[3];
-    float py = fP[4];
-    float pz = fP[5];
-    float ss[2], g[2][5];
+  float pt2 = param[3]*param[3] + param[4]*param[4];
+  float p2 = pt2 + param[5]*param[5];  
   
-    ss[0] = dS;
-    ss[1] = -dS;
-    for( Int_t i=0; i<2; i++){
-      float bs = bq*ss[i];
-      float c = cos(bs), s = sin(bs);
-      float cB,sB;
-      if( fabs(bq)>1.e-8){
-	cB= (1-c)/bq;     
-	sB= s/bq;  
-      }else{
-	const float kOvSqr6 = 1./sqrt(6.);
-	sB = (1.-bs*kOvSqr6)*(1.+bs*kOvSqr6)*ss[i];
-	cB = .5*sB*bs;
-      }
-      g[i][0] = fP[0] + sB*px + cB*py;
-      g[i][1] = fP[1] - cB*px + sB*py;
-      g[i][2] = fP[2] + ss[i]*pz;
-      g[i][3] =       + c*px + s*py;
-      g[i][4] =       - s*px + c*py;      
-    }
-
-    Int_t i=0;
+  float dx = xyz[0] - param[0];
+  float dy = xyz[1] - param[1]; 
+  float dz = xyz[2] - param[2]; 
+  float a = dx*param[3]+dy*param[4];
+  float dS(0.f);
   
-    float dMin = 1.e10;
-    for( Int_t j=0; j<2; j++){
-      float xx = g[j][0]-xyz[0];
-      float yy = g[j][1]-xyz[1];
-      float zz = g[j][2]-xyz[2];
-      float d = xx*xx + yy*yy + zz*zz;
-      if( d<dMin ){
-	dMin = d;
-	i = j;
-      }
-    }
+  float abq = bq*a;
 
-    dS = ss[i];
+  const float LocalSmall = 1.e-8f;
+  bool mask = ( fabs(bq)<LocalSmall );
+  if(mask && p2>1.e-4f)
+    dS = (a + dz*param[5])/p2;
+  if(mask)
+    return dS;
+  
+  dS = atan2( abq, pt2 + bq*(dy*param[3] -dx*param[4]) )/bq;
 
-    float x= g[i][0], y= g[i][1], z= g[i][2], ppx= g[i][3], ppy= g[i][4];      
-    float ddx = x-xyz[0];
-    float ddy = y-xyz[1];
-    float ddz = z-xyz[2];
-    float c = ddx*ppx  + ddy*ppy  + ddz*pz ;
-    float pp2 = ppx*ppx + ppy*ppy + pz*pz;    
-    if( fabs(pp2)>1.e-8 ){
-      dS+=c/pp2;
-    }
+  float bs= bq*dS;
+
+  float s = sin(bs), c = cos(bs);
+
+  if(fabs(bq) < LocalSmall)
+    bq = LocalSmall;
+  float aCoeff = a;
+  float bCoeff = dx*param[4] - dy*param[3] - pt2/bq;
+  
+  float sz(0.f);
+  if(fabs(param[5]) > 1.e-4f)
+    sz = dz/param[5];
+  float kz(0.f);
+  float cCoeff = ( sz * (bq*(bCoeff*c - aCoeff*s) - param[5]*param[5]) );
+  if(fabs(cCoeff) > 1.e-8f)
+    kz = (dS*param[5] - dz)*param[5] / cCoeff;
+  dS += sz*kz;
+  
+  bs= bq*dS;
+  s = sin(bs), c = cos(bs);
+  
+  float sB, cB;
+  const float kOvSqr6 = 1.f/sqrt(float(6.f));
+
+  if(LocalSmall < fabs(bs))
+  {
+    sB = s/bq;
+    cB = (1.f-c)/bq;
   }
+  else
+  {
+    sB = (1.f-bs*kOvSqr6)*(1.f+bs*kOvSqr6)*dS;
+    cB = .5f*sB*bs;
+  }
+
+  const float px = param[3];
+  const float py = param[4];
+
+  float p[5];
+  p[0] = param[0] + sB*px + cB*py;
+  p[1] = param[1] - cB*px + sB*py;
+  p[2] = param[2] +  dS*param[5];
+  p[3] =          c*px + s*py;
+  p[4] =         -s*px + c*py;
+
+  dx = xyz[0] - p[0];
+  dy = xyz[1] - p[1];
+  dz = xyz[2] - p[2];
+  a = dx*p[3]+dy*p[4] + dz*param[5];
+
+  abq = bq*a;
+
+  dS += atan2( abq, p2 + bq*(dy*p[3] -dx*p[4]) )/bq;
+  
   return dS;
 }
 
-float KFParticleBase::GetDStoPointBy( float B, const float xyz[] ) 
-  const
+float KFParticleBase::GetDStoPointBy( float By, const float xyz[] ) const
 { 
   
-  //* Get dS to a certain space point for Bz field
-  const float kCLight = 0.000299792458;
-  float bq = B*fQ*kCLight;
-  float pt2 = fP[3]*fP[3] + fP[5]*fP[5];
-  if( pt2<1.e-4 ) return 0;
-  float dx = xyz[0] - fP[0];
-  float dy = -xyz[2] + fP[2]; 
-  float a = dx*fP[3]-dy*fP[5];
-  float dS;
+  //* Get dS to a certain space point for By field
 
-  if( fabs(bq)<1.e-8 ) dS = a/pt2;  
-  else dS =  atan2( bq*a, pt2 + bq*(dy*fP[3] +dx*fP[5]) )/bq;
-
-  return dS;
+  const float param[6] = { fP[0], -fP[2], fP[1], fP[3], -fP[5], fP[4] };
+  const float point[3] = { xyz[0], -xyz[2], xyz[1] };
+  
+  return GetDStoPointBz(By, point, param);
 }
 
 void KFParticleBase::GetDStoParticleBz( float B, const KFParticleBase &p, 
-					   float &DS, float &DS1 ) 
-  const
+                                        float &DS, float &DS1, const float* param1, const float* param2 )  const
 { 
-  const float* param1 = fP;
-  const float* param2 = p.fP;
+  if(!param1)
+  {
+    param1 = fP;
+    param2 = p.fP;
+  }
 
   //* Get dS to another particle for Bz field
   const float kOvSqr6 = 1.f/sqrt(float(6.f));
@@ -2004,260 +2008,10 @@ void KFParticleBase::GetDStoParticleBz( float B, const KFParticleBase &p,
 void KFParticleBase::GetDStoParticleBy( float B, const KFParticleBase &p, 
                                         float &DS, float &DS1 ) const
 { 
-  //* Get dS to another particle for Bz field
-  float px = fP[3];
-  float py = -fP[5];
-  float pz = fP[4];
-
-  float px1 = p.fP[3];
-  float py1 = -p.fP[5];
-  float pz1 = p.fP[4];
-
-  const float kCLight = 0.000299792458;
-
-  float bq = B*fQ*kCLight;
-  float bq1 = B*p.fQ*kCLight;
-  float s=0, ds=0, s1=0, ds1=0;
-
-  if( fabs(bq)>1.e-8 || fabs(bq1)>1.e-8 ){
-
-    float dx = (p.fP[0] - fP[0]);
-    float dy = (-p.fP[2] + fP[2]);
-    float d2 = (dx*dx+dy*dy);
-
-    float p2  = (px *px  + py *py); 
-    float p21 = (px1*px1 + py1*py1);
-
-    if( fabs(p2) < 1.e-8 || fabs(p21) < 1.e-8 )
-    {
-      DS=0.;
-      DS1=0.;
-      return;
-    }
-
-    float a = (px*py1 - py*px1);
-    float b = (px*px1 + py*py1);
-
-    float ldx = bq*bq1*dx - bq1*py + bq*py1 ;
-    float ldy = bq*bq1*dy + bq1*px - bq*px1 ;
-    float l2 = ldx*ldx + ldy*ldy;
-    
-    float cS = bq1*p2 + bq*bq1*(dy* px - dx* py) -  bq*b;
-    float cS1= bq*p21 - bq*bq1*(dy*px1 - dx*py1) - bq1*b;
-
-    float ca  = bq*bq*bq1*d2  +2*( cS + bq*bq*(py1*dx-px1*dy)) ;
-    float ca1 = bq*bq1*bq1*d2 +2*( cS1 - bq1*bq1*(py*dx-px*dy)) ;  
-
-    float sa = 4*l2*p2 - ca*ca;
-    float sa1 = 4*l2*p21 - ca1*ca1;
-
-    if(sa<0) sa=0;
-    if(sa1<0)sa1=0;
-
-    if( fabs(bq)>1.e-8){
-      s  = atan2(   bq*( bq1*(dx*px +dy*py) + a ) , cS )/bq;
-      ds = atan2(sqrt(sa),ca)/bq;
-    } else {
-      s = ( (dx*px + dy*py) + (py*px1-px*py1)/bq1)/p2;
-      ds = s*s - (d2-2*(px1*dy-py1*dx)/bq1)/p2; 
-      if( ds<0 ) ds = 0;
-      ds = sqrt(ds);   
-    }
-
-    if( fabs(bq1)>1.e-8){
-      s1 = atan2( -bq1*( bq*(dx*px1+dy*py1) + a), cS1 )/bq1;
-      ds1 = atan2(sqrt(sa1),ca1)/bq1;  
-    } else {
-      s1 = (-(dx*px1 + dy*py1) + (py*px1-px*py1)/bq)/p21;
-      ds1 = s1*s1 - (d2+2*(px*dy-py*dx)/bq)/p21; 
-      if( ds1<0 ) ds1 = 0;
-      ds1 = sqrt(ds1);
-    }
-  }
-  float ss[2], ss1[2], g[2][5],g1[2][5];
+  const float param1[6] = { fP[0], -fP[2], fP[1], fP[3], -fP[5], fP[4] };
+  const float param2[6] = { p.fP[0], -p.fP[2], p.fP[1], p.fP[3], -p.fP[5], p.fP[4] };
   
-  ss[0] = s + ds;
-  ss[1] = s - ds;
-  ss1[0] = s1 + ds1;
-  ss1[1] = s1 - ds1;
-
-  for( Int_t i=0; i<2; i++){
-    float bs = bq*ss[i];
-    float c = cos(bs), sss = sin(bs);
-    float cB,sB;
-    if( fabs(bq)>1.e-8){
-      cB= (1-c)/bq;     
-      sB= sss/bq;  
-    }else{
-      const float kOvSqr6 = 1./sqrt(6.);
-      sB = (1.-bs*kOvSqr6)*(1.+bs*kOvSqr6)*ss[i];
-      cB = .5*sB*bs;
-    }
-    g[i][0] = fP[0] + sB*px + cB*py;
-    g[i][1] = -fP[2] - cB*px + sB*py;
-    g[i][2] = fP[1] + ss[i]*pz;
-    g[i][3] =       + c*px + sss*py;
-    g[i][4] =       - sss*px + c*py;
-
-    bs = bq1*ss1[i];  
-    c =  cos(bs); sss = sin(bs);
-    if( fabs(bq1)>1.e-8){
-      cB= (1-c)/bq1;   
-      sB= sss/bq1;  
-    }else{
-      const float kOvSqr6 = 1./sqrt(6.);
-      sB = (1.-bs*kOvSqr6)*(1.+bs*kOvSqr6)*ss1[i];
-      cB = .5*sB*bs;
-    }
-      
-    g1[i][0] = p.fP[0] + sB*px1 + cB*py1;
-    g1[i][1] = -p.fP[2] - cB*px1 + sB*py1;
-    g1[i][2] = p.fP[1] + ss1[i]*pz1;
-    g1[i][3] =         + c*px1 + sss*py1;
-    g1[i][4] =         - sss*px1 + c*py1;
-  }
-
-  Int_t i=0, i1=0;
-  
-  float dMin = 1.e10;
-  for( Int_t j=0; j<2; j++){
-    for( Int_t j1=0; j1<2; j1++){
-      float xx = g[j][0]-g1[j1][0];
-      float yy = g[j][1]-g1[j1][1];
-      float zz = g[j][2]-g1[j1][2];
-      float d = xx*xx + yy*yy + zz*zz;
-      if( d<dMin ){
-	dMin = d;
-	i = j;
-	i1 = j1;
-      }
-    }
-  }  
-
-  DS = ss[i];
-  DS1 = ss1[i1];
-}
-
-void KFParticleBase::GetDSIter(const KFParticleBase &p, float const &dS, float x[3], float dx[3], float ddx[3]) const
-{
-  float ssx=0, ssy=0, ssz=0, ssyy=0, ssyz=0, ssyyy=0;
-  float dssx=0, dssy=0, dssz=0, dssyy=0, dssyz=0, dssyyy=0; // d(...)/dS
-  float ddssx=0, ddssy=0, ddssz=0, ddssyy=0, ddssyz=0, ddssyyy=0; // d2(...)/dS2
-  float Kssx=0, Kssy=0, Kssz=0, Kssyy=0, Kssyz=0, Kssyyy=0;
-
-  const float kCLight = 0.000299792458;
-  float c = fQ*kCLight;
-
-  // get field integrals
-
-  float fld[3][3];   
-  float p0[3], p1[3], p2[3];
-
-  // line track approximation
-
-  p0[0] = p.fP[0];
-  p0[1] = p.fP[1];
-  p0[2] = p.fP[2];
-
-  p2[0] = p.fP[0] + p.fP[3]*dS;
-  p2[1] = p.fP[1] + p.fP[4]*dS;
-  p2[2] = p.fP[2] + p.fP[5]*dS;
-
-  p1[0] = 0.5*(p0[0]+p2[0]);
-  p1[1] = 0.5*(p0[1]+p2[1]);
-  p1[2] = 0.5*(p0[2]+p2[2]);
-
-  // first order track approximation
-  {
-    GetFieldValue( p0, fld[0] );
-    GetFieldValue( p1, fld[1] );
-    GetFieldValue( p2, fld[2] );
-
-    float ssy1 = ( 7*fld[0][1] + 6*fld[1][1]-fld[2][1] )*c*dS*dS/96.;
-    float ssy2 = (   fld[0][1] + 2*fld[1][1]         )*c*dS*dS/6.;
-
-    p1[0] -= ssy1*p.fP[5];
-    p1[2] += ssy1*p.fP[3];
-    p2[0] -= ssy2*p.fP[5];
-    p2[2] += ssy2*p.fP[3];
-  }
-
-  GetFieldValue( p0, fld[0] );
-  GetFieldValue( p1, fld[1] );
-  GetFieldValue( p2, fld[2] );
-
-  Kssx = c*( fld[0][0] + 2*fld[1][0]) / 6.;
-  Kssy = c*( fld[0][1] + 2*fld[1][1]) / 6.;
-  Kssz = c*( fld[0][2] + 2*fld[1][2]) / 6.;
-
-//  float c2[3][3]    =   { {  5, -4, -1},{  44,  80,  -4},{ 11, 44, 5} }; // /=360.    
-  float cc2[3][3]    =   { { 38,  8, -4},{ 148, 208, -20},{  3, 36, 3} }; // /=2520.
-  for(Int_t n=0; n<3; n++)
-    for(Int_t m=0; m<3; m++) 
-    {
-      Kssyz += cc2[n][m]*fld[n][1]*fld[m][2];
-    }
-  Kssyz *= c*c / 2520.;
-
-  Kssyy = ( fld[0][1]*( 38*fld[0][1] + 156*fld[1][1]  -   fld[2][1] )+
-            fld[1][1]*(              208*fld[1][1]  +16*fld[2][1] )+
-            fld[2][1]*(                             3*fld[2][1] )  
-          )*c*c/2520.;
-  Kssyyy = ( fld[0][1]*( fld[0][1]*( 85*fld[0][1] + 526*fld[1][1]  - 7*fld[2][1] )+
-             fld[1][1]*(             1376*fld[1][1]  +84*fld[2][1] )+
-             fld[2][1]*(                            19*fld[2][1] )  )+
-             fld[1][1]*( fld[1][1]*(             1376*fld[1][1] +256*fld[2][1] )+
-             fld[2][1]*(                            62*fld[2][1] )  )+
-             fld[2][1]*fld[2][1]  *(                             3*fld[2][1] )
-           )*c*c*c/90720.;
-
-  ssx = Kssx * dS*dS;
-  ssy = Kssy * dS*dS;
-  ssz = Kssz * dS*dS;
-  ssyz = Kssyz * dS*dS*dS;
-  ssyy = Kssyy * dS*dS*dS;
-  ssyyy = Kssyyy * dS*dS*dS*dS;
-
-  dssx = 2.*Kssx * dS;
-  dssy = 2.*Kssy * dS;
-  dssz = 2.*Kssz * dS;
-  dssyz = 3.*Kssyz * dS*dS;
-  dssyy = 3.*Kssyy * dS*dS;
-  dssyyy = 4.*Kssyyy * dS*dS*dS;
-
-  ddssx = 2.*Kssx;
-  ddssy = 2.*Kssy;
-  ddssz = 2.*Kssz;
-  ddssyz = 2.*3.*Kssyz * dS;
-  ddssyy = 2.*3.*Kssyy * dS;
-  ddssyyy = 3.*4.*Kssyyy * dS*dS;
-
-  float mJ[3][3];
-  for( Int_t iJ=0; iJ<3; iJ++ ) for( Int_t jJ=0; jJ<3; jJ++) mJ[iJ][jJ]=0;
-
-  mJ[0][0]=dS-ssyy;   mJ[0][1]=ssx;  mJ[0][2]=ssyyy-ssy;
-  mJ[1][0]=-ssz;      mJ[1][1]=dS;   mJ[1][2]=ssx+ssyz;
-  mJ[2][0]=ssy-ssyyy; mJ[2][1]=-ssx; mJ[2][2]=dS-ssyy;
-
-  x[0] = p.fP[0] + mJ[0][0]*p.fP[3] + mJ[0][1]*p.fP[4] + mJ[0][2]*p.fP[5];
-  x[1] = p.fP[1] + mJ[1][0]*p.fP[3] + mJ[1][1]*p.fP[4] + mJ[1][2]*p.fP[5];
-  x[2] = p.fP[2] + mJ[2][0]*p.fP[3] + mJ[2][1]*p.fP[4] + mJ[2][2]*p.fP[5];
-
-  mJ[0][0]= 1-dssyy;      mJ[0][1]= dssx;  mJ[0][2]= dssyyy-dssy;
-  mJ[1][0]= -dssz;        mJ[1][1]= 1;     mJ[1][2]= dssx+dssyz;
-  mJ[2][0]= dssy-dssyyy;  mJ[2][1]= -dssx; mJ[2][2]= 1-dssyy;
-
-  dx[0] = p.fP[0] + mJ[0][0]*p.fP[3] + mJ[0][1]*p.fP[4] + mJ[0][2]*p.fP[5];
-  dx[1] = p.fP[1] + mJ[1][0]*p.fP[3] + mJ[1][1]*p.fP[4] + mJ[1][2]*p.fP[5];
-  dx[2] = p.fP[2] + mJ[2][0]*p.fP[3] + mJ[2][1]*p.fP[4] + mJ[2][2]*p.fP[5];
-
-  mJ[0][0]= -ddssyy;        mJ[0][1]= ddssx;  mJ[0][2]= ddssyyy-ddssy;
-  mJ[1][0]= -ddssz;         mJ[1][1]= 0;      mJ[1][2]= ddssx+ddssyz;
-  mJ[2][0]= ddssy-ddssyyy;  mJ[2][1]= -ddssx; mJ[2][2]= -ddssyy;
-
-  ddx[0] = p.fP[0] + mJ[0][0]*p.fP[3] + mJ[0][1]*p.fP[4] + mJ[0][2]*p.fP[5];
-  ddx[1] = p.fP[1] + mJ[1][0]*p.fP[3] + mJ[1][1]*p.fP[4] + mJ[1][2]*p.fP[5];
-  ddx[2] = p.fP[2] + mJ[2][0]*p.fP[3] + mJ[2][1]*p.fP[4] + mJ[2][2]*p.fP[5];
+  return GetDStoParticleBz(B, p, DS, DS1, param1, param2);
 }
 
 float KFParticleBase::GetDStoPointCBM( const float xyz[] ) const
@@ -2326,55 +2080,10 @@ void KFParticleBase::GetDStoParticleCBM( const KFParticleBase &p, float &dS, flo
 {
   //* Transport the particle on dS, output to P[],C[], for CBM field
 
-  GetDStoParticleLine( p, dS, dS1 );
-  if( fQ==0 ){
-    return;
-  }
-
   float fld[3];
   GetFieldValue( fP, fld );
-  float fld1[3];
-  GetFieldValue( p.fP, fld1 );
 
-
-  GetDStoParticleBy((fld[1]+fld1[1])/2,p,dS,dS1);
-
-//   construct coefficients 
-// int NIt;
-//   for(int i=0; i<10; i++)
-//   {
-// /*std::cout << "  dS temp "<<dS <<  "  dS1 temp "<< dS1 << std::endl;*/
-//     float x[3],  dx[3],  ddx[3];
-//     float x1[3], dx1[3], ddx1[3];
-// 
-//     GetDSIter(*this, dS, x, dx, ddx);
-//     GetDSIter(p, dS1, x1, dx1, ddx1);
-// 
-//     float dr[3] = { x[0] - x1[0], x[1] - x1[1], x[2] - x1[2] };
-// 
-//     float dS0 = dS;
-//     float dS10 = dS1;
-// 
-//     float f    = dx[0]  * dr[0] + dx[1]  * dr[1] + dx[2]  * dr[2];
-//     float dfs  = ddx[0] * dr[0] + ddx[1] * dr[1] + ddx[2] * dr[2] + dx[0]*dx[0] + dx[1]*dx[1] + dx[2]*dx[2];
-//     float dfs1 = -ddx[0] * ddx1[0] - ddx[1] * ddx1[1] - ddx[2] * ddx1[2];
-// 
-//     float f1    = dx1[0]  * dr[0] + dx1[1]  * dr[1] + dx1[2]  * dr[2];
-//     float df1s1 = ddx1[0] * dr[0] + ddx1[1] * dr[1] + ddx1[2] * dr[2] - dx1[0]*dx1[0] - dx1[1]*dx1[1] - dx1[2]*dx1[2];
-//     float df1s  = -dfs1;
-// 
-//     float det = dfs*df1s1 - dfs1*df1s;
-//     if(fabs(det) < 1.e-8) det = 1.e-8;
-// 
-//     float DS  = dfs1*f1 - f*df1s1;
-//     float DS1 = f*df1s - f1*dfs;
-// 
-//     dS  += DS/det;
-//     dS1 += DS1/det;
-//     NIt++;
-// /*    if( (fabs(dS - dS0) < fabs(dS)*0.001) && (fabs(dS1 - dS10) < fabs(dS1)*0.001)) break;*/
-//   }
-//std::cout << "NIt  " << NIt <<"  dS  "<<  dS << "  dS1  "<<  dS1 << std::endl;
+  GetDStoParticleBy(fld[1],p,dS,dS1);
 }
 
 void KFParticleBase::TransportCBM( float dS, 

@@ -227,10 +227,10 @@ class KFParticleBase :public TObject {
 
   //* Particular extrapolators one can use 
 
-  float GetDStoPointBz( float Bz, const float xyz[] ) const;
+  float GetDStoPointBz( float B, const float xyz[], const float* param=0) const;
   float GetDStoPointBy( float By, const float xyz[] ) const;
 
-  void GetDStoParticleBz( float Bz, const KFParticleBase &p, float &dS, float &dS1 ) const ;
+  void GetDStoParticleBz( float Bz, const KFParticleBase &p, float &dS, float &dS1, const float* param1=0, const float* param2=0 ) const ;
   void GetDStoParticleBy( float B, const KFParticleBase &p, float &dS, float &dS1 ) const ;
 
   float GetDStoPointCBM( const float xyz[] ) const;
@@ -312,8 +312,6 @@ class KFParticleBase :public TObject {
   void TransportLine( float S, float P[], float C[] ) const ;
   float GetDStoPointLine( const float xyz[] ) const;
   void GetDStoParticleLine( const KFParticleBase &p, float &dS, float &dS1 ) const ;
-
-  void GetDSIter(const KFParticleBase &p, float const &dS, float x[3], float dx[3], float ddx[3]) const;
 
   static Bool_t InvertSym3( const float A[], float Ainv[] );
   static void InvertCholetsky3(float a[6]);
