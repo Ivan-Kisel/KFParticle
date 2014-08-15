@@ -300,6 +300,7 @@ class KFParticleBase :public TObject {
   virtual void Clear(Option_t * /*option*/ ="");
 #endif
 
+  static void InvertCholetsky3(float a[6]);
  protected:
 
   static Int_t IJ( Int_t i, Int_t j ){ 
@@ -314,7 +315,6 @@ class KFParticleBase :public TObject {
   void GetDStoParticleLine( const KFParticleBase &p, float &dS, float &dS1 ) const ;
 
   static Bool_t InvertSym3( const float A[], float Ainv[] );
-  static void InvertCholetsky3(float a[6]);
 
   static void MultQSQt( const float Q[], const float S[], 
                         float SOut[] );

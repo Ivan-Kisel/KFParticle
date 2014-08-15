@@ -351,6 +351,10 @@ void KFParticleTopoReconstructor::ReconstructPrimVertex(bool isHeavySystem)
     KFVertex pv = fKFParticlePVReconstructor->GetPrimKFVertex(nPV);
     fKFParticlePVReconstructor->CleanPV();
     fKFParticlePVReconstructor->AddPV(pv, pvTracks);
+    
+//     std::cout << "Reco PV "<< pv.X() << " " << pv.Y() << " " << pv.Z() << std::endl;
+//     int ui;
+//     std::cin >> ui;
   }
   
 #ifdef USE_TIMERS
