@@ -177,17 +177,6 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
     {
       unsigned short int &curTrack = (*notUsedTracksPtr)[iTr];
 
-      float dr[3] = {rBest[0] - fParticles[curTrack].X(),
-                     rBest[1] - fParticles[curTrack].Y(),
-                     rBest[2] - fParticles[curTrack].Z() };
-
-//       if(fabs(dr[2]) > 5.)
-//       {
-//         (*notUsedTracksNewPtr)[nNotUsedTracksNew] = curTrack;
-//         nNotUsedTracksNew++;
-//         continue;
-//       }
-
       if( ( fParticles[curTrack].GetDeviationFromVertex(rBest, covBest) < 3.f && fWeight[curTrack] > -1.f) || curTrack == bestTrack)
       {
         for(int iP=0; iP<3; iP++)
