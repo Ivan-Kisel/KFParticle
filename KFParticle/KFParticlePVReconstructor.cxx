@@ -66,6 +66,7 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
       for(int iComp=0; iComp<3; iComp++)
       {
         float K = C[iComp]/(C[iComp]+V[iComp]);
+        if (K == 1) continue;
         if(C[iComp] > 16*V[iComp])
           K = 1.f - V[iComp]/C[iComp];
         const float dzeta = parTmp[iComp]-pvEstimation[iComp];
@@ -73,7 +74,6 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
         C[iComp] -= K*C[iComp];
       }
     }
-    
     pvEstimationTr[0] = pvEstimation[0];
     pvEstimationTr[1] = pvEstimation[1];
     pvEstimationTr[2] = pvEstimation[2];
@@ -96,7 +96,7 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
     {
       const KFParticle &p = fParticles[iP];
       float chi = p.GetDeviationFromVertex( primVtx );      
-      if( chi >= 10.f )
+      if( chi >= 3.f )
         continue;
       
       pParticles[nPrimCand] = &fParticles[iP];
@@ -105,7 +105,7 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
     }
   
     primVtx.SetConstructMethod(0);
-    primVtx.ConstructPrimaryVertex( pParticles, nPrimCand, vFlags, 10.f );
+    primVtx.ConstructPrimaryVertex( pParticles, nPrimCand, vFlags, 3.f );
       
     delete [] pParticles;
     delete [] vFlags;
@@ -123,7 +123,6 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
     
     if( (fParticles[iP].X()*fParticles[iP].X() + fParticles[iP].Y()*fParticles[iP].Y()) > 100.f ) fWeight[iP] = -100.f;
   }
-
 } // void KFParticlePVReconstructor::Init
 
 void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
@@ -189,7 +188,7 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
 //         continue;
 //       }
 
-      if( ( fParticles[curTrack].GetDeviationFromVertex(rBest, covBest) < 10.f && fWeight[curTrack] > -1.f) || curTrack == bestTrack)
+      if( ( fParticles[curTrack].GetDeviationFromVertex(rBest, covBest) < 3.f && fWeight[curTrack] > -1.f) || curTrack == bestTrack)
       {
         for(int iP=0; iP<3; iP++)
           rVertex[iP] += fWeight[curTrack] * fParticles[curTrack].Parameters()[iP];
