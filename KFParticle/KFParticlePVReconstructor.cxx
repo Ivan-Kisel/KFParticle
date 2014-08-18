@@ -96,7 +96,7 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
     {
       const KFParticle &p = fParticles[iP];
       float chi = p.GetDeviationFromVertex( primVtx );      
-      if( chi >= 3.f )
+      if( chi >= 10.f )
         continue;
       
       pParticles[nPrimCand] = &fParticles[iP];
@@ -105,7 +105,7 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
     }
   
     primVtx.SetConstructMethod(0);
-    primVtx.ConstructPrimaryVertex( pParticles, nPrimCand, vFlags, 3.f );
+    primVtx.ConstructPrimaryVertex( pParticles, nPrimCand, vFlags, 10.f );
       
     delete [] pParticles;
     delete [] vFlags;
@@ -177,7 +177,7 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
     {
       unsigned short int &curTrack = (*notUsedTracksPtr)[iTr];
 
-      if( ( fParticles[curTrack].GetDeviationFromVertex(rBest, covBest) < 3.f && fWeight[curTrack] > -1.f) || curTrack == bestTrack)
+      if( ( fParticles[curTrack].GetDeviationFromVertex(rBest, covBest) < 10.f && fWeight[curTrack] > -1.f) || curTrack == bestTrack)
       {
         for(int iP=0; iP<3; iP++)
           rVertex[iP] += fWeight[curTrack] * fParticles[curTrack].Parameters()[iP];

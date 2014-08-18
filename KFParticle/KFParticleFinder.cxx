@@ -28,6 +28,7 @@ KFParticleFinder::KFParticleFinder():
   //chi2_prim         chi2_geo          ldl
   fCuts2D[0] = 3.f; fCuts2D[1] = 3.f; fCuts2D[2] = 5.f; 
   //tracks to select primary and secondary particles
+  //mass              chi2_topo          ldl
   fSecCuts[0] = 3.f; fSecCuts[1] = 5.f; fSecCuts[2] = 10.f;
 
   //track + particle
