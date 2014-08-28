@@ -239,7 +239,7 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
         vFlags[iFl] = true;
       primVtx.SetVtxGuess(cluster.fP[0], cluster.fP[1], cluster.fP[2]);
       primVtx.SetConstructMethod(0);
-      primVtx.ConstructPrimaryVertex( pParticles, nPrimCand, vFlags, 3.f );
+      primVtx.ConstructPrimaryVertex( pParticles, nPrimCand, vFlags, 4.f );
 
       // clean cluster
       vector<short int> clearClusterInd;
@@ -261,7 +261,7 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
       for(unsigned short int iTr = 0; iTr < nNotUsedTracks; iTr++)
       {
         unsigned short int &curTrack = (*notUsedTracksPtr)[iTr];
-        if( fParticles[curTrack].GetDeviationFromVertex(primVtx)<3.f )
+        if( fParticles[curTrack].GetDeviationFromVertex(primVtx)<4.f )
         {
           primVtx += fParticles[curTrack];
           clearClusterInd.push_back(curTrack);
@@ -282,7 +282,11 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
       nNotUsedTracksNew = 0;
     
       // save PV
-      if( primVtx.GetNDF() >= cutNDF ) //at least 2 particles
+#ifdef CBM
+      if( primVtx.GetNDF() >= cutNDF && (cluster.fTracks.size()>0.1f*fNParticles) ) //at least 2 particles
+#else
+      if( primVtx.GetNDF() >= cutNDF)
+#endif
       {
 //         std::cout << primVtx.X() << " " << primVtx.Y() << " " << primVtx.Z() << " " << cluster.fTracks.size() << std::endl;
         fPrimVertices.push_back(primVtx);
@@ -295,24 +299,31 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
   }
 //   if(fClusters.size()>1)
 //   {
-//     float dx = fClusters[0].fP[0] - fClusters[1].fP[0];
-//     float dy = fClusters[0].fP[1] - fClusters[1].fP[1];
-//     float dz = fClusters[0].fP[2] - fClusters[1].fP[2];
+//     for(int i=1; i<fClusters.size(); i++)
+//     {
+//       float dx = fClusters[0].fP[0] - fClusters[i].fP[0];
+//       float dy = fClusters[0].fP[1] - fClusters[i].fP[1];
+//       float dz = fClusters[0].fP[2] - fClusters[i].fP[2];
 // 
-//     float dr[3] = {dx, dy, dz};
-//     float cov[6] = {fClusters[0].fC[0] + fClusters[1].fC[0],
-//                     fClusters[0].fC[1] + fClusters[1].fC[1],
-//                     fClusters[0].fC[2] + fClusters[1].fC[2],
-//                     fClusters[0].fC[3] + fClusters[1].fC[3],
-//                     fClusters[0].fC[4] + fClusters[1].fC[4],
-//                     fClusters[0].fC[5] + fClusters[1].fC[5] };
+//       float dr[3] = {dx, dy, dz};
+//       float cov[6] = {fClusters[0].fC[0] + fClusters[i].fC[0],
+//                       fClusters[0].fC[1] + fClusters[i].fC[1],
+//                       fClusters[0].fC[2] + fClusters[i].fC[2],
+//                       fClusters[0].fC[3] + fClusters[i].fC[3],
+//                       fClusters[0].fC[4] + fClusters[i].fC[4],
+//                       fClusters[0].fC[5] + fClusters[i].fC[5] };
 //       float dr2 = dr[0]*dr[0] + dr[1]*dr[1] + dr[2]*dr[2];
 //       float drError2 = dr[0]* (cov[0]* dr[0] + cov[1]* dr[1] + cov[3]* dr[2]) +
 //                        dr[1]* (cov[1]* dr[0] + cov[2]* dr[1] + cov[4]* dr[2]) + 
 //                        dr[2]* (cov[3]* dr[0] + cov[4]* dr[1] + cov[5]* dr[2]);
-//     drError2 /= dr2;
+//       drError2 /= dr2;
+//     
+//       std::cout << "Ntr 1 " << fClusters[0].fTracks.size() << " ntr2  " << fClusters[i].fTracks.size() << std::endl;
+//       std::cout << "dr2 " << dr2 << " err " << drError2 << " chi " << sqrt(dr2/drError2) << std::endl;
+//     }
+//     int ui;
+//     std::cin >> ui;
 //   }
-
 //   static int nVert[10]={0.};
 //   if(fClusters.size()<10)
 //     nVert[fClusters.size()]++;

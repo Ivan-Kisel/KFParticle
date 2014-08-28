@@ -2435,9 +2435,9 @@ float KFParticleBase::GetDeviationFromVertex( const float v[], const float Cv[] 
                 +( mSi[1]*d[0] + mSi[2]*d[1] + mSi[4]*d[2])*d[1]
                 +( mSi[3]*d[0] + mSi[4]*d[1] + mSi[5]*d[2])*d[2] );
   if(chi2>=0)
-    return sqrt(chi2/2);
+    return sqrt(chi2);
   else
-    return -sqrt(fabs(chi2)/2);
+    return -sqrt(fabs(chi2));
 }
 
 
