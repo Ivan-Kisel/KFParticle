@@ -295,6 +295,8 @@ void KFTopoPerformance::CheckMCParticleIsReconstructable(KFMCParticle &part)
 
     const vector<int>& dIds = part.GetDaughterIds();
     const unsigned int nD = dIds.size();
+    if(nD == 0) return; //TODO optimize for all species
+    
     bool reco1 = 1;
     bool reco2 = 1;
     bool reco3 = 1;
