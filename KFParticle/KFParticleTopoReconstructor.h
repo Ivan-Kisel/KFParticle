@@ -57,6 +57,7 @@ class KFParticleTopoReconstructor{
   void Init(vector<KFParticle> &particles, vector<int>* pdg=0);
   void Init(const KFPTrackVector *particles, const std::vector<KFParticle>& pv);
   void Init(KFPTrackVector &tracks);
+
   
   void DeInit() { fTracks = 0; }
   
@@ -67,13 +68,14 @@ class KFParticleTopoReconstructor{
    /// Accessors
   int NPrimaryVertices() const { return fKFParticlePVReconstructor->NPrimaryVertices(); }
   KFParticle &GetPrimVertex(int iPV=0) const { return fKFParticlePVReconstructor->GetPrimVertex(iPV); }
-  vector<short int>& GetPVTrackIndexArray(int iPV=0) const { return fKFParticlePVReconstructor->GetPVTrackIndexArray(iPV); }
+  KFVertex &GetPrimKFVertex(int iPV=0) const { return fKFParticlePVReconstructor->GetPrimKFVertex(iPV); }
+  vector<int>& GetPVTrackIndexArray(int iPV=0) const { return fKFParticlePVReconstructor->GetPVTrackIndexArray(iPV); }
   
   vector<KFParticle> const &GetParticles() const { return fParticles; }
   const KFPTrackVector* GetTracks() const { return fTracks; }
   const kfvector_float* GetChiPrim() const { return fChiToPrimVtx; }
   
-  void AddPV(const KFVertex &pv, const vector<short int> &tracks) { 
+  void AddPV(const KFVertex &pv, const vector<int> &tracks) { 
     fKFParticlePVReconstructor->AddPV(pv,tracks);
     KFParticle pvPart=pv;
     fPV.push_back(pvPart);
@@ -83,6 +85,8 @@ class KFParticleTopoReconstructor{
     KFParticle pvPart=pv;
     fPV.push_back(pvPart);
   }
+  void AddParticle(const KFParticle& particle) { fParticles.push_back(particle); }
+    
 
   void SetBeamLine(KFParticle& p) { fKFParticlePVReconstructor->SetBeamLine(p); }
 #ifdef HomogeneousField

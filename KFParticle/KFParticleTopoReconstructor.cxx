@@ -271,6 +271,7 @@ void KFParticleTopoReconstructor::Init(KFPTrackVector &tracks)
 #endif /// USE_TIMERS
 }
 
+
 void KFParticleTopoReconstructor::Init(const KFPTrackVector *particles, const vector<KFParticle>& pv)
 {
 #ifdef USE_TIMERS
@@ -281,7 +282,6 @@ void KFParticleTopoReconstructor::Init(const KFPTrackVector *particles, const ve
   fPV.clear(); 
 
   fTracks = const_cast< KFPTrackVector* >(particles);
-  
   fChiToPrimVtx[0].resize(fTracks[0].Size());
   fChiToPrimVtx[1].resize(fTracks[1].Size());
   
@@ -340,21 +340,17 @@ void KFParticleTopoReconstructor::ReconstructPrimVertex(bool isHeavySystem)
       pvI = 0; //save only one PV
     }
 
-    vector<short int>& tracks = GetPVTrackIndexArray(iPV);
+    vector<int>& tracks = GetPVTrackIndexArray(iPV);
     for(unsigned int iTr=0; iTr<tracks.size(); iTr++)
       fTracks[0].SetPVIndex(pvI, tracks[iTr]);
   }
   
   if(isHeavySystem)
   {
-    vector<short int> pvTracks = fKFParticlePVReconstructor->GetPVTrackIndexArray(nPV);
+    vector<int> pvTracks = fKFParticlePVReconstructor->GetPVTrackIndexArray(nPV);
     KFVertex pv = fKFParticlePVReconstructor->GetPrimKFVertex(nPV);
     fKFParticlePVReconstructor->CleanPV();
     fKFParticlePVReconstructor->AddPV(pv, pvTracks);
-    
-//     std::cout << "Reco PV "<< pv.X() << " " << pv.Y() << " " << pv.Z() << std::endl;
-//     int ui;
-//     std::cin >> ui;
   }
   
 #ifdef USE_TIMERS
@@ -389,9 +385,9 @@ void KFParticleTopoReconstructor::SortTracks()
     int iTrSorted = sortedTracks[iTr].fIndex;
     
     int q = fTracks[0].Q()[iTrSorted];
-
     if(fTracks[0].PVIndex()[iTrSorted] < 0)
     {
+
       if(q<0)
       {
         trackIndex[1][nTracks[1]] = iTrSorted;
@@ -429,16 +425,6 @@ void KFParticleTopoReconstructor::SortTracks()
   for(int iTV=0; iTV<4; iTV++)
     fTracks[iTV].RecalculateLastIndex();
 
-//   for(int iTV=0; iTV<4; iTV++)
-//     std::cout << fTracks[iTV].Size() << " " << fTracks[iTV].NElectrons() << " " << fTracks[iTV].NMuons() << " " << fTracks[iTV].NPions() << " " << 
-//     fTracks[iTV].NKaons() << " " << fTracks[iTV].NProtons() << " " << std::endl;
-//   
-//   for(int iTV=0; iTV<4; iTV++)
-//   {
-//     std::cout << "Track vector " << iTV << std::endl;
-//     fTracks[iTV].PrintTracks();
-//   }
-  
   fChiToPrimVtx[0].resize(fTracks[0].Size(), -1);
   fChiToPrimVtx[1].resize(fTracks[1].Size(), -1);
 
@@ -489,7 +475,7 @@ void KFParticleTopoReconstructor::GetChiToPrimVertex(KFParticleSIMD* pv, const i
   
   for(int iTV=0; iTV<2; iTV++)
   {
-    unsigned int NTr = fTracks[iTV].Size(); 
+    unsigned int NTr = fTracks[iTV].Size();
     for(unsigned int iTr=0; iTr < NTr; iTr += float_vLen) 
     { 
       uint_v trackIndex = iTr + uint_v::IndexesFromZero();
@@ -516,8 +502,8 @@ void KFParticleTopoReconstructor::ReconstructParticles()
 #ifdef USE_TIMERS
   timer.Start();
 #endif // USE_TIMERS
-    fParticles.clear();
-
+  
+  fParticles.clear();
   if(fPV.size() < 1) return;
 
   TransportPVTracksToPrimVertex();

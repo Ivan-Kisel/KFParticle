@@ -242,7 +242,7 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
       primVtx.ConstructPrimaryVertex( pParticles, nPrimCand, vFlags, 4.f );
 
       // clean cluster
-      vector<short int> clearClusterInd;
+      vector<int> clearClusterInd;
       clearClusterInd.reserve(cluster.fTracks.size());
       for ( int iP = 0; iP < nTracks; iP++ ){
         if(cluster.fTracks[iP] == bestTrack) {
@@ -363,7 +363,7 @@ void KFParticlePVReconstructor::ReconstructPrimVertex()
   }
 } // void KFParticlePVReconstructor::Run()
 
-void KFParticlePVReconstructor::AddPV(const KFVertex &pv, const vector<short int> &tracks)
+void KFParticlePVReconstructor::AddPV(const KFVertex &pv, const vector<int> &tracks)
 {
   fPrimVertices.push_back(pv);
   KFParticleCluster cluster;
