@@ -1216,33 +1216,35 @@ void KFTopoPerformance::FillHistos()
   }
   
   //fill histograms with ChiPrim for every particle
-  for(int iTV=0; iTV<2; iTV++)
+  if(fTopoReconstructor->GetTracks())
   {
-    const kfvector_float& chiPrim = fTopoReconstructor->GetChiPrim()[iTV];
-    const KFPTrackVector& tracks  = fTopoReconstructor->GetTracks()[iTV];
-    
-    
-    for(int iTr = 0; iTr<tracks.Size(); iTr++)
+    for(int iTV=0; iTV<2; iTV++)
     {
-      int iP = tracks.Id()[iTr];
-      if(iP < 0) continue;
+      const kfvector_float& chiPrim = fTopoReconstructor->GetChiPrim()[iTV];
+      const KFPTrackVector& tracks  = fTopoReconstructor->GetTracks()[iTV];
+    
+      for(int iTr = 0; iTr<tracks.Size(); iTr++)
+      {
+        int iP = tracks.Id()[iTr];
+        if(iP < 0) continue;
 
-      int iMC = RtoMCParticleId[iP].GetBestMatch();
-      if(iMC < 0) 
-      {
-        hTrackParameters[KFPartEfficiencies::nParticles]->Fill(chiPrim[iTr] );
-        continue;
+        int iMC = RtoMCParticleId[iP].GetBestMatch();
+        if(iMC < 0) 
+        {
+          hTrackParameters[KFPartEfficiencies::nParticles]->Fill(chiPrim[iTr] );
+          continue;
+        }
+        KFMCParticle &mPart = vMCParticles[ iMC ];
+        if(mPart.GetMotherId() < 0)
+        {
+          hTrackParameters[KFPartEfficiencies::nParticles]->Fill(chiPrim[iTr] );
+          continue;
+        }
+        KFMCParticle &mMotherPart = vMCParticles[mPart.GetMotherId()];
+        int iParticle = fParteff.GetParticleIndex(mMotherPart.GetPDG());
+        if(iParticle > -1 && iParticle<KFPartEfficiencies::nParticles)
+          hTrackParameters[iParticle]->Fill(chiPrim[iTr] );
       }
-      KFMCParticle &mPart = vMCParticles[ iMC ];
-      if(mPart.GetMotherId() < 0)
-      {
-        hTrackParameters[KFPartEfficiencies::nParticles]->Fill(chiPrim[iTr] );
-        continue;
-      }
-      KFMCParticle &mMotherPart = vMCParticles[mPart.GetMotherId()];
-      int iParticle = fParteff.GetParticleIndex(mMotherPart.GetPDG());
-      if(iParticle > -1 && iParticle<KFPartEfficiencies::nParticles)
-        hTrackParameters[iParticle]->Fill(chiPrim[iTr] );
     }
   }
 
