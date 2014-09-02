@@ -118,24 +118,6 @@ void KFTopoPerformance::CheckMCTracks()
       }
     }
   }
-  
-//   std::cout << "MCTracks: " << std::endl;
-//   for(int i = 0; i<vMCTracks.size(); i++ )
-//   {
-//     KFMCTrack &m = vMCTracks[i];
-//     std::cout << "i " << i << " pdg " << m.PDG() << " mother " << m.MotherId() << " X " << m.X() << " Y " << m.Y() << " Z " << 
-//     m.Z() << " px " << m.Px() << " py " << m.Py() << " pz " << m.Pz() << std::endl;
-//     
-//   }
-//   std::cout << "MCPV: " << std::endl;
-//   for(int i=0; i<fPrimVertices.size(); i++)
-//   {
-//     std::cout << "i " << i << " x " << fPrimVertices[i].X() << " y " << fPrimVertices[i].Y() <<" z " << fPrimVertices[i].Z()  << std::endl;
-//     std::cout << "    ";
-//     for(int id=0; id < fPrimVertices[i].NDaughterTracks(); id++)
-//       std::cout << fPrimVertices[i].DaughterTrack(id) <<" ";
-//     std::cout << endl;
-//   }
 } // void KFTopoPerformance::CheckMCTracks()
 
 void KFTopoPerformance::GetMCParticles()
@@ -173,16 +155,6 @@ void KFTopoPerformance::GetMCParticles()
   {
     KFMCParticle &part = vMCParticles[iMC];
     part.SetMCTrackID( iMC );
-//     if(part.NDaughters() > 0 && part.GetPDG() == 310)
-//     {
-//       std::cout << iMC << " " << part.GetPDG() << " "<<std::endl;
-//       for(int iD=0; iD<part.NDaughters(); iD++)
-//       {
-//         int dId = part.GetDaughterIds()[iD];
-//         KFMCTrack &mtra = vMCTracks[vMCParticles[dId].GetMCTrackID()];
-//         std::cout << "   d" <<iD<<" " << dId << " " << vMCParticles[dId].GetPDG() <<" " << mtra.X() << " " << mtra.Y() << " " << mtra.Z() << " " << mtra.Px() << " " << mtra.Py() << " " << mtra.Pz() <<std::endl;;
-//       }
-//     }
   }
 }
 
@@ -349,16 +321,15 @@ void KFTopoPerformance::MatchParticles()
   RtoMCParticleId.clear();
   MCtoRParticleId.resize(vMCParticles.size());
   RtoMCParticleId.resize(fTopoReconstructor->GetParticles().size() );
-  
-    // match tracks ( particles which are direct copy of tracks )
+  // match tracks ( particles which are direct copy of tracks )
   for( unsigned int iRP = 0; iRP < fTopoReconstructor->GetParticles().size(); iRP++ ) {
-//    CbmKFParticle &rPart = fTopoReconstructor->GetParticles()[iRP];
     const KFParticle &rPart = fTopoReconstructor->GetParticles()[iRP];
 
     if (rPart.NDaughters() != 1) continue;
     
     const int rTrackId = rPart.DaughterIds()[0];
     const int mcTrackId = fTrackMatch[rTrackId];
+    
     if(mcTrackId < 0) continue;
 // #ifdef MAIN_DRAW
 //   if ( AliHLTTPCCADisplay::Instance().DrawType() == 3 ) {
@@ -390,6 +361,7 @@ void KFTopoPerformance::MatchParticles()
 
 
     KFMCParticle &mPart = vMCParticles[mcTrackId];
+   
     if( mPart.GetPDG() == rPart.GetPDG() ) {
       MCtoRParticleId[mcTrackId].ids.push_back(iRP);
       RtoMCParticleId[iRP].ids.push_back(mcTrackId);
@@ -399,10 +371,9 @@ void KFTopoPerformance::MatchParticles()
       RtoMCParticleId[iRP].idsMI.push_back(mcTrackId);
     }
   }
-
-    // match created mother particles
+  
+  // match created mother particles
   for( unsigned int iRP = 0; iRP < fTopoReconstructor->GetParticles().size(); iRP++ ) {
-//    CbmKFParticle &rPart = fTopoReconstructor->GetParticles()[iRP];
     const KFParticle &rPart = fTopoReconstructor->GetParticles()[iRP];
     const unsigned int NRDaughters = rPart.NDaughters();
     if (NRDaughters < 2) continue;
@@ -483,7 +454,7 @@ void KFTopoPerformance::MatchPV()
 
   for( int iPV = 0; iPV < fTopoReconstructor->NPrimaryVertices(); iPV++ ) {
 
-    vector<short int> &tracks = fTopoReconstructor->GetPVTrackIndexArray(iPV);
+    vector<int> &tracks = fTopoReconstructor->GetPVTrackIndexArray(iPV);
     
     int nPVTracks = tracks.size()>0 ? tracks.size() : -1;//tracks.size();
     
@@ -1250,6 +1221,7 @@ void KFTopoPerformance::FillHistos()
     const kfvector_float& chiPrim = fTopoReconstructor->GetChiPrim()[iTV];
     const KFPTrackVector& tracks  = fTopoReconstructor->GetTracks()[iTV];
     
+    
     for(int iTr = 0; iTr<tracks.Size(); iTr++)
     {
       int iP = tracks.Id()[iTr];
@@ -1278,7 +1250,7 @@ void KFTopoPerformance::FillHistos()
   for(int iPV = 0; iPV<fTopoReconstructor->NPrimaryVertices(); iPV++)
   {
     KFParticle & vtx = fTopoReconstructor->GetPrimVertex(iPV);
-    vector<short int> &tracks = fTopoReconstructor->GetPVTrackIndexArray(iPV);
+    vector<int> &tracks = fTopoReconstructor->GetPVTrackIndexArray(iPV);
 
     Double_t probPV = TMath::Prob(vtx.Chi2(), vtx.NDF());//(TDHelper<float>::Chi2IProbability( ndf, chi2 ));
     vector<Double_t> dzPV;
@@ -1439,7 +1411,7 @@ void KFTopoPerformance::FillHistos()
   {
     KFParticle TempPart = fTopoReconstructor->GetParticles()[iP];
     int nDaughters = TempPart.NDaughters();
-    if(nDaughters > 1) break; //use only tracks, not short lived particles
+    if(nDaughters > 1) continue; //use only tracks, not short lived particles
     
     if(!RtoMCParticleId[iP].IsMatchedWithPdg())  continue; //ghost
     

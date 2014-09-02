@@ -428,6 +428,28 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
         gDirectory->mkdir("FitQA");
         gDirectory->cd("FitQA");
         {
+          gDirectory->mkdir("FitQAvcNMCPVTracks");
+          gDirectory->cd("FitQAvcNMCPVTracks");
+          {
+            for(int iHPV=0; iHPV<nHistosPV-1; ++iHPV){
+              hPVFitQa2D[1][0][iHPV] = new TH2F(Table[iHPV].name.data(),Table[iHPV].title.data(),
+                                                500, 0., 5000.,
+                                                Table[iHPV].n, Table[iHPV].l, Table[iHPV].r);
+            }
+          }
+          gDirectory->cd(".."); //FitQA
+
+          gDirectory->mkdir("FitQAvcNPVTracks");
+          gDirectory->cd("FitQAvcNPVTracks");
+          {
+            for(int iHPV=0; iHPV<nHistosPV-1; ++iHPV){
+              hPVFitQa2D[1][1][iHPV] = new TH2F(Table[iHPV].name.data(),Table[iHPV].title.data(),
+                                                500, 0., 5000.,
+                                                Table[iHPV].n, Table[iHPV].l, Table[iHPV].r);
+            }
+          }
+          gDirectory->cd(".."); //FitQA
+          
           for(int iHPV=0; iHPV<nHistosPV; ++iHPV){
             hPVFitQa[1][iHPV] = new TH1F(Table[iHPV].name.data(),Table[iHPV].title.data(),
                                          Table[iHPV].n, Table[iHPV].l, Table[iHPV].r);
