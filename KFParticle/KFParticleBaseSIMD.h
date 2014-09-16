@@ -201,7 +201,7 @@ class KFParticleBaseSIMD {
   //* Set mass constraint 
 
   void SetNonlinearMassConstraint( float_v Mass );
-  void SetMassConstraint( float_v Mass, float_v SigmaMass = 0.f );
+  void SetMassConstraint( float_v Mass, float_v SigmaMass = float_v(0.f) );
 
   //* Set no decay length for resonances
 
