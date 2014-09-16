@@ -33,12 +33,18 @@ class KFParticleBaseSIMD {
   //*
   //* ABSTRACT METHODS HAVE TO BE DEFINED IN USER CLASS 
   //* 
+#if  __GNUC__ && ( defined(ENVIRONMENT32) ||  GCC_VERSION < 40300 )
+
+#else
+                                            
   void *operator new(size_t size) { return _mm_malloc(size, sizeof(float_v)); }
   void *operator new[](size_t size) { return _mm_malloc(size, sizeof(float_v)); }
   void *operator new(size_t size, void *ptr) { return ::operator new(size, ptr);}
   void *operator new[](size_t size, void *ptr) { return ::operator new(size, ptr);}
   void operator delete(void *ptr, size_t) { _mm_free(ptr); }
   void operator delete[](void *ptr, size_t) { _mm_free(ptr); }
+ 
+#endif 
                   
   //* Virtual method to access the magnetic field
 
