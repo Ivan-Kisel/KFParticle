@@ -32,8 +32,6 @@
 #include <Vc/Vc>
 #include <Vc/limits>
 
-#include "KFPSimdAllocator.h"
-
 using ::Vc::double_v;
 using ::Vc::float_v;
 using ::Vc::int_v;
@@ -72,6 +70,7 @@ typedef double Double_t;
                      + __GNUC_MINOR__ * 100 \
                      + __GNUC_PATCHLEVEL__)
   #if GCC_VERSION > 40300
+    #include "KFPSimdAllocator.h"
     typedef std::vector<float, KFPSimdAllocator<float> > kfvector_float;
     typedef std::vector<int, KFPSimdAllocator<int> > kfvector_int;
     typedef std::vector<unsigned int, KFPSimdAllocator<unsigned int> > kfvector_uint;
