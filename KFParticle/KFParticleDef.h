@@ -59,15 +59,32 @@ typedef double Double_t;
 #include "Rtypes.h"
 #endif
 
-// #ifdef FORMIC
-typedef std::vector<float, KFPSimdAllocator<float> > kfvector_float;
-typedef std::vector<int, KFPSimdAllocator<int> > kfvector_int;
-typedef std::vector<unsigned int, KFPSimdAllocator<unsigned int> > kfvector_uint;
-// #else
-// typedef std::vector<float> kfvector_float;
-// typedef std::vector<int> kfvector_int; 
-// typedef std::vector<unsigned int> kfvector_uint; 
-// #endif
+#if __GNUC__
+#if __x86_64__ || __ppc64__
+#define ENVIRONMENT64
+#else
+#define ENVIRONMENT32
+#endif
+#endif
+
+#if __GNUC__ && defined(ENVIRONMENT64)
+#define GCC_VERSION (  __GNUC__ * 10000 \
+                     + __GNUC_MINOR__ * 100 \
+                     + __GNUC_PATCHLEVEL__)
+  #if GCC_VERSION > 40300
+    typedef std::vector<float, KFPSimdAllocator<float> > kfvector_float;
+    typedef std::vector<int, KFPSimdAllocator<int> > kfvector_int;
+    typedef std::vector<unsigned int, KFPSimdAllocator<unsigned int> > kfvector_uint;
+  #else //GCC_VERSION > 40300
+    typedef std::vector<float> kfvector_float;
+    typedef std::vector<int> kfvector_int; 
+    typedef std::vector<unsigned int> kfvector_uint; 
+  #endif //GCC_VERSION > 40300
+#else //__GNUC__ && ENVIRONMENT64
+  typedef std::vector<float> kfvector_float;
+  typedef std::vector<int> kfvector_int; 
+  typedef std::vector<unsigned int> kfvector_uint; 
+#endif //__GNUC__ && ENVIRONMENT64
 
 namespace KFPMath
 {
