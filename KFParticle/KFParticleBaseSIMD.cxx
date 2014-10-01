@@ -1915,7 +1915,7 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
     const float_v& y1 = param1[1] - cB*px1 + sB*py1;
     const float_v& z1 = param1[2] + dS1[iP]*param1[5];
 
-    sss = KFPMath::Sin(bs2), ccc = KFPMath::Cos(bs2);
+    sss = KFPMath::Sin(bs2); ccc = KFPMath::Cos(bs2);
 
     sB(bs2Big) = sss/bq2;
     sB(!bs2Big) = ((1.f-bs2*kOvSqr6)*(1.f+bs2*kOvSqr6)*dS2[iP]);
@@ -1933,12 +1933,32 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
     dr2[iP] = dx*dx + dy*dy + dz*dz;
   }
   
-  const float_m isFirstRoot = dr2[0] < dr2[1];
+  float_v pointParam[2][8];
+  float_v pointCov[2][36];
+  
+  Transport((dS1[0] + dS1[1]) / 2.f, pointParam[0], pointCov[0]);
+  p.Transport((dS2[0] + dS2[1]) / 2.f, pointParam[1], pointCov[1]);
+  
+  const float_v drPoint[3] = { pointParam[0][0] - pointParam[1][0], pointParam[0][1] - pointParam[1][1], pointParam[0][2] - pointParam[1][2] } ;
+  const float_v covPoint[6] = { pointCov[0][0] + pointCov[1][0],
+                                pointCov[0][1] + pointCov[1][1],
+                                pointCov[0][2] + pointCov[1][2],
+                                pointCov[0][3] + pointCov[1][3],
+                                pointCov[0][4] + pointCov[1][4],
+                                pointCov[0][5] + pointCov[1][5]  };
+  float_v dr2Points = drPoint[0]*drPoint[0] + drPoint[1]*drPoint[1] + drPoint[2]*drPoint[2];
+  float_v dr2PointCov = drPoint[0]*drPoint[0]*covPoint[0] + drPoint[1]*drPoint[1]*covPoint[2] + drPoint[2]*drPoint[2]*covPoint[5] +
+                        2.f*( drPoint[0]*drPoint[1]*covPoint[1] + drPoint[0]*drPoint[2]*covPoint[3] + drPoint[1]*drPoint[2]*covPoint[4] );
+  const float_m isMiddlePoint = (dr2Points*dr2Points < 25.f*dr2PointCov);// && (abs(fPDG)==int_v(11)) && (abs(p.fPDG)==int_v(11));
+  const float_m isFirstRoot = (dr2[0] < dr2[1]) & (!isMiddlePoint);
   DS(isFirstRoot)  = dS1[0];
   DS1(isFirstRoot) = dS2[0];
   DS(!isFirstRoot)  = dS1[1];
   DS1(!isFirstRoot) = dS2[1];    
   
+  DS(isMiddlePoint)  = (dS1[0] + dS1[1]) / 2.f;
+  DS1(isMiddlePoint) = (dS2[0] + dS2[1]) / 2.f;
+    
   //find correct parts of helices
   int_v n1(Vc::Zero);
   int_v n2(Vc::Zero);
@@ -2084,6 +2104,18 @@ void KFParticleBaseSIMD::GetDStoParticleBy( float_v B, const KFParticleBaseSIMD 
   return GetDStoParticleBz(B, p, DS, DS1, param1, param2);
 }
 
+void KFParticleBaseSIMD::GetDStoParticleB( float_v B, float_v alpha, const KFParticleBaseSIMD &p, float_v &DS, float_v &DS1 ) const
+{
+  
+  const float_v cosA = KFPMath::Cos(alpha);
+  const float_v sinA = KFPMath::Sin(alpha);
+  
+  const float_v param1[6] = { fP[0], fP[1]*cosA+fP[2]*sinA , fP[1]*sinA-fP[2]*cosA, fP[3], fP[4]*cosA+fP[5]*sinA, fP[4]*sinA-fP[5]*cosA };
+  const float_v param2[6] = { p.fP[0], p.fP[1]*cosA+p.fP[2]*sinA , p.fP[1]*sinA-p.fP[2]*cosA, p.fP[3], p.fP[4]*cosA+p.fP[5]*sinA, p.fP[4]*sinA-p.fP[5]*cosA };
+  
+  return GetDStoParticleBz(B, p, DS, DS1, param1, param2);
+}
+
 float_v KFParticleBaseSIMD::GetDStoPointCBM( const float_v xyz[] ) const
 {
   //* Transport the particle on dS, output to P[],C[], for CBM field
@@ -2103,7 +2135,7 @@ float_v KFParticleBaseSIMD::GetDStoPointCBM( const float_v xyz[] ) const
   float_v fld[3];
   GetFieldValue( fP, fld );
   dS = GetDStoPointBy( fld[1],xyz );
-
+  
   dS(abs(dS)>1.E3f) = 0.f;
 
   return dS;
@@ -2169,6 +2201,7 @@ void KFParticleBaseSIMD::GetDStoParticleCBM( const KFParticleBaseSIMD &p, float_
   GetFieldValue( fP, fld );
 
   GetDStoParticleBy(fld[1],p,dS,dS1);
+//   GetDStoParticleB( -sqrt(fld[1]*fld[1] + fld[2]*fld[2]), KFPMath::ATan2(fld[1],fld[2]),p,dS,dS1 );
 }
 
 void KFParticleBaseSIMD::TransportCBM( float_v dS, 

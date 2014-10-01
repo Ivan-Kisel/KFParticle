@@ -244,6 +244,7 @@ class KFParticleBaseSIMD {
   
   void GetDStoParticleBz( float_v Bz, const KFParticleBaseSIMD &p, float_v &dS, float_v &dS1, const float_v* param1 =0, const float_v* param2 =0  ) const ;
   void GetDStoParticleBy( float_v B, const KFParticleBaseSIMD &p, float_v &dS, float_v &dS1 ) const ;
+  void GetDStoParticleB( float_v B, float_v alpha, const KFParticleBaseSIMD &p, float_v &DS, float_v &DS1 ) const ;
 
   float_v GetDStoPointCBM( const float_v xyz[] ) const;
   void GetDStoParticleCBM( const KFParticleBaseSIMD &p, float_v &dS, float_v &dS1 ) const ;
