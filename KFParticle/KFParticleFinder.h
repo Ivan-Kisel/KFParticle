@@ -154,7 +154,7 @@ class KFParticleFinder
   
   //cuts on charm particles
   float fCutCharmPt, fCutCharmChiPrim; //cuts on tracks
-  float fCutsCharm[8][3]; //cuts on reconstructed particles
+  float fCutsCharm[3]; //cuts on reconstructed charm candidates
   
   //cuts on LVM
   float fCutLVMPt, fCutLVMP;

@@ -41,15 +41,8 @@ KFParticleFinder::KFParticleFinder():
   fCutsTrackV0[5][0] = 10.;    fCutsTrackV0[5][1] = 3.;       fCutsTrackV0[5][2] = 3.; //Sigma+
   
   //charm
-             //chi2                   ldl                         chi2_topo
-  fCutsCharm[0][0] = 3.f; fCutsCharm[0][1] = 10.f; fCutsCharm[0][2] = 3.f; //D0 -> pi+ K-
-  fCutsCharm[1][0] = 3.f; fCutsCharm[1][1] = 10.f; fCutsCharm[1][2] = 3.f; //D+ -> K- pi+ pi+
-  fCutsCharm[2][0] = 3.f; fCutsCharm[2][1] = 10.f; fCutsCharm[2][2] = 3.f; //D0 -> pi+ pi+ pi- K-
-  fCutsCharm[3][0] = 3.f; fCutsCharm[3][1] = 10.f; fCutsCharm[3][2] = 3.f; //Ds+ -> K- K+ pi+
-  fCutsCharm[4][0] = 3.f; fCutsCharm[4][1] = 10.f; fCutsCharm[4][2] = 3.f; //Lambdac -> pi+ K- p
-  fCutsCharm[5][0] = 3.f; fCutsCharm[5][1] = -100.f; fCutsCharm[5][2] = -100.f; //D*0  -> D+ pi-
-  fCutsCharm[6][0] = 3.f; fCutsCharm[6][1] = -100.f; fCutsCharm[6][2] = -100.f; //D*+  -> D0 pi+
-  fCutsCharm[7][0] = 3.f; fCutsCharm[7][1] = -100.f; fCutsCharm[7][2] = -100.f; //D*+4 -> D04 pi+
+  //chi2               l/dl                  chi2_topo
+  fCutsCharm[0] = 3.f; fCutsCharm[1] = 10.f; fCutsCharm[2] = 3.f; //D0 -> pi+ K-
   
   //cuts on particles reconstructed from short-lived particles
   fCutsPartPart[0][0] =  10;  fCutsPartPart[0][1] = 3;  fCutsPartPart[0][2] = 3;  //H0 -> Lambda Lambda
@@ -84,6 +77,16 @@ void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* C
 //std::cout << "NPart estim " << nPart << std::endl;
 //   Particles.reserve(vRTracks.size() + nPart);
 
+  fD0.clear();
+  fD0bar.clear();
+  fD04.clear();
+  fD04bar.clear();
+  fDPlus.clear();
+  fDMinus.clear();
+  fLPi.clear();
+  fLPiPIndex.clear();
+  
+  
   Particles.reserve(nPart+vRTracks[0].Size()+vRTracks[1].Size()+vRTracks[2].Size()+vRTracks[3].Size());
   {
     KFPTrack kfTrack;
@@ -198,10 +201,10 @@ void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* C
     FindTrackV0Decay(fDMinus, -411, vRTracks[0], 1, vRTracks[0].FirstPion(), vRTracks[0].LastPion(),
                      Particles, PrimVtx, -1, &(ChiToPrimVtx[0]));    
     //D0 -> pi+ K-
-    SelectParticles(Particles,fD0,PrimVtx,fCutsCharm[0][2],fCutsCharm[0][1],
+    SelectParticles(Particles,fD0,PrimVtx,fCutsCharm[2],fCutsCharm[1],
                     KFParticleDatabase::Instance()->GetD0Mass(), KFParticleDatabase::Instance()->GetD0MassSigma(), fSecCuts[0]);
     //D0_bar -> pi+ K-
-    SelectParticles(Particles,fD0bar,PrimVtx,fCutsCharm[0][2],fCutsCharm[0][1],
+    SelectParticles(Particles,fD0bar,PrimVtx,fCutsCharm[2],fCutsCharm[1],
                     KFParticleDatabase::Instance()->GetD0Mass(), KFParticleDatabase::Instance()->GetD0MassSigma(), fSecCuts[0]);
     //D*+->D0 pi+
     for(int iPV=0; iPV<fNPV; iPV++)
@@ -212,10 +215,10 @@ void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* C
       FindTrackV0Decay(fD0, -421, vRTracks[3], -1, vRTracks[3].FirstPion(), vRTracks[3].LastPion(),
                        Particles, PrimVtx, iPV, 0);
     //D0 -> pi+ K- pi+ pi-
-    SelectParticles(Particles,fD04,PrimVtx,fCutsCharm[0][2],fCutsCharm[0][1],
+    SelectParticles(Particles,fD04,PrimVtx,fCutsCharm[2],fCutsCharm[1],
                     KFParticleDatabase::Instance()->GetD0Mass(), KFParticleDatabase::Instance()->GetD0MassSigma(), fSecCuts[0]);
     //D0_bar -> pi- K+ pi- pi+
-    SelectParticles(Particles,fD04bar,PrimVtx,fCutsCharm[0][2],fCutsCharm[0][1],
+    SelectParticles(Particles,fD04bar,PrimVtx,fCutsCharm[2],fCutsCharm[1],
                     KFParticleDatabase::Instance()->GetD0Mass(), KFParticleDatabase::Instance()->GetD0MassSigma(), fSecCuts[0]);
     //D*+->D0 pi+
     for(int iPV=0; iPV<fNPV; iPV++)
@@ -226,10 +229,10 @@ void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* C
       FindTrackV0Decay(fD04bar, -429, vRTracks[3], -1, vRTracks[3].FirstPion(), vRTracks[3].LastPion(),
                        Particles, PrimVtx, iPV, 0);
     //D+
-    SelectParticles(Particles,fDPlus,PrimVtx,fCutsCharm[1][2],fCutsCharm[1][1],
+    SelectParticles(Particles,fDPlus,PrimVtx,fCutsCharm[2],fCutsCharm[1],
                     KFParticleDatabase::Instance()->GetDPlusMass(), KFParticleDatabase::Instance()->GetDPlusMassSigma(), fSecCuts[0]);
     //D-
-    SelectParticles(Particles,fDMinus,PrimVtx,fCutsCharm[1][2],fCutsCharm[1][1],
+    SelectParticles(Particles,fDMinus,PrimVtx,fCutsCharm[2],fCutsCharm[1],
                     KFParticleDatabase::Instance()->GetDPlusMass(), KFParticleDatabase::Instance()->GetDPlusMassSigma(), fSecCuts[0]);
     //D*0->D+ pi-
     for(int iPV=0; iPV<fNPV; iPV++)
@@ -519,8 +522,8 @@ inline void KFParticleFinder::ConstructV0(KFPTrackVector* vTracks,
   float_v ldlCut  = cuts[2];
   if( !(float_m(abs(mother.PDG()) == 421)).isEmpty() )
   {
-    chi2Cut( float_m(abs(mother.PDG()) == 421) ) = fCutsCharm[0][0];
-    ldlCut( float_m(abs(mother.PDG()) == 421) )= fCutsCharm[0][1];
+    chi2Cut( float_m(abs(mother.PDG()) == 421) ) = fCutsCharm[0];
+    ldlCut( float_m(abs(mother.PDG()) == 421) )= fCutsCharm[1];
   }
   saveParticle &= (mother.Chi2()/static_cast<float_v>(mother.NDF()) < chi2Cut );
   saveParticle &= KFPMath::Finite(mother.GetChi2());
