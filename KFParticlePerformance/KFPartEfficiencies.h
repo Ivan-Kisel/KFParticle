@@ -55,7 +55,7 @@ class KFPartEfficiencies: public TNamed
                                 22, //dielectrons
                                 111,221, //pi0, eta
                                 443,100443, // J/Psi
-                                421,-421,100421,-100421, //D0
+                                421,-421,429,-429, //D0
                                 411,-411, //D+, D-
                                 431,-431, //Ds+, Ds-
                                 4122,-4122, //Lambdac
