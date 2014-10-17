@@ -18,6 +18,8 @@
 
 
 #include "KFParticlePVReconstructor.h"
+#include "KFParticleFinder.h"
+
 #include <vector>
 #include <string>
 
@@ -48,6 +50,9 @@ class KFParticleTopoReconstructor{
     for ( int i = 0; i < fNTimers; i++ ) fStatTime[i] = 0;
 #endif
     fKFParticlePVReconstructor = new KFParticlePVReconstructor;
+    
+    fKFParticleFinder = new KFParticleFinder;
+    fKFParticleFinder->SetNThreads(fNThreads);
   }
   ~KFParticleTopoReconstructor();
 
@@ -104,6 +109,11 @@ class KFParticleTopoReconstructor{
   void SaveInputParticles(const std::string prefix = "KFPData", bool onlySecondary = 0);
   void SetNThreads(short int n) { fNThreads=n; }
   
+  void SetChi2PrimaryCut(float chi) {
+    fKFParticlePVReconstructor->SetChi2PrimaryCut(chi); 
+    fKFParticleFinder->Set2DCuts(chi);
+  }
+  
  private:
   KFParticleTopoReconstructor &operator=(KFParticleTopoReconstructor &);
   KFParticleTopoReconstructor(KFParticleTopoReconstructor &);
@@ -112,7 +122,7 @@ class KFParticleTopoReconstructor{
   void TransportPVTracksToPrimVertex();
   
   KFParticlePVReconstructor* fKFParticlePVReconstructor;
-
+  KFParticleFinder* fKFParticleFinder;
   KFPTrackVector *fTracks;
   kfvector_float fChiToPrimVtx[2];
   vector<KFParticle> fParticles;

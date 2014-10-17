@@ -30,7 +30,7 @@ class KFPTrackVector;
 
 class KFParticlePVReconstructor{
  public:
-  KFParticlePVReconstructor():fParticles(0), fNParticles(0), fWeight(0.f), fBeamLine(), fIsBeamLine(0), fClusters(0), fPrimVertices(0) {};
+  KFParticlePVReconstructor():fParticles(0), fNParticles(0), fWeight(0.f), fBeamLine(), fIsBeamLine(0), fClusters(0), fPrimVertices(0), fChi2CutPreparation(100), fChi2Cut(16) {};
   ~KFParticlePVReconstructor(){};
   
   void Init(KFPTrackVector *tracks, int nParticles); // init array of particles
@@ -51,6 +51,9 @@ class KFParticlePVReconstructor{
   void AddPV(const KFVertex &pv);
   void CleanPV() { fClusters.clear(); fPrimVertices.clear(); }
 
+  //set functionality for cuts
+  void SetChi2PrimaryCut(float chi2) { fChi2Cut = chi2; fChi2CutPreparation = chi2*10; }
+  
  private:
   KFParticlePVReconstructor &operator=(KFParticlePVReconstructor &);
   KFParticlePVReconstructor(KFParticlePVReconstructor &);
@@ -74,6 +77,9 @@ class KFParticlePVReconstructor{
 
   vector< KFParticleCluster > fClusters;
   vector<KFVertex> fPrimVertices;  // created primary vertex(-es) (currently only one primary vertex in possible
+  
+  float fChi2CutPreparation;
+  float fChi2Cut;
 }; // class KFParticlePVReconstructor
 
 

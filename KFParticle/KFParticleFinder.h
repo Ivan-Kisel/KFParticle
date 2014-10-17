@@ -142,15 +142,28 @@ class KFParticleFinder
                        std::vector<KFParticle>* vMotherSec = 0,
                        float massMotherPDG = 0.f,
                        float massMotherPDGSigma = 0.f);
+  
+  //set cuts
+  void Set2DCuts(const float chi2Prim = 3.f, const float chi2 = 3.f, const float ldl = 5.f) {
+    fCuts2D[0] = chi2Prim; 
+    fCuts2D[1] = chi2;      
+    fCuts2D[2] = ldl;
+  } 
+  void SetSecondaryCuts(const float sigmaMass = 3.f, const float chi2Topo = 5.f, const float ldl = 10.f) {
+    fSecCuts[0] = sigmaMass;
+    fSecCuts[1] = chi2Topo;
+    fSecCuts[2] = ldl;
+  }
+  
  private:
 
   short int fNPV;
   short int fNThreads;
   
-  float fCuts2D[3];
-  float fSecCuts[3];
-  float fCutsTrackV0[6][3];
-  float fCutsPartPart[8][3];
+  float fCuts2D[3]; //chi2_prim, chi2_geo, l/dl
+  float fSecCuts[3]; //mass, chi2_topo, l/dl
+  float fCutsTrackV0[3][3];
+  float fCutsPartPart[2][3];
   
   //cuts on charm particles
   float fCutCharmPt, fCutCharmChiPrim; //cuts on tracks

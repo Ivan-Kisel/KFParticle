@@ -2369,7 +2369,7 @@ float KFParticleBase::GetDistanceFromParticle( const KFParticleBase &p )
 
 float KFParticleBase::GetDeviationFromVertex( const KFParticleBase &Vtx ) const
 {
-  //* Calculate sqrt(Chi2/ndf) deviation from vertex
+  //* Calculate Chi2 deviation from vertex
 
   return GetDeviationFromVertex( Vtx.fP, Vtx.fC );
 }
@@ -2377,7 +2377,7 @@ float KFParticleBase::GetDeviationFromVertex( const KFParticleBase &Vtx ) const
 
 float KFParticleBase::GetDeviationFromVertex( const float v[], const float Cv[] ) const
 {
-  //* Calculate sqrt(Chi2/ndf) deviation from vertex
+  //* Calculate Chi2 deviation from vertex
   //* v = [xyz], Cv=[Cxx,Cxy,Cyy,Cxz,Cyz,Czz]-covariance matrix
 
   float mP[8];
@@ -2434,17 +2434,15 @@ float KFParticleBase::GetDeviationFromVertex( const float v[], const float Cv[] 
   float chi2 = ( ( mSi[0]*d[0] + mSi[1]*d[1] + mSi[3]*d[2])*d[0]
                 +( mSi[1]*d[0] + mSi[2]*d[1] + mSi[4]*d[2])*d[1]
                 +( mSi[3]*d[0] + mSi[4]*d[1] + mSi[5]*d[2])*d[2] );
-  if(chi2>=0)
-    return sqrt(chi2);
-  else
-    return -sqrt(fabs(chi2));
+
+  return chi2;
 }
 
 
 float KFParticleBase::GetDeviationFromParticle( const KFParticleBase &p ) 
   const
 { 
-  //* Calculate sqrt(Chi2/ndf) deviation from other particle
+  //* Calculate Chi2 deviation from other particle
 
   float dS, dS1;
   GetDStoParticle( p, dS, dS1 );   

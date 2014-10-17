@@ -96,7 +96,7 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
     {
       const KFParticle &p = fParticles[iP];
       float chi = p.GetDeviationFromVertex( primVtx );      
-      if( chi >= 10.f )
+      if( chi >= fChi2CutPreparation )
         continue;
       
       pParticles[nPrimCand] = &fParticles[iP];
@@ -105,7 +105,7 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
     }
   
     primVtx.SetConstructMethod(0);
-    primVtx.ConstructPrimaryVertex( pParticles, nPrimCand, vFlags, 10.f );
+    primVtx.ConstructPrimaryVertex( pParticles, nPrimCand, vFlags, fChi2CutPreparation );
       
     delete [] pParticles;
     delete [] vFlags;
@@ -177,7 +177,7 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
     {
       unsigned short int &curTrack = (*notUsedTracksPtr)[iTr];
 
-      if( ( fParticles[curTrack].GetDeviationFromVertex(rBest, covBest) < 10.f && fWeight[curTrack] > -1.f) || curTrack == bestTrack)
+      if( ( fParticles[curTrack].GetDeviationFromVertex(rBest, covBest) < fChi2CutPreparation && fWeight[curTrack] > -1.f) || curTrack == bestTrack)
       {
         for(int iP=0; iP<3; iP++)
           rVertex[iP] += fWeight[curTrack] * fParticles[curTrack].Parameters()[iP];
@@ -239,7 +239,7 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
         vFlags[iFl] = true;
       primVtx.SetVtxGuess(cluster.fP[0], cluster.fP[1], cluster.fP[2]);
       primVtx.SetConstructMethod(0);
-      primVtx.ConstructPrimaryVertex( pParticles, nPrimCand, vFlags, 4.f );
+      primVtx.ConstructPrimaryVertex( pParticles, nPrimCand, vFlags, fChi2Cut );
 
       // clean cluster
       vector<int> clearClusterInd;
@@ -261,7 +261,7 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
       for(unsigned short int iTr = 0; iTr < nNotUsedTracks; iTr++)
       {
         unsigned short int &curTrack = (*notUsedTracksPtr)[iTr];
-        if( fParticles[curTrack].GetDeviationFromVertex(primVtx)<4.f )
+        if( fParticles[curTrack].GetDeviationFromVertex(primVtx)<fChi2Cut )
         {
           primVtx += fParticles[curTrack];
           clearClusterInd.push_back(curTrack);

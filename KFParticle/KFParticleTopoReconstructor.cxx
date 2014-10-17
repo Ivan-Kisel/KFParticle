@@ -12,14 +12,11 @@
 
 #include "KFParticleTopoReconstructor.h"
 
-#include "KFParticlePVReconstructor.h"
-
 #ifdef KFPWITHTRACKER
 #include "AliHLTTPCCAGBTracker.h"
 #endif
 
 #include "KFParticleSIMD.h"
-#include "KFParticleFinder.h"
 
 #include <fstream>
 #include <iostream>
@@ -511,9 +508,7 @@ void KFParticleTopoReconstructor::ReconstructParticles()
   //calculate chi to primary vertex, chi = sqrt(dr C-1 dr)
   GetChiToPrimVertex(&(fPV[0]), fPV.size());
 
-  KFParticleFinder kfpf;
-  kfpf.SetNThreads(fNThreads);
-  kfpf.FindParticles(fTracks, fChiToPrimVtx, fParticles, &(fPV[0]), fPV.size());
+  fKFParticleFinder->FindParticles(fTracks, fChiToPrimVtx, fParticles, &(fPV[0]), fPV.size());
 // #pragma omp critical 
 //   std::cout << "NPart " << fParticles.size() << " " << fTracks[0].Size() << " "<< fTracks[1].Size() << " " << fTracks[2].Size() << " " << fTracks[3].Size()<< std::endl;
 

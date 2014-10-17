@@ -34,25 +34,19 @@ KFParticleFinder::KFParticleFinder():
   //track + particle
   //                ldl          chi2_topo                        chi2_geo
   fCutsTrackV0[0][0] = 10;     fCutsTrackV0[0][1] = 5;        fCutsTrackV0[0][2] = 6;  //Xi
-  fCutsTrackV0[1][0] = 10;     fCutsTrackV0[1][1] = 3;        fCutsTrackV0[1][2] = 3;  //Omega
+  fCutsTrackV0[1][0] = 10;     fCutsTrackV0[1][1] = 3;        fCutsTrackV0[1][2] = 3;  //Omega, charm, H0, Sigma+
   fCutsTrackV0[2][0] = -100.;  fCutsTrackV0[2][1] = 10000.;   fCutsTrackV0[2][2] = 3;  //resonances
-  fCutsTrackV0[3][0] = 10;     fCutsTrackV0[3][1] = 3.;       fCutsTrackV0[3][2] = 3.; //charm
-  fCutsTrackV0[4][0] = 10.;    fCutsTrackV0[4][1] = 3.;       fCutsTrackV0[4][2] = 3.; //H0
-  fCutsTrackV0[5][0] = 10.;    fCutsTrackV0[5][1] = 3.;       fCutsTrackV0[5][2] = 3.; //Sigma+
   
   //charm
   //chi2               l/dl                  chi2_topo
   fCutsCharm[0] = 3.f; fCutsCharm[1] = 10.f; fCutsCharm[2] = 3.f; //D0 -> pi+ K-
   
   //cuts on particles reconstructed from short-lived particles
-  fCutsPartPart[0][0] =  10;  fCutsPartPart[0][1] = 3;  fCutsPartPart[0][2] = 3;  //H0 -> Lambda Lambda
-  fCutsPartPart[1][0] = -10;  fCutsPartPart[1][1] = 3;  fCutsPartPart[1][2] = 3;  //Sigma0 -> Lambda Gamma
-  fCutsPartPart[2][0] = -10;  fCutsPartPart[2][1] = 3;  fCutsPartPart[2][2] = 3;  //pi0 -> Gamma Gamma
-  fCutsPartPart[3][0] = -10;  fCutsPartPart[3][1] = 3;  fCutsPartPart[3][2] = 3;  //eta -> pi0 pi0 pi0
-  fCutsPartPart[4][0] =  10;  fCutsPartPart[4][1] = 3;  fCutsPartPart[4][2] = 3;  //Xi0 -> Lambda pi0
-  fCutsPartPart[5][0] = -10;  fCutsPartPart[5][1] = 3;  fCutsPartPart[5][2] = 3;  //K* -> K pi0
-  fCutsPartPart[6][0] = -10;  fCutsPartPart[6][1] = 3;  fCutsPartPart[6][2] = 3;  //Sigma*0 -> Lambda pi0
-  fCutsPartPart[7][0] = -10;  fCutsPartPart[7][1] = 3;  fCutsPartPart[7][2] = 3;  //Xi* -> Xi pi0
+  //ldl,                      chi2_topo                 chi2_geo
+  //H0 -> Lambda Lambda, Xi0 -> Lambda pi0
+  fCutsPartPart[0][0] =  10;  fCutsPartPart[0][1] = 3;  fCutsPartPart[0][2] = 3;
+  //Sigma0 -> Lambda Gamma, pi0 -> Gamma Gamma, K* -> K pi0, Sigma*0 -> Lambda pi0, Xi* -> Xi pi0
+  fCutsPartPart[1][0] = -10;  fCutsPartPart[1][1] = 3;  fCutsPartPart[1][2] = 3;  
 }
 
 void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* ChiToPrimVtx,
@@ -257,11 +251,11 @@ void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* C
     //pi0 -> gamma gamma
     const float& mPi0 = KFParticleDatabase::Instance()->GetPi0Mass();
     const float& mPi0Sigma = KFParticleDatabase::Instance()->GetPi0MassSigma();
-    CombinePartPart(vV0Sec[2], vV0Sec[2], Particles, PrimVtx, fCutsPartPart[2], -1, 111, 1, 0, &vPi0Prim, &vPi0Sec, mPi0, mPi0Sigma);
+    CombinePartPart(vV0Sec[2], vV0Sec[2], Particles, PrimVtx, fCutsPartPart[1], -1, 111, 1, 0, &vPi0Prim, &vPi0Sec, mPi0, mPi0Sigma);
     for(int iPV=0; iPV<fNPV; iPV++)
     {
-      CombinePartPart(vV0Prim[3][iPV], vV0Prim[3][iPV], Particles, PrimVtx, fCutsPartPart[2], iPV, 111, 1, 0, &vPi0Prim, &vPi0Sec, mPi0, mPi0Sigma);
-      CombinePartPart(vV0Sec[2],       vV0Prim[3][iPV], Particles, PrimVtx, fCutsPartPart[2],  -1, 111, 0, 0, &vPi0Prim, &vPi0Sec, mPi0, mPi0Sigma);
+      CombinePartPart(vV0Prim[3][iPV], vV0Prim[3][iPV], Particles, PrimVtx, fCutsPartPart[1], iPV, 111, 1, 0, &vPi0Prim, &vPi0Sec, mPi0, mPi0Sigma);
+      CombinePartPart(vV0Sec[2],       vV0Prim[3][iPV], Particles, PrimVtx, fCutsPartPart[1],  -1, 111, 0, 0, &vPi0Prim, &vPi0Sec, mPi0, mPi0Sigma);
     }
     for(int iPV=0; iPV<fNPV; iPV++ )
       ExtrapolateToPV(vPi0Prim[iPV],PrimVtx[iPV]);
@@ -274,9 +268,9 @@ void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* C
     FindTrackV0Decay(vPi0Sec, 111, vRTracks[1], -1, vRTracks[1].FirstProton(), vRTracks[1].LastProton(),
                      Particles, PrimVtx, -1);
     //Xi0 -> Lambda pi0
-    CombinePartPart(vPi0Sec, vV0Sec[0], Particles, PrimVtx, fCutsPartPart[4], -1, 3322);
+    CombinePartPart(vPi0Sec, vV0Sec[0], Particles, PrimVtx, fCutsPartPart[0], -1, 3322);
     //Xi0_bar -> Lambda_bar pi0
-    CombinePartPart(vPi0Sec, vV0Sec[1], Particles, PrimVtx, fCutsPartPart[4], -1, -3322);
+    CombinePartPart(vPi0Sec, vV0Sec[1], Particles, PrimVtx, fCutsPartPart[0], -1, -3322);
     //K*+ -> K+ pi0
     for(int iPV=0; iPV<fNPV; iPV++)
       FindTrackV0Decay(vPi0Prim[iPV], 111, vRTracks[2],  1, vRTracks[2].FirstKaon(), vRTracks[2].LastKaon(),
@@ -287,19 +281,19 @@ void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* C
                        Particles, PrimVtx, -1);
     //K*0 -> K0 pi0
     for(int iPV=0; iPV<fNPV; iPV++)
-      CombinePartPart(vPi0Prim[iPV], vV0Prim[0][iPV], Particles, PrimVtx, fCutsPartPart[5], iPV, 100313, 0, 1);    
+      CombinePartPart(vPi0Prim[iPV], vV0Prim[0][iPV], Particles, PrimVtx, fCutsPartPart[1], iPV, 100313, 0, 1);    
     //Sigma*0 -> Lambda pi0
     for(int iPV=0; iPV<fNPV; iPV++)
-      CombinePartPart(vPi0Prim[iPV], vV0Prim[1][iPV], Particles, PrimVtx, fCutsPartPart[6], iPV, 3214, 0, 1);       
+      CombinePartPart(vPi0Prim[iPV], vV0Prim[1][iPV], Particles, PrimVtx, fCutsPartPart[1], iPV, 3214, 0, 1);       
     //Sigma*0_bar -> Lambda_bar pi0
     for(int iPV=0; iPV<fNPV; iPV++)
-      CombinePartPart(vPi0Prim[iPV], vV0Prim[2][iPV], Particles, PrimVtx, fCutsPartPart[6], iPV, -3214, 0, 1);       
+      CombinePartPart(vPi0Prim[iPV], vV0Prim[2][iPV], Particles, PrimVtx, fCutsPartPart[1], iPV, -3214, 0, 1);       
     //Xi*- -> Xi- pi0
     for(int iPV=0; iPV<fNPV; iPV++)
-      CombinePartPart(vPi0Prim[iPV], vXiPrim[iPV], Particles, PrimVtx, fCutsPartPart[7], iPV, 3314, 0, 1);   
+      CombinePartPart(vPi0Prim[iPV], vXiPrim[iPV], Particles, PrimVtx, fCutsPartPart[1], iPV, 3314, 0, 1);   
     //Xi*+ -> Xi+ pi0
     for(int iPV=0; iPV<fNPV; iPV++)
-      CombinePartPart(vPi0Prim[iPV], vXiBarPrim[iPV], Particles, PrimVtx, fCutsPartPart[7], iPV, -3314, 0, 1);  
+      CombinePartPart(vPi0Prim[iPV], vXiBarPrim[iPV], Particles, PrimVtx, fCutsPartPart[1], iPV, -3314, 0, 1);  
 
 
 //     int nParts[100] = {0};
@@ -1567,12 +1561,12 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
           {
             case   3312: motherType = 0; break; //Xi
             case   3334: motherType = 1; break; //Omega
-            case   4122: motherType = 3; break; //LambdaC
-            case    431: motherType = 3; break; //Ds+-
-            case    411: motherType = 3; break; //D+-
-            case 429: motherType = 3; break; //D0
-            case   3001: motherType = 4; break; //H0
-            case   3222: motherType = 5; break; //Sigma+
+            case   4122: motherType = 1; break; //LambdaC
+            case    431: motherType = 1; break; //Ds+-
+            case    411: motherType = 1; break; //D+-
+            case    429: motherType = 1; break; //D0
+            case   3001: motherType = 1; break; //H0
+            case   3222: motherType = 1; break; //Sigma+
             default:   motherType = 2; break; //resonances
           }
           for(int iCut=0; iCut<3; iCut++)

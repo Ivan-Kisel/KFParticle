@@ -2620,7 +2620,7 @@ float_v KFParticleBaseSIMD::GetDistanceFromParticle( const KFParticleBaseSIMD &p
 
 float_v KFParticleBaseSIMD::GetDeviationFromVertex( const KFParticleBaseSIMD &Vtx ) const
 {
-  //* Calculate sqrt(Chi2/ndf) deviation from vertex
+  //* Calculate Chi2 deviation from vertex
 
   return GetDeviationFromVertex( Vtx.fP, Vtx.fC );
 }
@@ -2628,7 +2628,7 @@ float_v KFParticleBaseSIMD::GetDeviationFromVertex( const KFParticleBaseSIMD &Vt
 
 float_v KFParticleBaseSIMD::GetDeviationFromVertex( const float_v v[], const float_v Cv[] ) const
 {
-  //* Calculate sqrt(Chi2/ndf) deviation from vertex
+  //* Calculate Chi2 deviation from vertex
   //* v = [xyz], Cv=[Cxx,Cxy,Cyy,Cxz,Cyz,Czz]-covariance matrix
 
   float_v mP[8];
@@ -2663,33 +2663,17 @@ float_v KFParticleBaseSIMD::GetDeviationFromVertex( const float_v v[], const flo
     mSi[4]+=Cv[4];
     mSi[5]+=Cv[5];
   }
-  
-//   float_v mS[6];
-// 
-//   mS[0] = mSi[2]*mSi[5] - mSi[4]*mSi[4];
-//   mS[1] = mSi[3]*mSi[4] - mSi[1]*mSi[5];
-//   mS[2] = mSi[0]*mSi[5] - mSi[3]*mSi[3];
-//   mS[3] = mSi[1]*mSi[4] - mSi[2]*mSi[3];
-//   mS[4] = mSi[1]*mSi[3] - mSi[0]*mSi[4];
-//   mS[5] = mSi[0]*mSi[2] - mSi[1]*mSi[1];	 
-//       
-//   float_v s = ( mSi[0]*mS[0] + mSi[1]*mS[1] + mSi[3]*mS[3] );
-//   s = if3( float_v( abs(s) > 1.E-8 )  , 1.f/s , 0.f);
-// 
-//   return sqrt( abs(s*( ( mS[0]*d[0] + mS[1]*d[1] + mS[3]*d[2])*d[0]
-// 		   +(mS[1]*d[0] + mS[2]*d[1] + mS[4]*d[2])*d[1]
-// 		   +(mS[3]*d[0] + mS[4]*d[1] + mS[5]*d[2])*d[2] ))/2);
 
   InvertCholetsky3(mSi);
-  return sqrt( ( ( mSi[0]*d[0] + mSi[1]*d[1] + mSi[3]*d[2])*d[0]
-                     +(mSi[1]*d[0] + mSi[2]*d[1] + mSi[4]*d[2])*d[1]
-                     +(mSi[3]*d[0] + mSi[4]*d[1] + mSi[5]*d[2])*d[2] ));
+  return ( ( mSi[0]*d[0] + mSi[1]*d[1] + mSi[3]*d[2])*d[0]
+           +(mSi[1]*d[0] + mSi[2]*d[1] + mSi[4]*d[2])*d[1]
+           +(mSi[3]*d[0] + mSi[4]*d[1] + mSi[5]*d[2])*d[2] );
 }
 
 
 float_v KFParticleBaseSIMD::GetDeviationFromParticle( const KFParticleBaseSIMD &p ) const
 { 
-  //* Calculate sqrt(Chi2/ndf) deviation from other particle
+  //* Calculate Chi2 deviation from other particle
 
 //   float_v dS, dS1;
 //   GetDStoParticle( p, dS, dS1 );   
