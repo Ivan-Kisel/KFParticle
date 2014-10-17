@@ -1216,38 +1216,74 @@ void KFTopoPerformance::FillHistos()
   }
   
   //fill histograms with ChiPrim for every particle
-  if(fTopoReconstructor->GetTracks())
+//   if(fTopoReconstructor->GetTracks())
+//   {
+//     for(int iTV=0; iTV<2; iTV++)
+//     {
+//       const kfvector_float& chiPrim = fTopoReconstructor->GetChiPrim()[iTV];
+//       const KFPTrackVector& tracks  = fTopoReconstructor->GetTracks()[iTV];
+//     
+//       for(int iTr = 0; iTr<tracks.Size(); iTr++)
+//       {
+//         int iP = tracks.Id()[iTr];
+//         if(iP < 0) continue;
+// 
+//         int iMC = RtoMCParticleId[iP].GetBestMatch();
+//         if(iMC < 0) 
+//         {
+//           hTrackParameters[KFPartEfficiencies::nParticles]->Fill(chiPrim[iTr] );
+//           continue;
+//         }
+//         KFMCParticle &mPart = vMCParticles[ iMC ];
+//         if(mPart.GetMotherId() < 0)
+//         {
+//           hTrackParameters[KFPartEfficiencies::nParticles]->Fill(chiPrim[iTr] );
+//           continue;
+//         }
+//         KFMCParticle &mMotherPart = vMCParticles[mPart.GetMotherId()];
+//         int iParticle = fParteff.GetParticleIndex(mMotherPart.GetPDG());
+//         if(iParticle > -1 && iParticle<KFPartEfficiencies::nParticles)
+//           hTrackParameters[iParticle]->Fill(chiPrim[iTr] );
+//       }
+//     }
+//   }
+
+  //fill histograms with ChiPrim for every particle
+  for(unsigned int iP=0; iP<fTopoReconstructor->GetParticles().size(); iP++)
   {
-    for(int iTV=0; iTV<2; iTV++)
-    {
-      const kfvector_float& chiPrim = fTopoReconstructor->GetChiPrim()[iTV];
-      const KFPTrackVector& tracks  = fTopoReconstructor->GetTracks()[iTV];
+    KFParticle TempPart = fTopoReconstructor->GetParticles()[iP];
+    KFParticle & vtx = fTopoReconstructor->GetPrimVertex(0);
+    float chi2 = TempPart.GetDeviationFromVertex(vtx);
+    int ndf = 2;
     
-      for(int iTr = 0; iTr<tracks.Size(); iTr++)
-      {
-        int iP = tracks.Id()[iTr];
-        if(iP < 0) continue;
-
-        int iMC = RtoMCParticleId[iP].GetBestMatch();
-        if(iMC < 0) 
-        {
-          hTrackParameters[KFPartEfficiencies::nParticles]->Fill(chiPrim[iTr] );
-          continue;
-        }
-        KFMCParticle &mPart = vMCParticles[ iMC ];
-        if(mPart.GetMotherId() < 0)
-        {
-          hTrackParameters[KFPartEfficiencies::nParticles]->Fill(chiPrim[iTr] );
-          continue;
-        }
-        KFMCParticle &mMotherPart = vMCParticles[mPart.GetMotherId()];
-        int iParticle = fParteff.GetParticleIndex(mMotherPart.GetPDG());
-        if(iParticle > -1 && iParticle<KFPartEfficiencies::nParticles)
-          hTrackParameters[iParticle]->Fill(chiPrim[iTr] );
-      }
+    hTrackParameters[KFPartEfficiencies::nParticles]->Fill(chi2);
+    hTrackParameters[KFPartEfficiencies::nParticles+4]->Fill(TMath::Prob(chi2, ndf));
+    
+    if(!RtoMCParticleId[iP].IsMatched()) 
+    {
+      hTrackParameters[KFPartEfficiencies::nParticles+3]->Fill(chi2);
+      hTrackParameters[KFPartEfficiencies::nParticles+7]->Fill(TMath::Prob(chi2, ndf));
+      continue;
     }
+    
+    int iMCPart = RtoMCParticleId[iP].GetBestMatch();
+    KFMCParticle &mcPart = vMCParticles[iMCPart];
+    if(mcPart.GetMotherId() < 0)
+    {
+      hTrackParameters[KFPartEfficiencies::nParticles+1]->Fill(chi2 );
+      hTrackParameters[KFPartEfficiencies::nParticles+5]->Fill(TMath::Prob(chi2, ndf));
+    }
+    else
+    {
+      hTrackParameters[KFPartEfficiencies::nParticles+2]->Fill(chi2 );
+      hTrackParameters[KFPartEfficiencies::nParticles+6]->Fill(TMath::Prob(chi2, ndf));
+    }    
+    int iParticle = fParteff.GetParticleIndex(fTopoReconstructor->GetParticles()[iP].GetPDG());
+    if(iParticle > -1 && iParticle<KFPartEfficiencies::nParticles)
+      hTrackParameters[iParticle]->Fill(chi2 );
   }
-
+  
+  
   //fill histograms of the primary vertex quality
   for(int iPV = 0; iPV<fTopoReconstructor->NPrimaryVertices(); iPV++)
   {

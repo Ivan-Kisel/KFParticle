@@ -503,7 +503,15 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
         hTrackParameters[iPart] = new TH1F(chi2NamePart.Data(), chi2NamePart.Data(), 1000, 0, 100);
 
       }
-      hTrackParameters[KFPartEfficiencies::nParticles] = new TH1F("Chi2Prim", "Chi2Prim", 1000, 0, 100);
+      hTrackParameters[KFPartEfficiencies::nParticles  ] = new TH1F("Chi2Prim_total", "Chi2Prim_total", 1000, 0, 100);
+      hTrackParameters[KFPartEfficiencies::nParticles+1] = new TH1F("Chi2Prim_prim", "Chi2Prim_prim", 1000, 0, 100);
+      hTrackParameters[KFPartEfficiencies::nParticles+2] = new TH1F("Chi2Prim_sec", "Chi2Prim_sec", 1000, 0, 100);
+      hTrackParameters[KFPartEfficiencies::nParticles+3] = new TH1F("Chi2Prim_ghost", "Chi2Prim_ghost", 1000, 0, 100);
+      
+      hTrackParameters[KFPartEfficiencies::nParticles+4] = new TH1F("ProbPrim_total", "ProbPrim_total", 10000, 0, 1);
+      hTrackParameters[KFPartEfficiencies::nParticles+5] = new TH1F("ProbPrim_prim", "ProbPrim_prim", 10000, 0, 1);
+      hTrackParameters[KFPartEfficiencies::nParticles+6] = new TH1F("ProbPrim_sec", "ProbPrim_sec", 10000, 0, 1);
+      hTrackParameters[KFPartEfficiencies::nParticles+7] = new TH1F("ProbPrim_ghost", "ProbPrim_ghost", 10000, 0, 1);
     }
     gDirectory->cd(".."); //particle directory
 

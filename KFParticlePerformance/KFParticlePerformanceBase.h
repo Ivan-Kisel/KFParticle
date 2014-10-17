@@ -133,7 +133,7 @@ class KFParticlePerformanceBase
   static const int nFitPVTracksQA = 12;
   TH1F *hFitPVTracksQA[nFitPVTracksQA];
   
-  static const int nHistosTP = KFPartEfficiencies::nParticles + 1;
+  static const int nHistosTP = KFPartEfficiencies::nParticles + 8;
   TH1F *hTrackParameters[nHistosTP];
   
   static const int nPVefficiency = 6;
