@@ -1186,10 +1186,12 @@ void KFParticleFinder::ConstructTrackV0Cand(KFPTrackVector& vTracks,
   saveParticle &= ((float_m(!isPrimary) && isParticleFromVertex) || float_m(isPrimary) );
   if( saveParticle.isEmpty() ) { return; }
 
-  float_m isSameParticle = (abs(mother.PDG()) ==   4122) ||
-                           (abs(mother.PDG()) ==    411) ||
-                           (abs(mother.PDG()) ==    431) ||
-                           (abs(mother.PDG()) == 429) ||
+  float_m isSameParticle = (abs(mother.PDG()) ==    4122) ||
+                           (abs(mother.PDG()) ==     411) ||
+                           (abs(mother.PDG()) ==     431) ||
+                           (abs(mother.PDG()) ==     429) ||
+                           (abs(mother.PDG()) == 1003334) ||
+                           (abs(mother.PDG()) ==    3001) ||
                            isPrimary;
   if(!((isSameParticle).isFull()))
   {
@@ -1232,27 +1234,6 @@ void KFParticleFinder::ConstructTrackV0Cand(KFPTrackVector& vTracks,
   {
     if(!saveParticle[iv]) continue; 
     
-    if(!(isPrimaryPart[iv]))
-    {
-      if( vMotherSec )
-      {
-        float mass, errMass;
-        mother_temp.GetMass(mass, errMass);
-        if(abs(mother.PDG()[0]) == 3324)
-        {
-          vMotherSec->push_back(mother_temp);
-        }
-        else
-        {    
-          mother_temp.SetNonlinearMassConstraint(massMotherPDG[0]);
-
-          if( (fabs(mass - massMotherPDG[0])/massMotherPDGSigma[0]) <= 3 )
-          vMotherSec->push_back(mother_temp);
-        }
-      }
-      continue;
-    }
-    
     mother.GetKFParticle(mother_temp, iv);
     if( mother.PDG()[iv] == 3312 )
     {
@@ -1293,6 +1274,27 @@ void KFParticleFinder::ConstructTrackV0Cand(KFPTrackVector& vTracks,
     if( mother.PDG()[iv] == -429 ) 
     {
       fD04bar.push_back(mother_temp);
+      continue;
+    }
+    
+    if(!(isPrimaryPart[iv]))
+    {
+      if( vMotherSec )
+      {
+        float mass, errMass;
+        mother_temp.GetMass(mass, errMass);
+        if(abs(mother.PDG()[0]) == 3324)
+        {
+          vMotherSec->push_back(mother_temp);
+        }
+        else
+        {    
+          mother_temp.SetNonlinearMassConstraint(massMotherPDG[0]);
+
+          if( (fabs(mass - massMotherPDG[0])/massMotherPDGSigma[0]) <= 3 )
+          vMotherSec->push_back(mother_temp);
+        }
+      }
       continue;
     }
     
