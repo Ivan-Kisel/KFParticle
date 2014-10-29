@@ -11,6 +11,9 @@
 
 #include "KFMCParticle.h"
 
+#ifndef KFParticleStandalone
+ClassImp(KFMCParticle)
+#endif
 
 KFMCParticle::KFMCParticle() :fDaughterIds(), fMCTrackID(-1), fMotherId(-1), fPDG(0)
 {

@@ -15,7 +15,13 @@
 #include <vector>
 using std::vector;
 
-class KFMCParticle
+#ifdef HLTCA_STANDALONE
+#include "RootTypesDef.h"
+#else
+#include "TObject.h"
+#endif
+
+class KFMCParticle :public TObject
 {
  public:
   KFMCParticle();
@@ -49,6 +55,9 @@ class KFMCParticle
   bool fIsReconstructable[3]; //all particles ,all daughters are reconstructable, all daughters are reconstructed
   bool fIsV0[3];
   
+#ifndef KFParticleStandalone
+  ClassDef( KFMCParticle, 1 )
+#endif
 };
 
 #endif
