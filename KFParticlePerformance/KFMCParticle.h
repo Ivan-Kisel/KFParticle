@@ -30,7 +30,6 @@ class KFMCParticle :public TObject
   void AddDaughter( int i );
   int  NDaughters() const { return fDaughterIds.size(); };
   const vector<int>&  GetDaughterIds() const { return fDaughterIds; };
-  void FindCommonMC();
 
   void SetPDG(int pdg) {fPDG = pdg;}
   void SetMCTrackID(int id) {fMCTrackID = id;}
