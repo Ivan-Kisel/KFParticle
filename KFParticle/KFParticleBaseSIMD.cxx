@@ -1985,16 +1985,13 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
       n1(int_m(dz < dzMin)) = i1;
       n2(int_m(dz < dzMin)) = i2;
       dzMin(dz < dzMin) = dz;
-//     std::cout << "!!!!! " << dz << std::endl;
     }
   }
 
-//   std::cout << "n1 " << n1 << " n2 " << n2 << std::endl;
   DS( !isStraight1) += float_v(n1)*pi2/bq1;
   DS1(!isStraight2) += float_v(n2)*pi2/bq2;
 
   //add a correction on z-coordinate
-//   if(1)
   {
     const float_v& bs1 = bq1*DS;
     const float_v& bs2 = bq2*DS1;
@@ -2025,75 +2022,9 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
     float_v sz2(Vc::Zero);
     sz2( abs(delta) > 1.e-16f )= -cz*(pz2*bq1*kz11 - pz1*bq2*kz21) / delta;
 
-//     float_v eq1 = -ar1*sz1 + br*bq1*sz1 - br*bq2*sz2 + bq2*cz*pz1 + bq2*sz1*pz1*pz1 - bq2*pz1*pz2*sz2;
-//     float_v eq2 = -ar2*sz2 + br*bq1*sz1 - br*bq2*sz2 + bq1*cz*pz2 + bq1*pz1*pz2*sz1 - bq1*pz2*pz2*sz2;
-//     std::cout << "!!! eq1 " << eq1 << std::endl;
-//     std::cout << "!!! eq2 " << eq2 << std::endl;
-//     std::cout << "sz1 " << sz1 << std::endl;
-//     std::cout << "sz2 " << sz2 << std::endl;
-//     std::cout << std::endl;
-//     std::cout << "DS do    " << DS << std::endl;
     DS  += sz1;
-//     std::cout << "DS posle " << DS << std::endl;
-//     std::cout << "DS1 do    " << DS1 << std::endl;
     DS1 += sz2;
-//     std::cout << "DS1 posle " << DS1 << std::endl;
   }  
-
-//   if(1)
-//   {
-//     float_v eq1(Vc::Zero);
-//     float_v eq2(Vc::Zero);
-//     
-//     float_v bs1 = bq1*DS;
-//     float_v bs2 = bq2*DS1;
-//     float_v s1 = CAMath::Sin(bs1), c1 = CAMath::Cos(bs1);
-//     float_v s2 = CAMath::Sin(bs2), c2 = CAMath::Cos(bs2);
-//     
-//     const float_m& bs1Big = abs(bs1) > 1.e-8f;
-//     float_v sB(Vc::Zero), cB(Vc::Zero);
-//     sB(bs1Big) = s1/bq1;
-//     sB(!bs1Big) = ((1.f-bs1*kOvSqr6)*(1.f+bs1*kOvSqr6)*DS);
-//     cB(bs1Big) = (1.f-c1)/bq1;
-//     cB(!bs1Big) = .5f*sB*bs1;
-//   
-//     float_v x1 = param1[0] + sB*px1 + cB*py1;
-//     float_v y1 = param1[1] - cB*px1 + sB*py1;
-//     float_v z1 = param1[2] + DS*param1[5];
-//     float_v vx1 = s1*param1[4] + c1*param1[3];
-//     float_v vy1 = c1*param1[4] - s1*param1[3];
-//     float_v vz1 = param1[5];
-// 
-//     const float_m& bs2Big = abs(bs2) > 1.e-8f;
-//     sB(bs2Big) = s2/bq2;
-//     sB(!bs2Big) = ((1.f-bs2*kOvSqr6)*(1.f+bs2*kOvSqr6)*DS1);
-//     cB(bs2Big) = (1.f-c2)/bq2;
-//     cB(!bs2Big) = .5f*sB*bs2;
-// 
-//     float_v x2 = param2[0] + sB*px2 + cB*py2;
-//     float_v y2 = param2[1] - cB*px2 + sB*py2;
-//     float_v z2 = param2[2] + DS1*param2[5];
-//     float_v vx2 = s2*param2[4] + c2*param2[3];
-//     float_v vy2 = c2*param2[4] - s2*param2[3];    
-//     float_v vz2 = param2[5];
-// 
-//     float_v dx = (x1-x2);
-//     float_v dy = (y1-y2);
-//     float_v dz = (z1-z2);
-//     
-//     eq1 = dx*vx1 + dy*vy1 + dz*vz1;
-//     eq2 = dx*vx2 + dy*vy2 + dz*vz2;
-//     const float_v& r1 = sqrt(x1*x1+y1*y1);
-//     const float_v& r2 = sqrt(x2*x2+y2*y2);
-//     const float_v& dr = sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
-//     
-//     std::cout << "root " << std::endl;
-//     std::cout << "ds to particle eq: " << eq1 << " " << eq2 << std::endl;
-//     std::cout << "bq1 " << bq1 << " bq2 " << bq2 << std::endl;
-//     std::cout << "ds1 " << DS << " ds2 " << DS1 << std::endl;
-//     std::cout << "r1 " << r1 << "   r2 " << r2 << std::endl;
-//     std::cout << "dr " << dr << std::endl;
-//   }
 }
 
 void KFParticleBaseSIMD::GetDStoParticleBy( float_v B, const KFParticleBaseSIMD &p, float_v &DS, float_v &DS1 ) const
@@ -2120,17 +2051,7 @@ float_v KFParticleBaseSIMD::GetDStoPointCBM( const float_v xyz[] ) const
 {
   //* Transport the particle on dS, output to P[],C[], for CBM field
 
-//   const float_v *r = fP;
-//   float_v p2 = r[3]*r[3] + r[4]*r[4] + r[5]*r[5];
-//   float_v dS(Vc::Zero);
-//   dS(abs(p2) > float_v(1.E-4f)) = ( r[3]*(xyz[0]-r[0]) + r[4]*(xyz[1]-r[1]) + r[5]*(xyz[2]-r[2]) )/p2;
-
   float_v dS(Vc::Zero);
-
-//   if( fQ[0]==0 ){
-//     dS = GetDStoPointLine( xyz );
-//     return dS;
-//   }
 
   float_v fld[3];
   GetFieldValue( fP, fld );
@@ -2167,36 +2088,6 @@ void KFParticleBaseSIMD::GetDStoParticleLine( const KFParticleBaseSIMD &p, float
 void KFParticleBaseSIMD::GetDStoParticleCBM( const KFParticleBaseSIMD &p, float_v &dS, float_v &dS1 ) const
 {
   //* Transport the particle on dS, output to P[],C[], for CBM field
-
-//     float_v mTy[2];
-//     float_v mY[2];
-//     float_v mZ[2];
-// 
-//     mY[0]  = GetY();
-//     mZ[0]  = GetZ();
-//     mTy[0] = 1.f;
-//     mTy[0](abs(GetPz()) > small) = GetPy()/GetPz();
-// 
-//     mY[1]  = p.GetY();
-//     mZ[1]  = p.GetZ();
-//     mTy[1] = 1.f;
-//     mTy[1]( abs(p.GetPz()) > small) = p.GetPy()/p.GetPz();
-// 
-//     float_v r0[3] = {0.f};
-//     float_v dty = mTy[0]-mTy[1];
-//     
-//     r0[2](abs(dty) > small) = (mTy[0]*mZ[0]-mTy[1]*mZ[1] + mY[1] -mY[0])/dty;
-//     r0[1] = mY[0] + mTy[0]*(r0[2]-mZ[0]);
-//     r0[0] = GetX() + GetPx()/GetPz()*(r0[2]-mZ[0]);
-//     
-//     dS = GetDStoPointCBM(r0);
-//     dS1 = p.GetDStoPoint(r0);
-
-//   if( fQ[0]==0 ){
-//     GetDStoParticleLine( p, dS, dS1 );
-//     return;
-//   }
-
   float_v fld[3];
   GetFieldValue( fP, fld );
 

@@ -277,7 +277,7 @@ class KFParticleBase :public TObject {
   int Id() const { return fId; };
   int NDaughters() const { return fDaughtersIds.size(); };
   const std::vector<int>& DaughterIds() const { return fDaughtersIds; };
-  void ClearDaughterIds() { fDaughtersIds.clear(); }
+  void CleanDaughtersId() { fDaughtersIds.clear(); }
   
   void SetId( int id ){ fId = id; }; // should be always used (manualy)
   void AddDaughterId( int id ){ fDaughtersIds.push_back(id); };

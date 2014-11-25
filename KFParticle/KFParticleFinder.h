@@ -17,6 +17,7 @@
 #include "KFParticleSIMD.h"
 
 #include "KFPTrackVector.h"
+#include "KFPEmcCluster.h"
 
 #include <vector>
 
@@ -41,71 +42,71 @@ class KFParticleFinder
   /// cut[*][2] - z coordinate of the reconstructed particle.
   /// cut[*][3] - chi2/ndf of the reconstructed particle fitted to the PV;
 
-     void FindParticles(KFPTrackVector* vRTracks, kfvector_float* ChiToPrimVtx,
-                        std::vector<KFParticle>& Particles, KFParticleSIMD* PrimVtx, int nPV);
+  void FindParticles(KFPTrackVector* vRTracks, kfvector_float* ChiToPrimVtx,
+                     std::vector<KFParticle>& Particles, KFParticleSIMD* PrimVtx, int nPV);
 
-     void ExtrapolateToPV(std::vector<KFParticle>& vParticles, KFParticleSIMD& PrimVtx);
-     float_v GetChi2BetweenParticles(KFParticleSIMD &p1, KFParticleSIMD &p2);
+  void ExtrapolateToPV(std::vector<KFParticle>& vParticles, KFParticleSIMD& PrimVtx);
+  float_v GetChi2BetweenParticles(KFParticleSIMD &p1, KFParticleSIMD &p2);
      
-    inline void ConstructV0(KFPTrackVector* vTracks,
-                     int iTrTypePos,
-                     int iTrTypeNeg,
-                     uint_v& idPosDaughters,
-                     uint_v& idNegDaughters,
-                     int_v& daughterPosPDG,
-                     int_v& daughterNegPDG,
-                     KFParticleSIMD& mother,
-                     KFParticle& mother_temp,
-                     const unsigned short NTracks,
-                     std::vector<float_v>& l,
-                     std::vector<float_v>& dl,
-                     std::vector<KFParticle>& Particles,
-                     KFParticleSIMD* PrimVtx,
-                     const float* cuts,
-                     const int_v& pvIndex,
-                     const float* secCuts,
-                     const float_v& massMotherPDG,
-                     const float_v& massMotherPDGSigma,
-                     KFParticleSIMD& motherPrimSecCand,
-                     int& nPrimSecCand,
-                     std::vector< std::vector<KFParticle> >* vMotherPrim = 0,
-                     std::vector<KFParticle>* vMotherSec = 0
-                    ) __attribute__((always_inline));
-    
-    void SaveV0PrimSecCand(KFParticleSIMD& mother,
-                           int& NParticles,
-                           KFParticle& mother_temp,
-                           KFParticleSIMD* PrimVtx,
-                           const float* secCuts,
-                           std::vector< std::vector<KFParticle> >* vMotherPrim,
-                           std::vector<KFParticle>* vMotherSec);
-    
-    void ConstructTrackV0Cand(KFPTrackVector& vTracks,
-                               uint_v& idTracks,
-                               int_v& trackPDG,
-                               KFParticle* vV0[],
-                               KFParticleSIMD& mother,
-                               KFParticleSIMD* motherTopo,
-                               KFParticle& mother_temp,
-                               const unsigned short nElements,
-                               std::vector<float_v>& l,
-                               std::vector<float_v>& dl,
-                               std::vector<KFParticle>& Particles,
-                               KFParticleSIMD* PrimVtx,
-                               const float_v* cuts,
-                               const int_v& pvIndex,
-                               const float_v& massMotherPDG,
-                               const float_v& massMotherPDGSigma,
-                               std::vector< std::vector<KFParticle> >* vMotherPrim,
-                               std::vector<KFParticle>* vMotherSec);
+  inline void ConstructV0(KFPTrackVector* vTracks,
+                    int iTrTypePos,
+                    int iTrTypeNeg,
+                    uint_v& idPosDaughters,
+                    uint_v& idNegDaughters,
+                    int_v& daughterPosPDG,
+                    int_v& daughterNegPDG,
+                    KFParticleSIMD& mother,
+                    KFParticle& mother_temp,
+                    const unsigned short NTracks,
+                    std::vector<float_v>& l,
+                    std::vector<float_v>& dl,
+                    std::vector<KFParticle>& Particles,
+                    KFParticleSIMD* PrimVtx,
+                    const float* cuts,
+                    const int_v& pvIndex,
+                    const float* secCuts,
+                    const float_v& massMotherPDG,
+                    const float_v& massMotherPDGSigma,
+                    KFParticleSIMD& motherPrimSecCand,
+                    int& nPrimSecCand,
+                    std::vector< std::vector<KFParticle> >* vMotherPrim = 0,
+                    std::vector<KFParticle>* vMotherSec = 0
+                  ) __attribute__((always_inline));
+  
+  void SaveV0PrimSecCand(KFParticleSIMD& mother,
+                          int& NParticles,
+                          KFParticle& mother_temp,
+                          KFParticleSIMD* PrimVtx,
+                          const float* secCuts,
+                          std::vector< std::vector<KFParticle> >* vMotherPrim,
+                          std::vector<KFParticle>* vMotherSec);
+  
+  void ConstructTrackV0Cand(KFPTrackVector& vTracks,
+                              uint_v& idTracks,
+                              int_v& trackPDG,
+                              KFParticle* vV0[],
+                              KFParticleSIMD& mother,
+                              KFParticleSIMD* motherTopo,
+                              KFParticle& mother_temp,
+                              const unsigned short nElements,
+                              std::vector<float_v>& l,
+                              std::vector<float_v>& dl,
+                              std::vector<KFParticle>& Particles,
+                              KFParticleSIMD* PrimVtx,
+                              const float_v* cuts,
+                              const int_v& pvIndex,
+                              const float_v& massMotherPDG,
+                              const float_v& massMotherPDGSigma,
+                              std::vector< std::vector<KFParticle> >* vMotherPrim,
+                              std::vector<KFParticle>* vMotherSec);
 
-    void Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_float* ChiToPrimVtx,
-                            std::vector<KFParticle>& Particles,
-                            KFParticleSIMD* PrimVtx,
-                            const float* cuts,
-                            const float* secCuts,
-                            std::vector< std::vector<KFParticle> >* vMotherPrim,
-                            std::vector<KFParticle>* vMotherSec );
+  void Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_float* ChiToPrimVtx,
+                          std::vector<KFParticle>& Particles,
+                          KFParticleSIMD* PrimVtx,
+                          const float* cuts,
+                          const float* secCuts,
+                          std::vector< std::vector<KFParticle> >* vMotherPrim,
+                          std::vector<KFParticle>* vMotherSec );
 
   void FindTrackV0Decay(std::vector<KFParticle>& vV0,
                         const int V0PDG,
@@ -155,6 +156,9 @@ class KFParticleFinder
     fSecCuts[2] = ldl;
   }
   
+  //Set Emc clusters containing gammas
+  void SetEmcClusters(KFPEmcCluster* clusters) { fEmcClusters = clusters; }
+  
  private:
 
   short int fNPV;
@@ -185,6 +189,13 @@ class KFParticleFinder
   //vectors with temporary particles for H0
   std::vector<KFParticle> fLPi; //Lambda Pi+ combination
   std::vector<int> fLPiPIndex; //index of the proton in Labmda
+  
+  std::vector<KFParticle> fK0PiPlus;
+  std::vector<int> fK0PiMinusIndex;
+  std::vector<KFParticle> fK0PiPi;
+  
+  //pointer to the gamma EMC clusters
+  KFPEmcCluster* fEmcClusters;
 };
 
 #endif /* !KFParticleFinder_h */

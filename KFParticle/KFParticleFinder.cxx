@@ -21,7 +21,7 @@ using std::vector;
 
 KFParticleFinder::KFParticleFinder():
   fNPV(-1),fNThreads(1),fCutCharmPt(0.2f),fCutCharmChiPrim(6.f),fCutLVMPt(0.2f),fCutLVMP(1.0f),fCutJPsiPt(1.0f),
-  fD0(0), fD0bar(0), fD04(0), fD04bar(0), fDPlus(0), fDMinus(0), fLPi(0), fLPiPIndex(0)
+  fD0(0), fD0bar(0), fD04(0), fD04bar(0), fDPlus(0), fDMinus(0), fLPi(0), fLPiPIndex(0), fEmcClusters(0)
 {
   //Cuts
   //track + track
@@ -29,8 +29,11 @@ KFParticleFinder::KFParticleFinder():
   fCuts2D[0] = 3.f; fCuts2D[1] = 3.f; fCuts2D[2] = 5.f; 
   //tracks to select primary and secondary particles
   //mass              chi2_topo          ldl
+#ifdef PANDA_STT
+  fSecCuts[0] = 3.f; fSecCuts[1] = -3.f; fSecCuts[2] = 10.f;
+#else  
   fSecCuts[0] = 3.f; fSecCuts[1] = 5.f; fSecCuts[2] = 10.f;
-
+#endif
   //track + particle
   //                ldl          chi2_topo                        chi2_geo
   fCutsTrackV0[0][0] = 10;     fCutsTrackV0[0][1] = 5;        fCutsTrackV0[0][2] = 6;  //Xi
@@ -79,26 +82,56 @@ void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* C
   fDMinus.clear();
   fLPi.clear();
   fLPiPIndex.clear();
+  fK0PiPlus.clear();
+  fK0PiMinusIndex.clear();
+  fK0PiPi.clear();
   
+  int nEmcClusters = 0;
+  if(fEmcClusters)
+    nEmcClusters = fEmcClusters->Size();
   
-  Particles.reserve(nPart+vRTracks[0].Size()+vRTracks[1].Size()+vRTracks[2].Size()+vRTracks[3].Size());
+  vector<KFParticle> vGammaPrimEmc;
+  
+  Particles.reserve(nPart+vRTracks[0].Size()+vRTracks[1].Size()+vRTracks[2].Size()+vRTracks[3].Size() + nEmcClusters);
   {
     KFPTrack kfTrack;
     for(int iV=0; iV<4; iV++)
     {
-      for(unsigned short iTr=0; iTr < vRTracks[iV].Size(); iTr++) {
+      for(unsigned short iTr=0; iTr < vRTracks[iV].Size(); iTr++)
+      {
         vRTracks[iV].GetTrack(kfTrack, iTr);
         KFParticle tmp(kfTrack, vRTracks[iV].PDG()[iTr]);
         tmp.SetPDG(vRTracks[iV].PDG()[iTr]);//vTrackPDG[iTr]);
         tmp.SetId(Particles.size());
         vRTracks[iV].SetId(Particles.size(),iTr);
-        tmp.SetNDaughters(1);
         tmp.AddDaughterId( kfTrack.Id() );
 #ifdef NonhomogeneousField
         for(int iF=0; iF<10; iF++)
           tmp.SetFieldCoeff( vRTracks[iV].FieldCoefficient(iF)[iTr], iF);
 #endif
         Particles.push_back(tmp);
+      }
+    }
+    
+    if(fEmcClusters)
+    {
+      KFParticleSIMD tmpGammaSIMD;
+      KFParticle tmpGamma;
+      
+      for(unsigned short iEmc=0; iEmc < fEmcClusters->Size(); iEmc += float_vLen)
+      {
+        const unsigned short NClustersVec = (iEmc + float_vLen < fEmcClusters->Size()) ? float_vLen : (fEmcClusters->Size() - iEmc);
+        tmpGammaSIMD.Load(*fEmcClusters, iEmc, PrimVtx[0]);
+        for(int iV=0; iV<NClustersVec; iV++)
+        {
+          tmpGammaSIMD.GetKFParticle(tmpGamma, iV);
+          tmpGamma.SetPDG(22); //gamma pdg
+          tmpGamma.SetId(Particles.size());
+          tmpGamma.CleanDaughtersId();
+          tmpGamma.AddDaughterId(fEmcClusters->Id()[iEmc+iV]);
+          Particles.push_back(tmpGamma);
+          vGammaPrimEmc.push_back(tmpGamma);
+        }
       }
     }
   }
@@ -112,7 +145,7 @@ void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* C
   vector< vector<KFParticle> > vV0Prim[4]; // Ks, Lambda, Lambda_bar, gamma
   for(int iV0Prim = 0; iV0Prim<4; iV0Prim++)
     vV0Prim[iV0Prim].resize(fNPV);
-  vector<KFParticle> vV0Sec[3]; //Lambda, Lambda_bar, gamma
+  vector<KFParticle> vV0Sec[4]; //Ks, Lambda, Lambda_bar, gamma
   
   vector< vector<KFParticle> > vPi0Prim(fNPV);
   vector<KFParticle> vPi0Sec;
@@ -130,10 +163,10 @@ void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* C
   }
   
   //Xi- -> Lambda pi-, Omega- -> Lambda K-
-  FindTrackV0Decay(vV0Sec[0], 3122, vRTracks[1], -1, vRTracks[1].FirstPion(), vRTracks[1].LastKaon(),
+  FindTrackV0Decay(vV0Sec[1], 3122, vRTracks[1], -1, vRTracks[1].FirstPion(), vRTracks[1].LastKaon(),
                    Particles, PrimVtx, -1, &(ChiToPrimVtx[1]), &vXiPrim);
   //Xi+ -> Lambda pi+, Omega+ -> Lambda K+
-  FindTrackV0Decay(vV0Sec[1], -3122, vRTracks[0], 1, vRTracks[0].FirstPion(), vRTracks[0].LastKaon(),
+  FindTrackV0Decay(vV0Sec[2], -3122, vRTracks[0], 1, vRTracks[0].FirstPion(), vRTracks[0].LastKaon(),
                    Particles, PrimVtx, -1, &(ChiToPrimVtx[0]), &vXiBarPrim);
   for(int iPV=0; iPV<fNPV; iPV++ )
   {
@@ -157,220 +190,169 @@ void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* C
   for(int iPV=0; iPV<fNPV; iPV++)
     FindTrackV0Decay(vV0Prim[1][iPV], 3122, vRTracks[3], -1, vRTracks[3].FirstPion(), vRTracks[3].LastKaon(),
                      Particles, PrimVtx, iPV, 0);
-    //Sigma*+_bar -> Lambda_bar pi-
-    for(int iPV=0; iPV<fNPV; iPV++)
-      FindTrackV0Decay(vV0Prim[2][iPV], -3122, vRTracks[3], -1, vRTracks[3].FirstPion(), vRTracks[3].LastPion(),
-                       Particles, PrimVtx, iPV, 0);
-    //Sigma*-_bar -> Lambda_bar pi+, Xi*+ -> Lambda_bar + K+
-    for(int iPV=0; iPV<fNPV; iPV++)
-      FindTrackV0Decay(vV0Prim[2][iPV], -3122, vRTracks[2], 1, vRTracks[2].FirstPion(), vRTracks[2].LastKaon(),
-                       Particles, PrimVtx, iPV, 0);
-    //Xi*0 -> Xi- pi+
-    for(int iPV=0; iPV<fNPV; iPV++)
-      FindTrackV0Decay(vXiPrim[iPV], 3312, vRTracks[2], 1, vRTracks[2].FirstPion(), vRTracks[2].LastPion(),
-                       Particles, PrimVtx, iPV, 0, &vXiStarPrim);
-    //Xi*0_bar -> Xi+ pi-
-    for(int iPV=0; iPV<fNPV; iPV++)
-      FindTrackV0Decay(vXiBarPrim[iPV], -3312, vRTracks[3], -1, vRTracks[3].FirstPion(), vRTracks[3].LastPion(),
-                       Particles, PrimVtx, iPV, 0, &vXiStarBarPrim);
-    //Omega*- -> Xi- pi+ K-
-    for(int iPV=0; iPV<fNPV; iPV++)
-      FindTrackV0Decay(vXiStarPrim[iPV], 3324, vRTracks[3], -1, vRTracks[3].FirstKaon(), vRTracks[3].LastKaon(),
-                       Particles, PrimVtx, iPV, 0);
-    //Omega*+ -> Xi+ pi- K+
-    for(int iPV=0; iPV<fNPV; iPV++)
-      FindTrackV0Decay(vXiStarBarPrim[iPV], -3324, vRTracks[2], 1, vRTracks[2].FirstKaon(), vRTracks[2].LastKaon(),
-                       Particles, PrimVtx, iPV, 0);
-    // Charm
-    //LambdaC -> pi+ K- p, Ds+ -> pi+ K- K+, D+ -> pi+ K- pi+
-    FindTrackV0Decay(fD0, 421, vRTracks[0], 1, vRTracks[0].FirstPion(), vRTracks[0].LastProton(),
-                     Particles, PrimVtx, -1, &(ChiToPrimVtx[0]));
-    //LambdaC_bar -> pi- K+ p-, Ds- -> pi- K+ K-, D- -> pi- K+ pi-
-    FindTrackV0Decay(fD0bar, -421, vRTracks[1], -1, vRTracks[1].FirstPion(), vRTracks[1].LastProton(),
-                     Particles, PrimVtx, -1, &(ChiToPrimVtx[1]));    
-    //D0->pi+ K- pi+ pi-
-    FindTrackV0Decay(fDPlus, 411, vRTracks[1], -1, vRTracks[1].FirstPion(), vRTracks[1].LastPion(),
-                     Particles, PrimVtx, -1, &(ChiToPrimVtx[1]));
-    //D0_bar->pi- K+ pi- pi+
-    FindTrackV0Decay(fDMinus, -411, vRTracks[0], 1, vRTracks[0].FirstPion(), vRTracks[0].LastPion(),
-                     Particles, PrimVtx, -1, &(ChiToPrimVtx[0]));    
-    //D0 -> pi+ K-
-    SelectParticles(Particles,fD0,PrimVtx,fCutsCharm[2],fCutsCharm[1],
-                    KFParticleDatabase::Instance()->GetD0Mass(), KFParticleDatabase::Instance()->GetD0MassSigma(), fSecCuts[0]);
-    //D0_bar -> pi+ K-
-    SelectParticles(Particles,fD0bar,PrimVtx,fCutsCharm[2],fCutsCharm[1],
-                    KFParticleDatabase::Instance()->GetD0Mass(), KFParticleDatabase::Instance()->GetD0MassSigma(), fSecCuts[0]);
-    //D*+->D0 pi+
-    for(int iPV=0; iPV<fNPV; iPV++)
-      FindTrackV0Decay(fD0, 421, vRTracks[2], 1, vRTracks[2].FirstPion(), vRTracks[2].LastPion(),
-                       Particles, PrimVtx, iPV, 0);
-    //D*- -> D0_bar pi-
-    for(int iPV=0; iPV<fNPV; iPV++)
-      FindTrackV0Decay(fD0, -421, vRTracks[3], -1, vRTracks[3].FirstPion(), vRTracks[3].LastPion(),
-                       Particles, PrimVtx, iPV, 0);
-    //D0 -> pi+ K- pi+ pi-
-    SelectParticles(Particles,fD04,PrimVtx,fCutsCharm[2],fCutsCharm[1],
-                    KFParticleDatabase::Instance()->GetD0Mass(), KFParticleDatabase::Instance()->GetD0MassSigma(), fSecCuts[0]);
-    //D0_bar -> pi- K+ pi- pi+
-    SelectParticles(Particles,fD04bar,PrimVtx,fCutsCharm[2],fCutsCharm[1],
-                    KFParticleDatabase::Instance()->GetD0Mass(), KFParticleDatabase::Instance()->GetD0MassSigma(), fSecCuts[0]);
-    //D*+->D0 pi+
-    for(int iPV=0; iPV<fNPV; iPV++)
-      FindTrackV0Decay(fD04, 429, vRTracks[2], 1, vRTracks[2].FirstPion(), vRTracks[2].LastPion(),
-                       Particles, PrimVtx, iPV, 0);
-    //D0*- -> D0_bar pi-
-    for(int iPV=0; iPV<fNPV; iPV++)
-      FindTrackV0Decay(fD04bar, -429, vRTracks[3], -1, vRTracks[3].FirstPion(), vRTracks[3].LastPion(),
-                       Particles, PrimVtx, iPV, 0);
-    //D+
-    SelectParticles(Particles,fDPlus,PrimVtx,fCutsCharm[2],fCutsCharm[1],
-                    KFParticleDatabase::Instance()->GetDPlusMass(), KFParticleDatabase::Instance()->GetDPlusMassSigma(), fSecCuts[0]);
-    //D-
-    SelectParticles(Particles,fDMinus,PrimVtx,fCutsCharm[2],fCutsCharm[1],
-                    KFParticleDatabase::Instance()->GetDPlusMass(), KFParticleDatabase::Instance()->GetDPlusMassSigma(), fSecCuts[0]);
-    //D*0->D+ pi-
-    for(int iPV=0; iPV<fNPV; iPV++)
-      FindTrackV0Decay(fDPlus, 411, vRTracks[3], -1, vRTracks[3].FirstPion(), vRTracks[3].LastPion(),
-                       Particles, PrimVtx, iPV, 0);
-    //D*0_bar->D- pi+
-    for(int iPV=0; iPV<fNPV; iPV++)
-      FindTrackV0Decay(fDMinus, -411, vRTracks[2], 1, vRTracks[2].FirstPion(), vRTracks[2].LastPion(),
-                       Particles, PrimVtx, iPV, 0);
+  //Sigma*+_bar -> Lambda_bar pi-
+  for(int iPV=0; iPV<fNPV; iPV++)
+    FindTrackV0Decay(vV0Prim[2][iPV], -3122, vRTracks[3], -1, vRTracks[3].FirstPion(), vRTracks[3].LastPion(),
+                      Particles, PrimVtx, iPV, 0);
+  //Sigma*-_bar -> Lambda_bar pi+, Xi*+ -> Lambda_bar + K+
+  for(int iPV=0; iPV<fNPV; iPV++)
+    FindTrackV0Decay(vV0Prim[2][iPV], -3122, vRTracks[2], 1, vRTracks[2].FirstPion(), vRTracks[2].LastKaon(),
+                      Particles, PrimVtx, iPV, 0);
+  //Xi*0 -> Xi- pi+
+  for(int iPV=0; iPV<fNPV; iPV++)
+    FindTrackV0Decay(vXiPrim[iPV], 3312, vRTracks[2], 1, vRTracks[2].FirstPion(), vRTracks[2].LastPion(),
+                      Particles, PrimVtx, iPV, 0, &vXiStarPrim);
+  //Xi*0_bar -> Xi+ pi-
+  for(int iPV=0; iPV<fNPV; iPV++)
+    FindTrackV0Decay(vXiBarPrim[iPV], -3312, vRTracks[3], -1, vRTracks[3].FirstPion(), vRTracks[3].LastPion(),
+                      Particles, PrimVtx, iPV, 0, &vXiStarBarPrim);
+  //Omega*- -> Xi- pi+ K-
+  for(int iPV=0; iPV<fNPV; iPV++)
+    FindTrackV0Decay(vXiStarPrim[iPV], 3324, vRTracks[3], -1, vRTracks[3].FirstKaon(), vRTracks[3].LastKaon(),
+                      Particles, PrimVtx, iPV, 0);
+  //Omega*+ -> Xi+ pi- K+
+  for(int iPV=0; iPV<fNPV; iPV++)
+    FindTrackV0Decay(vXiStarBarPrim[iPV], -3324, vRTracks[2], 1, vRTracks[2].FirstKaon(), vRTracks[2].LastKaon(),
+                      Particles, PrimVtx, iPV, 0);
+  // Charm
+  //LambdaC -> pi+ K- p, Ds+ -> pi+ K- K+, D+ -> pi+ K- pi+
+  FindTrackV0Decay(fD0, 421, vRTracks[0], 1, vRTracks[0].FirstPion(), vRTracks[0].LastProton(),
+                    Particles, PrimVtx, -1, &(ChiToPrimVtx[0]));
+  //LambdaC_bar -> pi- K+ p-, Ds- -> pi- K+ K-, D- -> pi- K+ pi-
+  FindTrackV0Decay(fD0bar, -421, vRTracks[1], -1, vRTracks[1].FirstPion(), vRTracks[1].LastProton(),
+                    Particles, PrimVtx, -1, &(ChiToPrimVtx[1]));    
+  //D0->pi+ K- pi+ pi-
+  FindTrackV0Decay(fDPlus, 411, vRTracks[1], -1, vRTracks[1].FirstPion(), vRTracks[1].LastPion(),
+                    Particles, PrimVtx, -1, &(ChiToPrimVtx[1]));
+  //D0_bar->pi- K+ pi- pi+
+  FindTrackV0Decay(fDMinus, -411, vRTracks[0], 1, vRTracks[0].FirstPion(), vRTracks[0].LastPion(),
+                    Particles, PrimVtx, -1, &(ChiToPrimVtx[0]));    
+  //D0 -> pi+ K-
+  SelectParticles(Particles,fD0,PrimVtx,fCutsCharm[2],fCutsCharm[1],
+                  KFParticleDatabase::Instance()->GetD0Mass(), KFParticleDatabase::Instance()->GetD0MassSigma(), fSecCuts[0]);
+  //D0_bar -> pi+ K-
+  SelectParticles(Particles,fD0bar,PrimVtx,fCutsCharm[2],fCutsCharm[1],
+                  KFParticleDatabase::Instance()->GetD0Mass(), KFParticleDatabase::Instance()->GetD0MassSigma(), fSecCuts[0]);
+  //D*+->D0 pi+
+  for(int iPV=0; iPV<fNPV; iPV++)
+    FindTrackV0Decay(fD0, 421, vRTracks[2], 1, vRTracks[2].FirstPion(), vRTracks[2].LastPion(),
+                      Particles, PrimVtx, iPV, 0);
+  //D*- -> D0_bar pi-
+  for(int iPV=0; iPV<fNPV; iPV++)
+    FindTrackV0Decay(fD0, -421, vRTracks[3], -1, vRTracks[3].FirstPion(), vRTracks[3].LastPion(),
+                      Particles, PrimVtx, iPV, 0);
+  //D0 -> pi+ K- pi+ pi-
+  SelectParticles(Particles,fD04,PrimVtx,fCutsCharm[2],fCutsCharm[1],
+                  KFParticleDatabase::Instance()->GetD0Mass(), KFParticleDatabase::Instance()->GetD0MassSigma(), fSecCuts[0]);
+  //D0_bar -> pi- K+ pi- pi+
+  SelectParticles(Particles,fD04bar,PrimVtx,fCutsCharm[2],fCutsCharm[1],
+                  KFParticleDatabase::Instance()->GetD0Mass(), KFParticleDatabase::Instance()->GetD0MassSigma(), fSecCuts[0]);
+  //D*+->D0 pi+
+  for(int iPV=0; iPV<fNPV; iPV++)
+    FindTrackV0Decay(fD04, 429, vRTracks[2], 1, vRTracks[2].FirstPion(), vRTracks[2].LastPion(),
+                      Particles, PrimVtx, iPV, 0);
+  //D0*- -> D0_bar pi-
+  for(int iPV=0; iPV<fNPV; iPV++)
+    FindTrackV0Decay(fD04bar, -429, vRTracks[3], -1, vRTracks[3].FirstPion(), vRTracks[3].LastPion(),
+                      Particles, PrimVtx, iPV, 0);
+  //D+
+  SelectParticles(Particles,fDPlus,PrimVtx,fCutsCharm[2],fCutsCharm[1],
+                  KFParticleDatabase::Instance()->GetDPlusMass(), KFParticleDatabase::Instance()->GetDPlusMassSigma(), fSecCuts[0]);
+  //D-
+  SelectParticles(Particles,fDMinus,PrimVtx,fCutsCharm[2],fCutsCharm[1],
+                  KFParticleDatabase::Instance()->GetDPlusMass(), KFParticleDatabase::Instance()->GetDPlusMassSigma(), fSecCuts[0]);
+  //D*0->D+ pi-
+  for(int iPV=0; iPV<fNPV; iPV++)
+    FindTrackV0Decay(fDPlus, 411, vRTracks[3], -1, vRTracks[3].FirstPion(), vRTracks[3].LastPion(),
+                      Particles, PrimVtx, iPV, 0);
+  //D*0_bar->D- pi+
+  for(int iPV=0; iPV<fNPV; iPV++)
+    FindTrackV0Decay(fDMinus, -411, vRTracks[2], 1, vRTracks[2].FirstPion(), vRTracks[2].LastPion(),
+                      Particles, PrimVtx, iPV, 0);
 
-    //H0 -> Lambda Lambda
-    CombinePartPart(vV0Sec[0], vV0Sec[0], Particles, PrimVtx, fCutsPartPart[0], -1, 3000, 1, 1);
-    //H0 -> Lambda p pi-
-    FindTrackV0Decay(fLPi, 3002, vRTracks[0], 1, vRTracks[0].FirstProton(), vRTracks[0].LastProton(),
-                     Particles, PrimVtx, -1);
-    //Sigma0 -> Lambda Gamma
-    for(int iPV=0; iPV<fNPV; iPV++)
-      CombinePartPart(vV0Prim[3][iPV], vV0Prim[1][iPV], Particles, PrimVtx, fCutsPartPart[1], iPV, 3212);
-    //Sigma0_bar -> Lambda_bar Gamma
-    for(int iPV=0; iPV<fNPV; iPV++)
-      CombinePartPart(vV0Prim[3][iPV], vV0Prim[2][iPV], Particles, PrimVtx, fCutsPartPart[1], iPV, -3212);
-    //pi0 -> gamma gamma
-    const float& mPi0 = KFParticleDatabase::Instance()->GetPi0Mass();
-    const float& mPi0Sigma = KFParticleDatabase::Instance()->GetPi0MassSigma();
-    CombinePartPart(vV0Sec[2], vV0Sec[2], Particles, PrimVtx, fCutsPartPart[1], -1, 111, 1, 0, &vPi0Prim, &vPi0Sec, mPi0, mPi0Sigma);
-    for(int iPV=0; iPV<fNPV; iPV++)
+  //H0 -> Lambda Lambda
+  CombinePartPart(vV0Sec[1], vV0Sec[1], Particles, PrimVtx, fCutsPartPart[0], -1, 3000, 1, 1);
+  //H0 -> Lambda p pi-
+  FindTrackV0Decay(fLPi, 3002, vRTracks[0], 1, vRTracks[0].FirstProton(), vRTracks[0].LastProton(),
+                    Particles, PrimVtx, -1);
+  //Sigma0 -> Lambda Gamma
+  for(int iPV=0; iPV<fNPV; iPV++)
+    CombinePartPart(vV0Prim[3][iPV], vV0Prim[1][iPV], Particles, PrimVtx, fCutsPartPart[1], iPV, 3212);
+  //Sigma0_bar -> Lambda_bar Gamma
+  for(int iPV=0; iPV<fNPV; iPV++)
+    CombinePartPart(vV0Prim[3][iPV], vV0Prim[2][iPV], Particles, PrimVtx, fCutsPartPart[1], iPV, -3212);
+  //pi0 -> gamma gamma
+  const float& mPi0 = KFParticleDatabase::Instance()->GetPi0Mass();
+  const float& mPi0Sigma = KFParticleDatabase::Instance()->GetPi0MassSigma();
+  CombinePartPart(vV0Sec[3], vV0Sec[3], Particles, PrimVtx, fCutsPartPart[1], -1, 111, 1, 0, &vPi0Prim, &vPi0Sec, mPi0, mPi0Sigma);
+  for(int iPV=0; iPV<fNPV; iPV++)
+  {
+    CombinePartPart(vV0Prim[3][iPV], vV0Prim[3][iPV], Particles, PrimVtx, fCutsPartPart[1], iPV, 111, 1, 0, &vPi0Prim, &vPi0Sec, mPi0, mPi0Sigma);
+    CombinePartPart(vV0Sec[3],       vV0Prim[3][iPV], Particles, PrimVtx, fCutsPartPart[1],  -1, 111, 0, 0, &vPi0Prim, &vPi0Sec, mPi0, mPi0Sigma);
+  }
+  for(int iPV=0; iPV<fNPV; iPV++ )
+    ExtrapolateToPV(vPi0Prim[iPV],PrimVtx[iPV]);
+  //eta -> pi0 pi0 pi0
+  //TODO implement this
+  //Sigma+ -> p pi0
+  FindTrackV0Decay(vPi0Sec, 111, vRTracks[0],  1, vRTracks[0].FirstProton(), vRTracks[0].LastProton(),
+                    Particles, PrimVtx, -1);
+  //Sigma+_bar -> p- pi0
+  FindTrackV0Decay(vPi0Sec, 111, vRTracks[1], -1, vRTracks[1].FirstProton(), vRTracks[1].LastProton(),
+                    Particles, PrimVtx, -1);
+  //Xi0 -> Lambda pi0
+  CombinePartPart(vPi0Sec, vV0Sec[1], Particles, PrimVtx, fCutsPartPart[0], -1, 3322);
+  //Xi0_bar -> Lambda_bar pi0
+  CombinePartPart(vPi0Sec, vV0Sec[2], Particles, PrimVtx, fCutsPartPart[0], -1, -3322);
+  //K*+ -> K+ pi0
+  for(int iPV=0; iPV<fNPV; iPV++)
+    FindTrackV0Decay(vPi0Prim[iPV], 111, vRTracks[2],  1, vRTracks[2].FirstKaon(), vRTracks[2].LastKaon(),
+                      Particles, PrimVtx, -1);
+  //K*- -> K- pi0
+  for(int iPV=0; iPV<fNPV; iPV++)
+    FindTrackV0Decay(vPi0Prim[iPV], 111, vRTracks[3], -1, vRTracks[3].FirstKaon(), vRTracks[3].LastKaon(),
+                      Particles, PrimVtx, -1);
+  //K*0 -> K0 pi0
+  for(int iPV=0; iPV<fNPV; iPV++)
+    CombinePartPart(vPi0Prim[iPV], vV0Prim[0][iPV], Particles, PrimVtx, fCutsPartPart[1], iPV, 100313, 0, 1);    
+  //Sigma*0 -> Lambda pi0
+  for(int iPV=0; iPV<fNPV; iPV++)
+    CombinePartPart(vPi0Prim[iPV], vV0Prim[1][iPV], Particles, PrimVtx, fCutsPartPart[1], iPV, 3214, 0, 1);       
+  //Sigma*0_bar -> Lambda_bar pi0
+  for(int iPV=0; iPV<fNPV; iPV++)
+    CombinePartPart(vPi0Prim[iPV], vV0Prim[2][iPV], Particles, PrimVtx, fCutsPartPart[1], iPV, -3214, 0, 1);       
+  //Xi*- -> Xi- pi0
+  for(int iPV=0; iPV<fNPV; iPV++)
+    CombinePartPart(vPi0Prim[iPV], vXiPrim[iPV], Particles, PrimVtx, fCutsPartPart[1], iPV, 3314, 0, 1);   
+  //Xi*+ -> Xi+ pi0
+  for(int iPV=0; iPV<fNPV; iPV++)
+    CombinePartPart(vPi0Prim[iPV], vXiBarPrim[iPV], Particles, PrimVtx, fCutsPartPart[1], iPV, -3314, 0, 1);  
+
+  //reconstruct particles with daughters
+  if(fEmcClusters)
+  {
+    //pi0 -> gamma gamma, EMC
+    vector< vector<KFParticle> > vPi0PrimEmc(1);
+    vector<KFParticle> vPi0SecEmc;
+    vector< vector<KFParticle> > vD0PrimEmc(1);
+    CombinePartPart(vGammaPrimEmc, vGammaPrimEmc, Particles, PrimVtx, fCutsPartPart[1], 0, 111, 1, 0, &vPi0PrimEmc, &vPi0SecEmc, mPi0, mPi0Sigma);
+        
+    //D+ -> K0 pi+
+    FindTrackV0Decay(vV0Sec[0],    310, vRTracks[0],  1, vRTracks[0].FirstPion(), vRTracks[0].LastPion(), Particles, PrimVtx, -1/*, &(ChiToPrimVtx[0])*/);
+    //D0 -> K0 pi+ pi-
+    FindTrackV0Decay(fK0PiPlus, 100411, vRTracks[1], -1, vRTracks[1].FirstPion(), vRTracks[1].LastPion(), Particles, PrimVtx, -1/*, &(ChiToPrimVtx[0])*/);
+    //D0 -> K0 pi+ pi- pi0
+    CombinePartPart(fK0PiPi, vPi0PrimEmc[0], Particles, PrimVtx, fCutsPartPart[1], -1, 428, 0, 0, &vD0PrimEmc, 0, 
+                    KFParticleDatabase::Instance()->GetD0Mass(), 0.025);
+    
+    for(int iPV=0; iPV<1; iPV++ )
     {
-      CombinePartPart(vV0Prim[3][iPV], vV0Prim[3][iPV], Particles, PrimVtx, fCutsPartPart[1], iPV, 111, 1, 0, &vPi0Prim, &vPi0Sec, mPi0, mPi0Sigma);
-      CombinePartPart(vV0Sec[2],       vV0Prim[3][iPV], Particles, PrimVtx, fCutsPartPart[1],  -1, 111, 0, 0, &vPi0Prim, &vPi0Sec, mPi0, mPi0Sigma);
+      ExtrapolateToPV(vPi0PrimEmc[iPV],PrimVtx[iPV]);
+      ExtrapolateToPV(vD0PrimEmc[iPV],PrimVtx[iPV]);
     }
-    for(int iPV=0; iPV<fNPV; iPV++ )
-      ExtrapolateToPV(vPi0Prim[iPV],PrimVtx[iPV]);
-    //eta -> pi0 pi0 pi0
-    //TODO implement this
-    //Sigma+ -> p pi0
-    FindTrackV0Decay(vPi0Sec, 111, vRTracks[0],  1, vRTracks[0].FirstProton(), vRTracks[0].LastProton(),
-                     Particles, PrimVtx, -1);
-    //Sigma+_bar -> p- pi0
-    FindTrackV0Decay(vPi0Sec, 111, vRTracks[1], -1, vRTracks[1].FirstProton(), vRTracks[1].LastProton(),
-                     Particles, PrimVtx, -1);
-    //Xi0 -> Lambda pi0
-    CombinePartPart(vPi0Sec, vV0Sec[0], Particles, PrimVtx, fCutsPartPart[0], -1, 3322);
-    //Xi0_bar -> Lambda_bar pi0
-    CombinePartPart(vPi0Sec, vV0Sec[1], Particles, PrimVtx, fCutsPartPart[0], -1, -3322);
-    //K*+ -> K+ pi0
-    for(int iPV=0; iPV<fNPV; iPV++)
-      FindTrackV0Decay(vPi0Prim[iPV], 111, vRTracks[2],  1, vRTracks[2].FirstKaon(), vRTracks[2].LastKaon(),
-                       Particles, PrimVtx, -1);
-    //K*- -> K- pi0
-    for(int iPV=0; iPV<fNPV; iPV++)
-      FindTrackV0Decay(vPi0Prim[iPV], 111, vRTracks[3], -1, vRTracks[3].FirstKaon(), vRTracks[3].LastKaon(),
-                       Particles, PrimVtx, -1);
-    //K*0 -> K0 pi0
-    for(int iPV=0; iPV<fNPV; iPV++)
-      CombinePartPart(vPi0Prim[iPV], vV0Prim[0][iPV], Particles, PrimVtx, fCutsPartPart[1], iPV, 100313, 0, 1);    
-    //Sigma*0 -> Lambda pi0
-    for(int iPV=0; iPV<fNPV; iPV++)
-      CombinePartPart(vPi0Prim[iPV], vV0Prim[1][iPV], Particles, PrimVtx, fCutsPartPart[1], iPV, 3214, 0, 1);       
-    //Sigma*0_bar -> Lambda_bar pi0
-    for(int iPV=0; iPV<fNPV; iPV++)
-      CombinePartPart(vPi0Prim[iPV], vV0Prim[2][iPV], Particles, PrimVtx, fCutsPartPart[1], iPV, -3214, 0, 1);       
-    //Xi*- -> Xi- pi0
-    for(int iPV=0; iPV<fNPV; iPV++)
-      CombinePartPart(vPi0Prim[iPV], vXiPrim[iPV], Particles, PrimVtx, fCutsPartPart[1], iPV, 3314, 0, 1);   
-    //Xi*+ -> Xi+ pi0
-    for(int iPV=0; iPV<fNPV; iPV++)
-      CombinePartPart(vPi0Prim[iPV], vXiBarPrim[iPV], Particles, PrimVtx, fCutsPartPart[1], iPV, -3314, 0, 1);  
-
-
-//     int nParts[100] = {0};
-//     for(int iP=0; iP<Particles.size(); iP++)
-//     {
-//       int pdg = Particles[iP].GetPDG();
-//       int id = 0;
-//       if(pdg ==    310) nParts[id]++; id++; //0
-//       if(pdg ==   3122) nParts[id]++; id++; //1
-//       if(pdg ==  -3122) nParts[id]++; id++; //2    
-//       if(pdg ==    421) nParts[id]++; id++; //3
-//       if(pdg ==   -421) nParts[id]++; id++; //4
-//       if(pdg ==    313) nParts[id]++; id++; //5
-//       if(pdg ==   -313) nParts[id]++; id++; //6
-//       if(pdg ==   3124) nParts[id]++; id++; //7    
-//       if(pdg ==  -3124) nParts[id]++; id++; //8    
-//       if(pdg ==    333) nParts[id]++; id++; //9    
-//       if(pdg ==     22) nParts[id]++; id++; //10  
-//       if(pdg == 100113) nParts[id]++; id++; //11
-//       if(pdg == 200113) nParts[id]++; id++; //12
-//       if(pdg ==    443) nParts[id]++; id++; //13
-//       if(pdg == 100443) nParts[id]++; id++; //14
-//       if(pdg ==    113) nParts[id]++; id++; //15
-// 
-//       if(pdg ==     3312) nParts[id]++;    id++; //16
-//       if(pdg ==    -3312) nParts[id]++;    id++; //17
-//       if(pdg ==     3334) nParts[id]++;    id++; //18
-//       if(pdg ==    -3334) nParts[id]++;    id++; //19
-//       if(pdg ==      323) nParts[id]++;    id++; //20
-//       if(pdg ==     -323) nParts[id]++;    id++; //21
-//       if(pdg ==     3224) nParts[id]++;    id++; //22
-//       if(pdg ==    -3224) nParts[id]++;    id++; //23
-//       if(pdg ==     3114) nParts[id]++;    id++; //24
-//       if(pdg ==    -3114) nParts[id]++;    id++; //25
-//       if(pdg ==  1003314) nParts[id]++;    id++; //26
-//       if(pdg == -1003314) nParts[id]++;    id++; //27
-//       if(pdg ==     3324) nParts[id]++;    id++; //28
-//       if(pdg ==    -3324) nParts[id]++;    id++; //29
-//       if(pdg ==  1003334) nParts[id]++;    id++; //30
-//       if(pdg == -1003334) nParts[id]++;    id++; //31
-//      
-//       if(pdg ==      411) nParts[id]++;    id++; //32
-//       if(pdg ==     -411) nParts[id]++;    id++; //33
-//       if(pdg ==      431) nParts[id]++;    id++; //34
-//       if(pdg ==     -431) nParts[id]++;    id++; //35
-//       if(pdg ==     4122) nParts[id]++;    id++; //36
-//       if(pdg ==    -4122) nParts[id]++;    id++; //37
-//       if(pdg ==   429) nParts[id]++;    id++; //38
-//       if(pdg ==  -429) nParts[id]++;    id++; //39
-//       if(pdg ==    10411) nParts[id]++;    id++; //40
-//       if(pdg ==   -10411) nParts[id]++;    id++; //41
-//       if(pdg ==    20411) nParts[id]++;    id++; //42
-//       if(pdg ==   -20411) nParts[id]++;    id++; //43
-//       if(pdg ==    10421) nParts[id]++;    id++; //44
-//       if(pdg ==   -10421) nParts[id]++;    id++; //45
-//       
-//       if(pdg == 3000) nParts[id]++;    id++; //46
-//       if(pdg == 3001) nParts[id]++;    id++; //47
-//     }
-//     
-// std::cout << "2D ";
-// for(int i=0; i<16; i++)
-//   std::cout << std::setw(5) << nParts[i] << " ";
-// std::cout << std::endl;
-// std::cout << " MS ";
-// for(int i=16; i<32; i++)
-//   std::cout << std::setw(5) << nParts[i] << " ";
-// std::cout << std::endl;
-// std::cout << " Charm ";
-// for(int i=32; i<46; i++)
-//   std::cout << std::setw(5) << nParts[i] << " ";
-// std::cout << std::endl;
-// std::cout << " H0 ";
-// for(int i=46; i<48; i++)
-//   std::cout << std::setw(5) << nParts[i] << " ";
-// std::cout << std::endl;
-
+    //D0* -> D0 pi0
+    CombinePartPart(vD0PrimEmc[0], vPi0PrimEmc[0], Particles, PrimVtx, fCutsPartPart[1], 0, 10428);
+  }
 }
 
 void KFParticleFinder::ExtrapolateToPV(vector<KFParticle>& vParticles, KFParticleSIMD& PrimVtx)
@@ -664,17 +646,12 @@ inline void KFParticleFinder::SaveV0PrimSecCand(KFParticleSIMD& mother,
   float_m isLambda    = (abs(mother.PDG()) == 3122);
   float_m isGamma     = (mother.PDG() == 22);
 
-  int_v primArrayIndex(-1); //for saving primary candidates; 
-  int_v secArrayIndex(-1); //for saving secondary candidates;
+  int_v arrayIndex(-1); //for saving primary candidates; 
 
-  primArrayIndex(mother.PDG() ==   int_v(310)) = 0;
-  primArrayIndex(mother.PDG() ==  int_v(3122)) = 1;
-  primArrayIndex(mother.PDG() == -3122) = 2;
-  primArrayIndex(mother.PDG() ==    22) = 3;
-
-  secArrayIndex(mother.PDG() ==  3122) = 0;
-  secArrayIndex(mother.PDG() == -3122) = 1;
-  secArrayIndex(mother.PDG() ==    22) = 2;
+  arrayIndex(mother.PDG() ==   310) = 0;
+  arrayIndex(mother.PDG() ==  3122) = 1;
+  arrayIndex(mother.PDG() == -3122) = 2;
+  arrayIndex(mother.PDG() ==    22) = 3;
 
   float_m isPrimaryPart(false);
 
@@ -695,7 +672,7 @@ inline void KFParticleFinder::SaveV0PrimSecCand(KFParticleSIMD& mother,
   }
   
   isPrim |= ( ( isPrimaryPart ) && (isK0 || isLambda || isGamma) );
-  isSec  |= ( (!isPrimaryPart ) && (isLambda || isGamma) );
+  isSec  |= ( (!isPrimaryPart ) && (isK0 || isLambda || isGamma) );
   
   mother.SetNonlinearMassConstraint(massMotherPDG);
 
@@ -708,11 +685,11 @@ inline void KFParticleFinder::SaveV0PrimSecCand(KFParticleSIMD& mother,
       if(isPrim[iv] )
       {
         for(unsigned int iP = 0; iP<iPrimVert[iv].size(); iP++)
-          vMotherPrim[primArrayIndex[iv]][iPrimVert[iv][iP]].push_back(mother_temp);
+          vMotherPrim[arrayIndex[iv]][iPrimVert[iv][iP]].push_back(mother_temp);
       }
       
       if(isSec[iv] )
-        vMotherSec[secArrayIndex[iv]].push_back(mother_temp);
+        vMotherSec[arrayIndex[iv]].push_back(mother_temp);
     }
   }
 }
@@ -1241,15 +1218,23 @@ void KFParticleFinder::ConstructTrackV0Cand(KFPTrackVector& vTracks,
       fLPiPIndex.push_back( V0.DaughterIds()[1][iv] );
     }
     
-    // reset daughter ids for 3- and 4-particels decays
+    if(  mother.PDG()[iv] == 100411 )
+    {
+      fK0PiPlus.push_back(mother_temp);
+      fK0PiMinusIndex.push_back( V0.DaughterIds()[0][iv] );
+      continue;
+    }
+    
+    // reset daughter ids for 3- and 4-particle decays
     if( (abs(mother.PDG()[iv]) == 411)  ||
+        (abs(mother.PDG()[iv]) == 427) ||
         (abs(mother.PDG()[iv]) == 429) ||
         (abs(mother.PDG()[iv]) == 431)  ||
         (abs(mother.PDG()[iv]) == 4122) ||
         (abs(mother.PDG()[iv]) == 1003334) ||
         (abs(mother.PDG()[iv]) == 3001) )
     {
-      mother_temp.ClearDaughterIds();
+      mother_temp.CleanDaughtersId();
       for(int iD=0; iD < vV0[iv]->NDaughters(); iD++)
         mother_temp.AddDaughterId( vV0[iv]->DaughterIds()[iD] );
       mother_temp.AddDaughterId(trackId[iv]);
@@ -1263,6 +1248,12 @@ void KFParticleFinder::ConstructTrackV0Cand(KFPTrackVector& vTracks,
     if( mother.PDG()[iv] == -411 ) 
     {
       fDMinus.push_back(mother_temp);
+      continue;
+    }
+    
+    if( mother.PDG()[iv] == 427 )
+    {
+      fK0PiPi.push_back(mother_temp);
       continue;
     }
     
@@ -1468,6 +1459,7 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
         {
           motherPDG( isPrimary && int_m(trackPdgPos[iPDGPos] ==  211) ) =  323; 
           motherPDG( isPrimary && int_m(trackPdgPos[iPDGPos] ==  -211) ) =  -323; 
+          motherPDG( isSecondary && int_m(abs(trackPdgPos[iPDGPos]) ==  211) ) =  100411;
         }
         else if( V0PDG == 3312 )
           motherPDG( isPrimary && int_m(trackPdgPos[iPDGPos] ==  211) ) =  3324; 
@@ -1516,6 +1508,12 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
           const int_v& id = reinterpret_cast<const int_v&>(vTracks.Id()[iTr]);
           int_m isSameProton = (id == fLPiPIndex[iV0]);
           motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == 2212) && (!isSameProton)) =  3001; 
+        }
+        else if( V0PDG == 100411 )
+        {
+          const int_v& id = reinterpret_cast<const int_v&>(vTracks.Id()[iTr]);
+          int_m isSamePiMinus = (id == fK0PiMinusIndex[iV0]);
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == -211) && (!isSamePiMinus)) =  427; 
         }
         else if( V0PDG == 111 )
         {
@@ -1566,6 +1564,7 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
             case   4122: motherType = 1; break; //LambdaC
             case    431: motherType = 1; break; //Ds+-
             case    411: motherType = 1; break; //D+-
+            case    428: motherType = 1; break; //D0
             case    429: motherType = 1; break; //D0
             case   3001: motherType = 1; break; //H0
             case   3222: motherType = 1; break; //Sigma+
@@ -1708,6 +1707,7 @@ void KFParticleFinder::CombinePartPart(vector<KFParticle>& particles1,
                                        float massMotherPDG,
                                        float massMotherPDGSigma)
 {
+  if( (particles1.size() ==  0) || (particles2.size() ==  0) ) return;
   KFParticle mother_temp;
   KFParticleSIMD mother;
   KFParticleSIMD *motherTopo = new KFParticleSIMD[fNPV];
@@ -1729,12 +1729,42 @@ void KFParticleFinder::CombinePartPart(vector<KFParticle>& particles1,
     for(unsigned short iP2=startIndex; iP2 < nPart2; iP2 += float_vLen)
     {
       unsigned int nElements = (iP2 + float_vLen < nPart2) ? float_vLen : (nPart2 - iP2);
+      float_m active(int_v::IndexesFromZero() < int(nElements));
 
       for(unsigned short iv=0; iv<nElements; iv++)
         tmpPart2[iv] = &particles2[iP2+iv];
 
       vDaughters[1] = KFParticleSIMD(tmpPart2,nElements);
 
+//       if( reconstructPi0 )
+//       {
+//         int indexOffset = fEmcClusters->Id()[0];
+//         uint_v gammaIndex1( (unsigned int)0);
+//         uint_v gammaIndex2( (unsigned int)0);
+//         for(int iv=0; iv<nElements; iv++)
+//         {
+//           gammaIndex1[iv] = Particles[ particles2[iP2+iv].DaughterIds()[0] ].DaughterIds()[0] - indexOffset;
+//           gammaIndex2[iv] = Particles[ particles2[iP2+iv].DaughterIds()[1] ].DaughterIds()[0] - indexOffset;
+//         }
+//         
+//         KFParticleSIMD gamma1(*fEmcClusters, gammaIndex1, vDaughters[0]);
+//         KFParticleSIMD gamma2(*fEmcClusters, gammaIndex2, vDaughters[0]);
+//         const KFParticleSIMD* pi0Daughters[2] = {&gamma1, &gamma2};
+//         
+//         int_v gammaId = vDaughters[1].Id();
+//         vDaughters[1].SetVtxGuess(vDaughters[0].X(), vDaughters[0].Y(), vDaughters[0].Z());
+//         vDaughters[1].Construct(pi0Daughters, 2);
+//         vDaughters[1].SetId(gammaId);
+//         
+//         float_v mass, dm;
+//         vDaughters[1].GetMass(mass,dm);
+//         const float& mPi0 = KFParticleDatabase::Instance()->GetPi0Mass();
+//         const float& mPi0Sigma = KFParticleDatabase::Instance()->GetPi0MassSigma();
+//         active &= (abs(mass - mPi0)/mPi0Sigma) < 3.f;
+//         vDaughters[1].SetNonlinearMassConstraint(mPi0);
+//         if(active.isEmpty()) continue;
+//       }
+      
       if(isPrimary)
       {
         float_v errGuess[3] = {100.f*sqrt(PrimVtx[iPV].CovarianceMatrix()[0]),
@@ -1750,23 +1780,21 @@ void KFParticleFinder::CombinePartPart(vector<KFParticle>& particles1,
         const KFParticleSIMD* vDaughtersPointer[2] = {&vDaughters[0], &vDaughters[1]};
         mother.Construct(vDaughtersPointer, 2, 0);
       }
-
-      float_m active(int_v::IndexesFromZero() < int(nElements));
   
       float_m saveParticle(active);
       saveParticle &= (mother.Chi2()/static_cast<float_v>(mother.NDF()) < cuts[2] );
       saveParticle &= KFPMath::Finite(mother.GetChi2());
-      saveParticle &= (mother.GetChi2() > 0.0f);
+      saveParticle &= (mother.GetChi2() >= 0.0f);
       saveParticle &= (mother.GetChi2() == mother.GetChi2());
       
-      if( saveParticle.isEmpty() ) { return; }
+      if( saveParticle.isEmpty() ) { continue; }
 
       int_m isSameTrack(false);
       for(unsigned short iD=0; iD<vDaughters[0].DaughterIds().size(); iD++)
         for(unsigned short iD1=0; iD1<vDaughters[1].DaughterIds().size(); iD1++)
           isSameTrack |= ( int_v(vDaughters[0].DaughterIds()[iD]) == int_v(vDaughters[1].DaughterIds()[iD1]) );
       saveParticle &= ( !static_cast<float_m>(isSameTrack));
-      if( saveParticle.isEmpty() ) { return; }        
+      if( saveParticle.isEmpty() ) { continue; }        
       
       float_v lMin(1.e8f);
       float_v ldlMin(1.e8f);
@@ -1784,10 +1812,10 @@ void KFParticleFinder::CombinePartPart(vector<KFParticle>& particles1,
       }
       saveParticle &= ( (float_m(!isPrimary) && ldlMin > cuts[0]) || float_m(isPrimary) );
       saveParticle &= (lMin < 200.f);
-    // 
-    // //         if(isPrimary && (float(ldlMin > 3) )) continue;
+    
+//         if(isPrimary && (float(ldlMin > 3) )) continue;
       saveParticle &= ((float_m(!isPrimary) && isParticleFromVertex) || float_m(isPrimary) );
-      if( saveParticle.isEmpty() ) { return; }
+      if( saveParticle.isEmpty() ) { continue; }
 
       float_m isSameParticle(isPrimary);
       if(!((isSameParticle).isFull()))
@@ -1797,7 +1825,7 @@ void KFParticleFinder::CombinePartPart(vector<KFParticle>& particles1,
         vDaughters[0].GetDistanceToVertexLine(mother, l1, dl1, &isParticleFromVertexLocal);
         
         saveParticle &= ( isSameParticle || ((!isSameParticle) && isParticleFromVertexLocal));
-        if( saveParticle.isEmpty() ) { return; }
+        if( saveParticle.isEmpty() ) { continue; }
       }
   
       for(int iP=0; iP<fNPV; iP++)
@@ -1828,7 +1856,16 @@ void KFParticleFinder::CombinePartPart(vector<KFParticle>& particles1,
         if(!saveParticle[iv]) continue; 
         
         mother.GetKFParticle(mother_temp, iv);
-        
+
+        // reset daughter ids for 3- and 4-particle decays
+        if( (abs(mother.PDG()[iv]) == 428) )
+        {
+          mother_temp.CleanDaughtersId();
+          for(int iD=0; iD < particles1[iP1].NDaughters(); iD++)
+            mother_temp.AddDaughterId( particles1[iP1].DaughterIds()[iD] );
+          mother_temp.AddDaughterId(tmpPart2[iv]->Id());
+        }
+    
         if(saveOnlyPrimary)
         {
           if(isPrimaryPart[iv])

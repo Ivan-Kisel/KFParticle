@@ -74,11 +74,6 @@ class KFParticle :public KFParticleBase
 
   KFParticle( const KFPVertex &vertex );
 
-  void CleanDaughtersId() { fDaughtersIds.clear(); }
-  void SetNDaughters( int n ) { fDaughtersIds.reserve(n); }
-  void AddDaughter( int id ){ fDaughtersIds.push_back(id); }
-
-
   //* Initialise covariance matrix and set current parameters to 0.0 
 
   void Initialize();

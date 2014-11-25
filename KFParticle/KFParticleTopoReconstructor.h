@@ -63,6 +63,8 @@ class KFParticleTopoReconstructor{
   void Init(const KFPTrackVector *particles, const std::vector<KFParticle>& pv);
   void Init(KFPTrackVector &tracks);
 
+  void SetEmcClusters(KFPEmcCluster* clusters) { fKFParticleFinder->SetEmcClusters(clusters); }
+
   
   void DeInit() { fTracks = 0; }
   

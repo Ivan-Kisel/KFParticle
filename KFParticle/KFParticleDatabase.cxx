@@ -15,7 +15,17 @@ KFParticleDatabase* KFParticleDatabase::fDatabase = 0;
 
 KFParticleDatabase::KFParticleDatabase():
   fMassPi0PDG(0.13498),
+#ifdef PANDA_STT
+  fMassPi0PDGSigma(0.009),
+#elif defined ALICE_ITS
   fMassPi0PDGSigma(0.006),
+#elif defined STAR_HFT
+  fMassPi0PDGSigma(0.006),
+#elif defined CBM
+  fMassPi0PDGSigma(0.006),
+#else 
+  fMassPi0PDGSigma(0.006),
+#endif
   fMassD0PDG(1.86484),
   fMassD0PDGSigma(0.0145),
   fMassDPlusPDG(1.86962),
@@ -33,9 +43,9 @@ KFParticleDatabase::KFParticleDatabase():
   fMassSecPDG[3] = 0; //gamma
   
 #ifdef PANDA_STT
-  fMassSecPDGSigma[0]=2.2e-3; //K0 TODO tune
-  fMassSecPDGSigma[1]=3.7e-3; //Lambda
-  fMassSecPDGSigma[2]=2.e-3; //Xi TODO tune
+  fMassSecPDGSigma[0]=12.0e-3; //K0 TODO tune
+  fMassSecPDGSigma[1]=2.7e-3; //Lambda
+  fMassSecPDGSigma[2]=2.8e-3; //Xi TODO tune
 #elif defined ALICE_ITS
   fMassSecPDGSigma[0]=17.7e-3;
   fMassSecPDGSigma[1]=5.9e-3;

@@ -232,6 +232,141 @@ void KFParticleSIMD::Rotate()
   fQ = fQ.rotated(1);
 }
 
+KFParticleSIMD::KFParticleSIMD(KFPEmcCluster &track, uint_v& index, const KFParticleSIMD& vertexGuess): KFParticleBaseSIMD()
+#ifdef NonhomogeneousField
+, fField()
+#endif
+{
+  Create(track, index, vertexGuess);
+}
+
+void KFParticleSIMD::Create(KFPEmcCluster &track, uint_v& index, const KFParticleSIMD& vertexGuess)
+{
+  for(int i=0; i<3; i++)
+    fP[i].gather(&(track.Parameter(i)[0]), index);
+  fP[6].gather(&(track.Parameter(3)[0]), index);
+  
+  const float_v& dx = fP[0] - vertexGuess.fP[0];
+  const float_v& dy = fP[1] - vertexGuess.fP[1];
+  const float_v& dz = fP[2] - vertexGuess.fP[2];
+  const float_v& dl2 = dx*dx + dy*dy + dz*dz;
+  const float_v& dl = sqrt(dl2);
+
+  fP[0] = vertexGuess.fP[0];
+  fP[1] = vertexGuess.fP[1];
+  fP[2] = vertexGuess.fP[2];
+  
+  fP[3] = dx/dl * fP[6];
+  fP[4] = dy/dl * fP[6];
+  fP[5] = dz/dl * fP[6];
+  
+  float_v V[10];
+  for(int i=0; i<10; i++)
+    V[i].gather(&(track.Covariance(i)[0]), index);
+  
+  float_v J[7][4];
+  for(int i=0; i<7; i++)
+    for(int j=0; j<4; j++)
+      J[i][j] = 0.f;
+  J[0][0] = 1.f; J[1][1] = 1.f; J[2][2] = 1.f; J[6][3] = 1.f;
+  J[3][0] = fP[6]/dl * (1.f - dx*dx/dl2); J[3][1] = -dx*dy*fP[6]/(dl*dl2); J[3][2] = -dx*dz*fP[6]/(dl*dl2); J[3][3] = dx/dl;
+  J[4][0] = -dx*dy*fP[6]/(dl*dl2); J[4][1] = fP[6]/dl * (1.f - dy*dy/dl2); J[4][2] = -dy*dz*fP[6]/(dl*dl2); J[4][3] = dy/dl;
+  J[5][0] = -dx*dz*fP[6]/(dl*dl2); J[5][1] = -dy*dz*fP[6]/(dl*dl2); J[5][2] = fP[6]/dl * (1.f - dz*dz/dl2); J[5][3] = dz/dl;
+  
+  float_v VJT[4][7]; // V*J^T
+  for(Int_t i=0; i<4; i++)
+  {
+    for(Int_t j=0; j<7; j++)
+    {
+      VJT[i][j] = 0.f;
+      for(Int_t k=0; k<4; k++)
+        VJT[i][j] += V[IJ(i,k)]*J[j][k];
+    }
+  }
+  //Calculate the covariance matrix of the particle fC
+  for( Int_t i=0; i<36; i++ ) fC[i] = 0.f;
+  
+  for(Int_t i=0; i<7; ++i)
+    for(Int_t j=0; j<=i; ++j)
+      for(Int_t l=0; l<4; l++)
+        fC[IJ(i,j)]+= J[i][l]*VJT[l][j];
+  fC[35] = 1.f;
+  
+  fQ = float_v(Vc::Zero);
+  fNDF = 0;
+  fChi2 = 0;
+  
+  SumDaughterMass = float_v(Vc::Zero);
+  fMassHypo = float_v(Vc::Zero);
+}
+
+KFParticleSIMD::KFParticleSIMD(KFPEmcCluster &track, int index, const KFParticleSIMD& vertexGuess): KFParticleBaseSIMD()
+#ifdef NonhomogeneousField
+, fField()
+#endif
+{
+  Load(track, index, vertexGuess);
+}
+
+void KFParticleSIMD::Load(KFPEmcCluster &track, int index, const KFParticleSIMD& vertexGuess)
+{
+  for(int i=0; i<3; i++)
+    fP[i] = reinterpret_cast<const float_v&>(track.Parameter(i)[index]);
+  fP[6] = reinterpret_cast<const float_v&>(track.Parameter(3)[index]);
+  const float_v& dx = fP[0] - vertexGuess.fP[0];
+  const float_v& dy = fP[1] - vertexGuess.fP[1];
+  const float_v& dz = fP[2] - vertexGuess.fP[2];
+  const float_v& dl2 = dx*dx + dy*dy + dz*dz;
+  const float_v& dl = sqrt(dl2);
+
+  fP[0] = vertexGuess.fP[0];
+  fP[1] = vertexGuess.fP[1];
+  fP[2] = vertexGuess.fP[2];
+  
+  fP[3] = dx/dl * fP[6];
+  fP[4] = dy/dl * fP[6];
+  fP[5] = dz/dl * fP[6];
+  
+  float_v V[10];
+  for(int i=0; i<10; i++)
+    V[i] = reinterpret_cast<const float_v&>(track.Covariance(i)[index]);
+  
+  float_v J[7][4];
+  for(int i=0; i<7; i++)
+    for(int j=0; j<4; j++)
+      J[i][j] = 0.f;
+  J[0][0] = 1.f; J[1][1] = 1.f; J[2][2] = 1.f; J[6][3] = 1.f;
+  J[3][0] = fP[6]/dl * (1.f - dx*dx/dl2); J[3][1] = -dx*dy*fP[6]/(dl*dl2); J[3][2] = -dx*dz*fP[6]/(dl*dl2); J[3][3] = dx/dl;
+  J[4][0] = -dx*dy*fP[6]/(dl*dl2); J[4][1] = fP[6]/dl * (1.f - dy*dy/dl2); J[4][2] = -dy*dz*fP[6]/(dl*dl2); J[4][3] = dy/dl;
+  J[5][0] = -dx*dz*fP[6]/(dl*dl2); J[5][1] = -dy*dz*fP[6]/(dl*dl2); J[5][2] = fP[6]/dl * (1.f - dz*dz/dl2); J[5][3] = dz/dl;
+  
+  float_v VJT[4][7]; // V*J^T
+  for(Int_t i=0; i<4; i++)
+  {
+    for(Int_t j=0; j<7; j++)
+    {
+      VJT[i][j] = 0.f;
+      for(Int_t k=0; k<4; k++)
+        VJT[i][j] += V[IJ(i,k)]*J[j][k];
+    }
+  }
+  //Calculate the covariance matrix of the particle fC
+  for( Int_t i=0; i<36; i++ ) fC[i] = 0.f;
+  
+  for(Int_t i=0; i<7; ++i)
+    for(Int_t j=0; j<=i; ++j)
+      for(Int_t l=0; l<4; l++)
+        fC[IJ(i,j)]+= J[i][l]*VJT[l][j];
+  fC[35] = 1.f;
+  
+  fQ = float_v(Vc::Zero);
+  fNDF = 0;
+  fChi2 = 0;
+  
+  SumDaughterMass = float_v(Vc::Zero);
+  fMassHypo = float_v(Vc::Zero);
+}
+
 KFParticleSIMD::KFParticleSIMD( const KFPVertex &vertex ): KFParticleBaseSIMD()
 #ifdef NonhomogeneousField
 , fField()
@@ -595,43 +730,6 @@ float_v KFParticleSIMD::GetAngleRZ( const KFParticleSIMD &p ) const
   return a;
 }
 
-
-/*
-
-#include "AliExternalTrackParam.h"
-
-void KFParticleSIMD::GetDStoParticleALICE( const KFParticleSIMDBaseSIMD &p, 
-					   float_v &DS, float_v &DS1 ) 
-  const
-{ 
-  DS = DS1 = 0;   
-  float_v x1, a1, x2, a2;
-  float_v par1[5], par2[5], cov[15];
-  for(int i=0; i<15; i++) cov[i] = 0;
-  cov[0] = cov[2] = cov[5] = cov[9] = cov[14] = .001;
-
-  GetExternalTrackParam( *this, x1, a1, par1 );
-  GetExternalTrackParam( p, x2, a2, par2 );
-
-  AliExternalTrackParam t1(x1,a1, par1, cov);
-  AliExternalTrackParam t2(x2,a2, par2, cov);
-
-  float_v xe1=0, xe2=0;
-  t1.GetDCA( &t2, -GetFieldAlice(), xe1, xe2 );
-  t1.PropagateTo( xe1, -GetFieldAlice() );
-  t2.PropagateTo( xe2, -GetFieldAlice() );
-
-  float_v xyz1[3], xyz2[3];
-  t1.GetXYZ( xyz1 );
-  t2.GetXYZ( xyz2 );
-  
-  DS = GetDStoPoint( xyz1 );
-  DS1 = p.GetDStoPoint( xyz2 );
-
-  return;
-}
-*/
-
   // * Pseudo Proper Time of decay = (r*pt) / |pt| * M/|pt|
 float_v KFParticleSIMD::GetPseudoProperDecayTime( const KFParticleSIMD &pV, const float_v& mass, float_v* timeErr2 ) const
 { // TODO optimize with respect to time and stability
@@ -694,9 +792,8 @@ void KFParticleSIMD::GetKFParticle(KFParticle &Part, int iPart)
   Part.SetId(static_cast<int>(Id()[iPart]));
 
   Part.CleanDaughtersId();
-  Part.SetNDaughters(DaughterIds().size());
   for( unsigned int i = 0; i < DaughterIds().size(); i++ )
-    Part.AddDaughter(static_cast<int>(DaughterIds()[i][iPart]));
+    Part.AddDaughterId(static_cast<int>(DaughterIds()[i][iPart]));
 
   Part.SetPDG( static_cast<int>(GetPDG()[iPart]) );
 

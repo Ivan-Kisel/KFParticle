@@ -20,6 +20,7 @@
 
 #include "KFPTrack.h"
 #include "KFPTrackVector.h"
+#include "KFPEmcCluster.h"
 #include "KFPVertex.h"
 
 #ifdef NonhomogeneousField
@@ -93,6 +94,12 @@ class KFParticleSIMD :public KFParticleBaseSIMD
   KFParticleSIMD(KFPTrack &Track, const Int_t *pdg=0);
   KFParticleSIMD(KFPTrackVector &track, int n, const Int_t *pdg=0);
 
+  KFParticleSIMD( KFPEmcCluster &track, uint_v& index, const KFParticleSIMD& vertexGuess );
+  KFParticleSIMD( KFPEmcCluster &track, int index, const KFParticleSIMD& vertexGuess );
+  void Create( KFPEmcCluster &track, uint_v& index, const KFParticleSIMD& vertexGuess );
+  void Load( KFPEmcCluster &track, int index, const KFParticleSIMD& vertexGuess );
+
+    
   //* Initialisation from VVertex 
 
   KFParticleSIMD( const KFPVertex &vertex );
