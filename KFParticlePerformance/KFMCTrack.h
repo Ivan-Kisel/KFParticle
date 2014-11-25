@@ -26,7 +26,7 @@ using std::istream;
 class KFMCTrack
 {
  public:
-  KFMCTrack():fMotherId(-1),fPDG(0),fNMCPoints(0),fIsReconstructed(0) {};
+  KFMCTrack():fMotherId(-1),fPDG(0),fNMCPoints(0),fIsReconstructed(0),fIsOutOfDetector(0) {};
 
   int MotherId()          const { return fMotherId; }
   int    PDG()            const { return fPDG;}
@@ -34,6 +34,7 @@ class KFMCTrack
   float X()               const { return fPar[0]; }
   float Y()               const { return fPar[1]; }
   float Z()               const { return fPar[2]; }
+  float R()               const { return sqrt(X()*X() + Y()*Y() + Z()*Z()); }
   float Px()              const { return fPar[3]; }
   float Py()              const { return fPar[4]; }
   float Pz()              const { return fPar[5]; }
@@ -42,6 +43,7 @@ class KFMCTrack
   const float *Par()      const { return fPar; }
   int   NMCPoints()       const { return fNMCPoints; }
   bool  IsReconstructed() const { return fIsReconstructed; }
+  bool  IsOutOfDetector() const { return fIsOutOfDetector; }
   
   void SetPar( int i, float v )  { fPar[i] = v; }
   void SetX( float v )           { fPar[0] = v; }
@@ -55,6 +57,7 @@ class KFMCTrack
   void SetPDG( int v )           { fPDG = v; }
   void SetNMCPoints( int v )     { fNMCPoints = v; }
   void SetReconstructed()        { fIsReconstructed = 1; }
+  void SetOutOfDetector() { fIsOutOfDetector = 1; }
   
  protected:
 
@@ -64,6 +67,7 @@ class KFMCTrack
   int   fNMCPoints;     //* N MC points
   
   bool fIsReconstructed;
+  bool fIsOutOfDetector;
 };
 
 #endif

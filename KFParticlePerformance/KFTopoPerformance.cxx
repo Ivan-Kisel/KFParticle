@@ -171,19 +171,21 @@ void KFTopoPerformance::FindReconstructableMCParticles()
 void KFTopoPerformance::CheckMCParticleIsReconstructable(KFMCParticle &part)
 {
   if ( part.IsReconstructable(0) ) return;
-
+  if ( vMCTracks[part.GetMCTrackID()].IsOutOfDetector() ) return;
+  
     // tracks
-  if ( /*part.NDaughters() == 0*/ part.GetPDG() ==  -211 ||
-                                  part.GetPDG() ==   211 ||
-                                  part.GetPDG() ==  2212 ||
-                                  part.GetPDG() == -2212 ||
-                                  part.GetPDG() ==   321 ||
-                                  part.GetPDG() ==  -321 ||
-                                  part.GetPDG() ==    11 ||
-                                  part.GetPDG() ==   -11 ||
-                                  part.GetPDG() ==    13 ||
-                                  part.GetPDG() ==   -13 ) { // TODO other particles
-
+  if ( part.GetPDG() ==  -211 ||
+       part.GetPDG() ==   211 ||
+       part.GetPDG() ==  2212 ||
+       part.GetPDG() == -2212 ||
+       part.GetPDG() ==   321 ||
+       part.GetPDG() ==  -321 ||
+       part.GetPDG() ==    11 ||
+       part.GetPDG() ==   -11 ||
+       part.GetPDG() ==    13 ||
+       part.GetPDG() ==   -13 ||
+       ( (part.GetPDG() == 22) && (vMCTracks[part.GetMCTrackID()].IsReconstructed()) ) )
+  {
     part.SetAsReconstructable(0);
 
     int iMCTrack = part.GetMCTrackID();
@@ -331,37 +333,8 @@ void KFTopoPerformance::MatchParticles()
     const int mcTrackId = fTrackMatch[rTrackId];
     
     if(mcTrackId < 0) continue;
-// #ifdef MAIN_DRAW
-//   if ( AliHLTTPCCADisplay::Instance().DrawType() == 3 ) {
-//   if( mcTrackId == 2346 || mcTrackId == 2347 )
-//   {
-//     if(iRP==0)
-//     {
-//       AliHLTTPCCADisplay::Instance().ClearView();
-//       AliHLTTPCCADisplay::Instance().SetTPCView();
-//       AliHLTTPCCADisplay::Instance().DrawTPC();
-//     }
-// 
-//     AliHLTTPCCADisplay::Instance().DrawGBTrack( rTrackId, kBlue, 2. );
-// 
-//     AliHLTTPCCADisplay::Instance().SpecDrawMCTrackPointsGlobal( (*AliHLTTPCCAPerformance::Instance().GetSubPerformance("Global Performance")->fMCTracks)[mcTrackId], AliHLTTPCCAPerformance::Instance().GetSubPerformance("Global Performance")->fLocalMCPoints, kRed, 0.3 );
-// 
-//     AliHLTTPCCADisplay::Instance().DrawGBPoint( rPart.X(), rPart.Y(), rPart.Z(), kGreen );
-//     KFParticle rPart1 = rPart;
-//     const Double_t vtx[3] = {0,0,18};
-//     rPart1.TransportToPoint(vtx);
-//     AliHLTTPCCADisplay::Instance().DrawGBPoint( rPart1.X(), rPart1.Y(), rPart1.Z(), kMagenta );
-//     const KFParticle &mPart = fTopoReconstructor->GetParticles()[2];
-//     AliHLTTPCCADisplay::Instance().DrawGBPoint( mPart.X(), mPart.Y(), mPart.Z(), kOrange );
-// 
-//     AliHLTTPCCADisplay::Instance().Ask();
-//   }
-//   }
-// #endif
-
 
     KFMCParticle &mPart = vMCParticles[mcTrackId];
-   
     if( mPart.GetPDG() == rPart.GetPDG() ) {
       MCtoRParticleId[mcTrackId].ids.push_back(iRP);
       RtoMCParticleId[iRP].ids.push_back(mcTrackId);
@@ -570,25 +543,6 @@ void KFTopoPerformance::MatchPV()
     {
       RtoMCPVId[iPV].idsMI.push_back(iBestMCPV);
     }
-    
-//     for(unsigned int iMCPV=0; iMCPV<nTracksFromMCPV.size(); iMCPV++ )
-//     {
-//       if(nTracksFromMCPV[iMCPV] > 0 )
-//       {
-//         if( nTracksFromMCPV[iMCPV] >= 0.5 * fPrimVertices[iMCPV].NReconstructedDaughterTracks() )
-//           if(iMCPV < int(fPrimVertices.size()))
-//           {
-//             fPrimVertices[iMCPV].SetReconstructed();
-//           
-//             MCtoRPVId[iMCPV].ids.push_back(iPV);
-//             RtoMCPVId[iPV].ids.push_back(iMCPV);
-//           }
-//           else
-//           {
-//             RtoMCPVId[iPV].idsMI.push_back(iMCPV);
-//           }
-//       }
-//     }
   }
 }
 
@@ -874,7 +828,7 @@ void KFTopoPerformance::FillHistos()
 
     int iParticle = fParteff.GetParticleIndex(fTopoReconstructor->GetParticles()[iP].GetPDG());
     if(iParticle < 0) continue;
-
+    
     float M, ErrM;
     float dL, ErrdL; // decay length
     float cT, ErrcT; // c*tau
@@ -884,7 +838,6 @@ void KFTopoPerformance::FillHistos()
     float Theta;
     float Phi;
     float X,Y,Z,R;
-//    CbmKFParticle TempPart = fTopoReconstructor->GetParticles()[iP];
     KFParticle TempPart = fTopoReconstructor->GetParticles()[iP];
     TempPart.GetMass(M,ErrM);
     TempPart.GetMomentum(P,ErrP);
@@ -906,7 +859,7 @@ void KFTopoPerformance::FillHistos()
     float_v l,dl;
     KFParticleSIMD pv(fTopoReconstructor->GetPrimVertex());
     tempSIMDPart.GetDistanceToVertexLine(pv, l, dl);
-
+    
     //for all particle-candidates
     hPartParam[iParticle][ 0]->Fill(M);
     hPartParam[iParticle][ 1]->Fill(P);
@@ -1011,7 +964,9 @@ void KFTopoPerformance::FillHistos()
       int iMCTrack = mcPart.GetMCTrackID();
       KFMCTrack &mcTrack = vMCTracks[iMCTrack];
       int mcDaughterId = -1;
-      if(iParticle > 62 && iParticle <73)
+      if(iParticle > 64 && iParticle <75)
+        mcDaughterId = iMCTrack;
+      else if(mcTrack.PDG() == 22 && TempPart.NDaughters() == 1)
         mcDaughterId = iMCTrack;
       else
         mcDaughterId = mcPart.GetDaughterIds()[0];
@@ -1066,58 +1021,6 @@ void KFTopoPerformance::FillHistos()
         hFitQA[iParticle][iPar]->Fill(res[iPar]);
         hFitQA[iParticle][iPar+8]->Fill(pull[iPar]);
       }
-
-// #ifdef MAIN_DRAW
-//       if ( AliHLTTPCCADisplay::Instance().DrawType() == 3 ) {
-//       if(mcTrack.PDG()==310)
-//       {
-//         AliHLTTPCCADisplay::Instance().ClearView();
-//         AliHLTTPCCADisplay::Instance().SetTPCView();
-//         AliHLTTPCCADisplay::Instance().DrawTPC();
-// 
-//         KFParticle rPart = fTopoReconstructor->GetParticles()[iP];
-//         const unsigned int NRDaughters = rPart.NDaughters();
-// 
-//         float param[8] = {mcX, mcY, mcZ, mcPx, mcPy, mcPz, 0, 0};
-// 
-//         for (unsigned int iD=0 ; iD < NRDaughters; iD++ ) {
-// 
-//           KFParticle dPart = fTopoReconstructor->GetParticles()[rPart.DaughterIds()[iD]];
-// 
-//           int iDMC = RtoMCParticleId[dPart.DaughterIds()[0]].GetBestMatch();
-//           AliHLTTPCCADisplay::Instance().SpecDrawMCTrackPointsGlobal( (*AliHLTTPCCAPerformance::Instance().GetSubPerformance("Global Performance")->fMCTracks)[iDMC], AliHLTTPCCAPerformance::Instance().GetSubPerformance("Global Performance")->fLocalMCPoints, kRed, 0.3 );
-// 
-//           float vtx[3] = {rPart.X(), rPart.Y(), rPart.Z()};
-//           double vertex[3] = {rPart.X(), rPart.Y(), rPart.Z()};
-//           for(int iP=0; iP<8; iP++)
-//             param[iP] = dPart.Parameters()[iP];
-//           double b[3];
-//           dPart.GetFieldValue(vertex, b);
-//           AliHLTTPCCADisplay::Instance().DrawParticleGlobal( param, dPart.Q(), 0, dPart.GetDStoPoint(vertex), b[2], kBlue, 2 );
-// std::cout << "!!!!    " << rPart.DaughterIds()[iD] << " " << fTopoReconstructor->GetChiPrim()[rPart.DaughterIds()[iD]] << std::endl;
-// 
-//         }
-// 
-//         param[0] = mcX;
-//         param[1] = mcY;
-//         param[2] = mcZ;
-//         param[3] = mcPx;
-//         param[4] = mcPy;
-//         param[5] = mcPz;
-// 
-//         AliHLTTPCCADisplay::Instance().DrawGBPoint( param, kBlack );
-//         AliHLTTPCCADisplay::Instance().DrawGBPoint( rPart.X(), rPart.Y(), rPart.Z(), kGreen );
-// 
-//     KFParticle & vtx = fTopoReconstructor->GetPrimVertex();
-// 
-//         AliHLTTPCCADisplay::Instance().DrawGBPoint( vtx.X(), vtx.Y(), vtx.Z(), kRed );
-// 
-//         AliHLTTPCCADisplay::Instance().Ask();
-//       }
-//       }
-// #endif
-//      Double_t mcT = mcDaughter.GetStartT() - mcTrack.GetStartT();
-      
     }
     // Fit quality of daughters
     int daughterIndex[2] = {-1, -1};
@@ -1130,7 +1033,6 @@ void KFTopoPerformance::FillHistos()
       KFMCTrack &mcTrack = vMCTracks[mcDaughterId];
 //      int recDaughterId = MCtoRParticleId[mcDaughterId].GetBestMatchWithPdg();
       int recDaughterId = MCtoRParticleId[mcDaughterId].GetBestMatch();
-//      CbmKFParticle Daughter = fPF->GetParticles()[recDaughterId];
       KFParticle Daughter = fTopoReconstructor->GetParticles()[recDaughterId];
       Daughter.GetMass(M,ErrM);
 
