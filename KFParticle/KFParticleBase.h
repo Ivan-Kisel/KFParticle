@@ -50,17 +50,26 @@ class KFParticleBase :public TObject {
  
   //* Get dS to xyz[] space point 
 
-  virtual float GetDStoPoint( const float xyz[] ) const = 0;
+  virtual float GetDStoPoint( const float xyz[3], float dsdr[6] ) const = 0;
+  
+  float GetDStoPointLine( const float xyz[3], float dsdr[6] ) const;
+  float GetDStoPointBz( float B, const float xyz[3], float dsdr[6], const float* param=0) const;
+  float GetDStoPointBy( float By, const float xyz[3], float dsdr[6] ) const;
+  float GetDStoPointB( const float* B, const float xyz[3], float dsdr[6] ) const;
+  float GetDStoPointCBM( const float xyz[3], float dsdr[3] ) const;
 
   //* Get dS to other particle p (dSp for particle p also returned) 
 
-  virtual void GetDStoParticle( const KFParticleBase &p, 
-				float &DS, float &DSp ) const = 0;
+  virtual void GetDStoParticle( const KFParticleBase &p, float dS[2], float dsdr[4][6] ) const = 0;
+  
+  void GetDStoParticleLine( const KFParticleBase &p, float dS[2], float dsdr[4][6] ) const ;
+  void GetDStoParticleBz( float Bz, const KFParticleBase &p, float dS[2], float dsdr[4][6], const float* param1=0, const float* param2=0 ) const ;
+  void GetDStoParticleBy( float B,  const KFParticleBase &p, float dS[2], float dsdr[4][6] ) const ;
+  void GetDStoParticleCBM( const KFParticleBase &p, float dS[2], float dsdr[4][6] ) const ;
   
   //* Transport on dS value along trajectory, output to P,C
 
-  virtual void Transport( float dS, float P[], float C[] ) const = 0;
-
+  virtual void Transport( float dS, const float dsdr[6], float P[], float C[], float* dsdr1=0, float* F=0, float* F1=0 ) const = 0;
 
 
   //*
@@ -83,10 +92,6 @@ class KFParticleBase :public TObject {
   //* Initialise covariance matrix and set current parameters to 0.0 
 
   void Initialize();
-
-  //* Set decay vertex parameters for linearisation 
-
-  void SetVtxGuess( float x, float y, float z );
 
   //* Set consruction method
 
@@ -182,7 +187,6 @@ class KFParticleBase :public TObject {
   void AddDaughter( const KFParticleBase &Daughter );
 
   void AddDaughterWithEnergyFit( const KFParticleBase &Daughter );
-  void AddDaughterWithEnergyCalc( const KFParticleBase &Daughter );
   void AddDaughterWithEnergyFitMC( const KFParticleBase &Daughter ); //with mass constrained
 
   //* Set production vertex 
@@ -223,21 +227,12 @@ class KFParticleBase :public TObject {
 
   //* Transport the particle on dS parameter (SignedPath/Momentum) 
 
-  void TransportToDS( float dS );
+  void TransportToDS( float dS, const float* dsdr );
 
   //* Particular extrapolators one can use 
 
-  float GetDStoPointBz( float B, const float xyz[], const float* param=0) const;
-  float GetDStoPointBy( float By, const float xyz[] ) const;
-
-  void GetDStoParticleBz( float Bz, const KFParticleBase &p, float &dS, float &dS1, const float* param1=0, const float* param2=0 ) const ;
-  void GetDStoParticleBy( float B, const KFParticleBase &p, float &dS, float &dS1 ) const ;
-
-  float GetDStoPointCBM( const float xyz[] ) const;
-  void GetDStoParticleCBM( const KFParticleBase &p, float &dS, float &dS1 ) const ;
-
-  void TransportBz( float Bz, float dS, float P[], float C[] ) const;
-  void TransportCBM( float dS, float P[], float C[] ) const;  
+  void TransportBz( float Bz, float dS, const float* dsdr, float P[], float C[], float* dsdr1=0, float* F=0, float* F1=0 ) const;
+  void TransportCBM( float dS, const float* dsdr, float P[], float C[], float* dsdr1=0, float* F=0, float* F1=0 ) const;  
 
 
   //* 
@@ -262,11 +257,6 @@ class KFParticleBase :public TObject {
 
   void SubtractFromVertex( KFParticleBase &Vtx ) const;
   void SubtractFromParticle( KFParticleBase &Vtx ) const;
-
-  //* Special method for creating gammas
-
-  void ConstructGammaBz( const KFParticleBase &daughter1,
-                         const KFParticleBase &daughter2, float Bz  );
 
   //* return parameters for the Armenteros-Podolanski plot
   static void GetArmenterosPodolanski(KFParticleBase& positive, KFParticleBase& negative, float QtAlfa[2] );
@@ -301,6 +291,8 @@ class KFParticleBase :public TObject {
 #endif
 
   static void InvertCholetsky3(float a[6]);
+  static void MultQSQt( const float Q[], const float S[], float SOut[], const int kN );
+
  protected:
 
   static Int_t IJ( Int_t i, Int_t j ){ 
@@ -309,19 +301,11 @@ class KFParticleBase :public TObject {
 
   float & Cij( Int_t i, Int_t j ){ return fC[IJ(i,j)]; }
 
-  void Convert( bool ToProduction );
-  void TransportLine( float S, float P[], float C[] ) const ;
-  float GetDStoPointLine( const float xyz[] ) const;
-  void GetDStoParticleLine( const KFParticleBase &p, float &dS, float &dS1 ) const ;
+  void TransportLine( float S, const float* dsdr, float P[], float C[], float* dsdr1, float* F, float* F1 ) const ;
 
   static Bool_t InvertSym3( const float A[], float Ainv[] );
 
-  static void MultQSQt( const float Q[], const float S[], 
-                        float SOut[] );
-
-  static float GetSCorrection( const float Part[], const float XYZ[] );
-
-  void GetMeasurement( const float XYZ[], float m[], float V[] ) const ;
+  bool GetMeasurement( const KFParticleBase& daughter, float m[], float V[], float D[3][3] ) ;
 
   //* Mass constraint function. is needed for the nonlinear mass constraint and a fit with mass constraint
   void SetMassConstraint( float *mP, float *mC, float mJ[7][7], float mass );
@@ -330,7 +314,6 @@ class KFParticleBase :public TObject {
   float fC[36]; //* Low-triangle covariance matrix of fP
   float fChi2;  //* Chi^2
   float fSFromDecay; //* Distance from decay vertex to current position
-  float fVtxGuess[3];  //* Guess for the position of the decay vertex 
   float SumDaughterMass;  //* sum of the daughter particles masses
   float fMassHypo;  //* sum of the daughter particles masse
   Int_t fNDF;   //* Number of degrees of freedom 
