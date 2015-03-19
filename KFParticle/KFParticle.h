@@ -974,7 +974,7 @@ inline void KFParticle::GetDStoParticle( const KFParticleBase &p, float dS[2], f
 inline void KFParticle::Transport( float dS, const float* dsdr, float P[], float C[], float* dsdr1, float* F, float* F1 ) const 
 {
 #ifdef HomogeneousField
-  KFParticleBase::TransportBz( GetFieldAlice(), dsdr, dS, P, C, dsdr1, F, F1 );
+  KFParticleBase::TransportBz( GetFieldAlice(), dS, dsdr, P, C, dsdr1, F, F1 );
 #endif
 #ifdef NonhomogeneousField
   KFParticleBase::TransportCBM( dS, dsdr, P, C, dsdr1, F, F1 );

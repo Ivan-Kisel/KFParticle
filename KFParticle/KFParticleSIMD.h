@@ -1038,7 +1038,7 @@ inline void KFParticleSIMD::GetDStoParticle( const KFParticleBaseSIMD &p, float_
 inline void KFParticleSIMD::Transport( float_v dS, const float_v* dsdr, float_v P[], float_v C[], float_v* dsdr1, float_v* F, float_v* F1 ) const 
 {
 #ifdef HomogeneousField
-  KFParticleBaseSIMD::TransportBz( GetFieldAlice(), dsdr, dS, P, C, dsdr1, F, F1 );
+  KFParticleBaseSIMD::TransportBz( GetFieldAlice(), dS, dsdr, P, C, dsdr1, F, F1 );
 #endif
 #ifdef NonhomogeneousField
   KFParticleBaseSIMD::TransportCBM( dS, dsdr, P, C, dsdr1, F, F1 );
