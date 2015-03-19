@@ -111,10 +111,6 @@ class KFParticleSIMD :public KFParticleBaseSIMD
 
   void Initialize();
 
-  //* Set decay vertex parameters for linearisation 
-
-  void SetVtxGuess( float_v x, float_v y, float_v z );
-
   //*
   //*  ACCESSORS
   //*

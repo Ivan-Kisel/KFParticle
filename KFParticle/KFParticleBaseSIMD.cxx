@@ -3252,7 +3252,7 @@ void KFParticleBaseSIMD::MultQSQt( const float_v Q[], const float_v S[], float_v
 {
   //* Matrix multiplication Q*S*Q^T, Q - square matrix, S - symmetric
 
-  float_v mA[kN*kN];
+  float_v* mA = new float_v[kN*kN];
   
   for( Int_t i=0, ij=0; i<kN; i++ ){
     for( Int_t j=0; j<kN; j++, ++ij ){
@@ -3268,6 +3268,8 @@ void KFParticleBaseSIMD::MultQSQt( const float_v Q[], const float_v S[], float_v
       for( Int_t k=0; k<kN; k++ )  SOut[ij] += Q[ i*kN+k ] * mA[ k*kN+j ];
     }
   }
+  
+  if(mA) delete[] mA;
 }
 
 
