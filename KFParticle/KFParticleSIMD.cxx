@@ -33,7 +33,7 @@ KFParticleSIMD::KFParticleSIMD( const KFParticleSIMD &d1, const KFParticleSIMD &
   *this = mother;
 }
 
-void KFParticleSIMD::Create( const float_v Param[], const float_v Cov[], float_v Charge, float_v mass /*Int_t PID*/ )
+void KFParticleSIMD::Create( const float_v Param[], const float_v Cov[], int_v Charge, float_v mass /*Int_t PID*/ )
 {
   // Constructor from "cartesian" track, PID hypothesis should be provided
   //
@@ -192,7 +192,7 @@ void KFParticleSIMD::Create(KFPTrackVector &track, uint_v& index, const int_v& p
 #endif
   
   //   fPDG.gather(&(track.PDG()[0]), index);
-  fQ = track.Q()[index[0]];
+  fQ.gather(&(track.Q()[0]), index);
 
   float_v mass = KFParticleDatabase::Instance()->GetMass(pdg);
   Create(fP,fC,fQ,mass);
@@ -210,7 +210,7 @@ void KFParticleSIMD::Load(KFPTrackVector &track, int index, const int_v& pdg)
 #endif
   
   //   fPDG.gather(&(track.PDG()[0]), index);
-  fQ = track.Q()[index];
+  fQ = reinterpret_cast<const int_v&>(track.Q()[index]);
 
   float_v mass = KFParticleDatabase::Instance()->GetMass(pdg);
   Create(fP,fC,fQ,mass);
@@ -289,7 +289,7 @@ void KFParticleSIMD::Create(KFPEmcCluster &track, uint_v& index, const KFParticl
         fC[IJ(i,j)]+= J[i][l]*VJT[l][j];
   fC[35] = 1.f;
   
-  fQ = float_v(Vc::Zero);
+  fQ = int_v(Vc::Zero);
   fNDF = 0;
   fChi2 = 0;
   
@@ -356,7 +356,7 @@ void KFParticleSIMD::Load(KFPEmcCluster &track, int index, const KFParticleSIMD&
         fC[IJ(i,j)]+= J[i][l]*VJT[l][j];
   fC[35] = 1.f;
   
-  fQ = float_v(Vc::Zero);
+  fQ = int_v(Vc::Zero);
   fNDF = 0;
   fChi2 = 0;
   
