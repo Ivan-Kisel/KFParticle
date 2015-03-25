@@ -19,9 +19,6 @@
 float_v KFParticleSIMD::fgBz = -5.f;  //* Bz compoment of the magnetic field
 #endif
 
-static const float_v Zero = 0.f;
-static const float_v One = 1.f;
-
 KFParticleSIMD::KFParticleSIMD( const KFParticleSIMD &d1, const KFParticleSIMD &d2 ): KFParticleBaseSIMD()
 #ifdef NonhomogeneousField
 , fField()
@@ -382,7 +379,7 @@ KFParticleSIMD::KFParticleSIMD( const KFPVertex &vertex ): KFParticleBaseSIMD()
     fC[i] = C[i];
   fChi2 = vertex.GetChi2();
   fNDF = 2*vertex.GetNContributors() - 3;
-  fQ = Zero;
+  fQ = int_v(Vc::Zero);
   fAtProductionVertex = 0;
   fSFromDecay = 0;
 }
@@ -511,7 +508,7 @@ float_m KFParticleSIMD::GetDistanceFromVertexXY( const float_v vtx[], const floa
   float_v ex(Vc::Zero), ey(Vc::Zero);
   float_m mask = ( pt < float_v(1.e-4) );
 
-  pt(mask) = One;
+  pt(mask) = float_v(1.f);
   ex(!mask) = (px/pt);
   ey(!mask) = (py/pt);
   val(mask) = float_v(1.e4);
@@ -727,13 +724,13 @@ float_v KFParticleSIMD::GetAngle  ( const KFParticleSIMD &p ) const
   float_v n = sqrt( mP[3]*mP[3] + mP[4]*mP[4] + mP[5]*mP[5] );
   float_v n1= sqrt( mP1[3]*mP1[3] + mP1[4]*mP1[4] + mP1[5]*mP1[5] );
   n*=n1;
-  float_v a = Zero;
+  float_v a(Vc::Zero);
   float_m mask = (n>(1.e-8f));
   a(mask) = ( mP[3]*mP1[3] + mP[4]*mP1[4] + mP[5]*mP1[5] )/n;
-  mask = ( abs(a) < One);
-  float_m aPos = (a>=Zero);
+  mask = ( abs(a) < float_v(1.f));
+  float_m aPos = (a>=float_v(Vc::Zero));
   a(mask) = KFPMath::ACos(a);
-  a((!mask) && aPos) = Zero;
+  a((!mask) && aPos) = float_v(Vc::Zero);
   a((!mask) && (!aPos)) = 3.1415926535f;
   return a;
 }
@@ -751,14 +748,14 @@ float_v KFParticleSIMD::GetAngleXY( const KFParticleSIMD &p ) const
   float_v n = sqrt( mP[3]*mP[3] + mP[4]*mP[4] );
   float_v n1= sqrt( mP1[3]*mP1[3] + mP1[4]*mP1[4] );
   n*=n1;
-  float_v a = Zero;
+  float_v a(Vc::Zero);
   float_m mask = (n>(1.e-8f));
   a = ( mP[3]*mP1[3] + mP[4]*mP1[4] )/n;
   a(!mask) = 0.f;
-  mask = ( abs(a) < One);
-  float_m aPos = (a>=Zero);
+  mask = ( abs(a) < float_v(1.f));
+  float_m aPos = (a>=float_v(Vc::Zero));
   a(mask) = KFPMath::ACos(a);
-  a((!mask) && aPos) = Zero;
+  a((!mask) && aPos) = float_v(Vc::Zero);
   a((!mask) && (!aPos)) = 3.1415926535f;
   return a;
 }
@@ -778,13 +775,13 @@ float_v KFParticleSIMD::GetAngleRZ( const KFParticleSIMD &p ) const
   float_v n = sqrt( nr*nr + mP[5]*mP[5] );
   float_v n1= sqrt( n1r*n1r + mP1[5]*mP1[5] );
   n*=n1;
-  float_v a = Zero;
+  float_v a(Vc::Zero);
   float_m mask = (n>(1.e-8f));
   a(mask) = ( nr*n1r +mP[5]*mP1[5])/n;
-  mask = ( abs(a) < One);
-  float_m aPos = (a>=Zero);
+  mask = ( abs(a) < float_v(Vc::Zero));
+  float_m aPos = (a>=float_v(Vc::Zero));
   a(mask) = KFPMath::ACos(a);
-  a((!mask) && aPos) = Zero;
+  a((!mask) && aPos) = float_v(Vc::Zero);
   a((!mask) && (!aPos)) = 3.1415926535f;
   return a;
 }
