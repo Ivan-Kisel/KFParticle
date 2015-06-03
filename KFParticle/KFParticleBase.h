@@ -185,6 +185,7 @@ class KFParticleBase :public TObject {
   //* Add daughter track to the particle 
 
   void AddDaughter( const KFParticleBase &Daughter );
+  void SubtractDaughter( const KFParticleBase &Daughter );
 
   void AddDaughterWithEnergyFit( const KFParticleBase &Daughter );
   void AddDaughterWithEnergyFitMC( const KFParticleBase &Daughter ); //with mass constrained
