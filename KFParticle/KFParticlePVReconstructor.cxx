@@ -98,8 +98,15 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
     {
       const KFParticle &p = fParticles[iP];
       float chi = p.GetDeviationFromVertex( primVtx );      
-      if( chi >= fChi2CutPreparation )
-        continue;
+       
+      bool isBadDaughter=0;
+      for(int iP=0; iP<8; iP++)
+        isBadDaughter|= p.GetParameter(iP) != p.GetParameter(iP);
+      for(int iC=0; iC<36; iC++)
+        isBadDaughter|= p.GetCovariance(iC) != p.GetCovariance(iC);
+
+      if( chi >= fChi2CutPreparation || isBadDaughter)
+         continue;
       
       pParticles[nPrimCand] = &fParticles[iP];
       vFlags[nPrimCand] = 1;
