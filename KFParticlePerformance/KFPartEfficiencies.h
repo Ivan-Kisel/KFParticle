@@ -16,7 +16,13 @@
 #include <iomanip>
 #include "KFMCCounter.h"
 
-class KFPartEfficiencies
+#ifdef HLTCA_STANDALONE
+#include "RootTypesDef.h"
+#else
+#include "TObject.h"
+#endif
+
+class KFPartEfficiencies :public TObject
 {
  public:
 
