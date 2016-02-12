@@ -25,7 +25,6 @@
 
 #include "KFPartMatch.h"
 #include "KFMCParticle.h"
-#include "KFPHistogram/KFPHistogram.h"
 
 class AliHLTTPCCAGBTracker;
 
@@ -33,6 +32,7 @@ class AliHLTTPCCAGBTracker;
 class TObject;
 class TParticle;
 class KFParticleTopoReconstructor;
+class KFPHistogram;
 class TDirectory;
 class TH1D;
 class TH2D;
@@ -73,7 +73,7 @@ class KFTopoPerformance: public KFParticlePerformanceBase
     /// Histograms
     //     virtual void CreateHistos(string histoDir);
   virtual void FillHistos();
-  void FillHistos(const KFPHistogram& histograms);
+  void FillHistos(const KFPHistogram* histograms);
   
   void AddV0Histos();
   

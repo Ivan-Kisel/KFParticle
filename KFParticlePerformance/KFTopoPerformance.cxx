@@ -23,6 +23,7 @@
 
 #include "KFParticleTopoReconstructor.h"
 #include "KFParticleSIMD.h"
+#include "KFPHistogram/KFPHistogram.h"
 #include "TParticlePDG.h"
 #include "TDatabasePDG.h"
 
@@ -1494,14 +1495,14 @@ void KFTopoPerformance::AddV0Histos()
 }
 
 
-void KFTopoPerformance::FillHistos(const KFPHistogram& histograms)
+void KFTopoPerformance::FillHistos(const KFPHistogram* histograms)
 {
   for(int iParticle=0; iParticle<KFPartEfficiencies::nParticles; iParticle++)
   {
-    const int& nHistograms = histograms.GetHistogramSet(0).GetNHisto1D();
+    const int& nHistograms = histograms->GetHistogramSet(0).GetNHisto1D();
     for(int iHistogram=0; iHistogram<nHistograms; iHistogram++)
     {
-      const KFPHistogram1D& histogram = histograms.GetHistogram(iParticle,iHistogram);
+      const KFPHistogram1D& histogram = histograms->GetHistogram(iParticle,iHistogram);
       for(int iBin=0; iBin<histogram.Size(); iBin++)
         hPartParam[iParticle][iHistogram]->SetBinContent( iBin, histogram.GetHistogram()[iBin] );
     }
