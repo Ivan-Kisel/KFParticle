@@ -12,15 +12,11 @@
 #ifndef KFPartEfficiencies_H
 #define KFPartEfficiencies_H
 
-#ifndef HLTCA_STANDALONE
-#include "TNamed.h"
-#endif
-
 #include <map>
 #include <iomanip>
 #include "KFMCCounter.h"
 
-class KFPartEfficiencies: public TNamed
+class KFPartEfficiencies
 {
  public:
 
@@ -66,7 +62,7 @@ class KFPartEfficiencies: public TNamed
                                 1000010020, -1000010020, 1000010030, -1000010030, 1000020030, -1000020030, 1000020040, -1000020040, // stable fragments
                                 123456789 //V0
                                };
-    TString mPartName[nParticles] = {"ks","lambda","lambdab","xi-","xi+","xi0","xi0b","omega-","omega+","#Sigma^0","#Sigma^0b", "#Sigma^+", "#Sigma^+b",
+    std::string mPartName[nParticles] = {"ks","lambda","lambdab","xi-","xi+","xi0","xi0b","omega-","omega+","#Sigma^0","#Sigma^0b", "#Sigma^+", "#Sigma^+b",
                                      "k*0","k*0b","k*+","k*-", "k*0_{K0,#pi0}", "k*+_{K+,#pi0}", "k*-_{K-,#pi0}",
                                      "sigma*+","sigma*-","sigma*+b","sigma*-b","sigma*0","sigma*0b",
                                      "lambda*","lambda*b",
@@ -89,7 +85,7 @@ class KFPartEfficiencies: public TNamed
                                      "d+", "d-", "t+", "t-", "He3+", "He3-", "He4+", "He4-",
                                      "V0"
                                     };
-    TString mPartTitle[nParticles] = {"KShort   ", //0
+    std::string mPartTitle[nParticles] = {"KShort   ", //0
                                       "Lambda   ", //1
                                       "Lambda b ", //2
                                       "Xi-      ", //3
@@ -867,9 +863,9 @@ class KFPartEfficiencies: public TNamed
 
     for(int iP=0; iP<nParticles; iP++)
     {
-      AddCounter(Form("%s",partName[iP].Data()), Form("%-*s",14,partTitle[iP].Data()));
-      AddCounter(Form("%s_prim",partName[iP].Data()), Form("%s Prim",partTitle[iP].Data()));
-      AddCounter(Form("%s_sec",partName[iP].Data()), Form("%s Sec ",partTitle[iP].Data()));
+      AddCounter(partName[iP],           partTitle[iP] + "     ");
+      AddCounter(partName[iP] + "_prim", partTitle[iP] + " Prim");
+      AddCounter(partName[iP] + "_sec",  partTitle[iP] + " Sec ");
     }
 
     for(int iP=0; iP<nParticles; iP++)
@@ -886,7 +882,9 @@ class KFPartEfficiencies: public TNamed
     else return -1;
   }
 
-  virtual void AddCounter(TString shortname, TString name){
+  std::map<int,int> GetPdgToIndexMap() const { return fPdgToIndex; }
+  
+  virtual void AddCounter(std::string shortname, std::string name){
     indices[shortname] = names.size();
     names.push_back(name);
 
@@ -926,7 +924,7 @@ class KFPartEfficiencies: public TNamed
   };
   
 
-  void Inc(bool isReco, int nClones, bool isMC1, bool isMC2, bool isMC3, TString name)
+  void Inc(bool isReco, int nClones, bool isMC1, bool isMC2, bool isMC3, std::string name)
   {
     const int index = indices[name];
     
@@ -939,7 +937,7 @@ class KFPartEfficiencies: public TNamed
       clone.counters[index] += nClones;
   };
 
-  void IncReco(bool isGhost, bool isBg, TString name){
+  void IncReco(bool isGhost, bool isBg, std::string name){
     const int index = indices[name];
 
     if (isGhost) ghost.     counters[index]++;
@@ -1022,9 +1020,9 @@ class KFPartEfficiencies: public TNamed
     return strm;
   }
 
-  void AddFromFile(TString fileName)
+  void AddFromFile(std::string fileName)
   {
-    std::fstream file(fileName.Data(),std::fstream::in);
+    std::fstream file(fileName.data(),std::fstream::in);
     file >> *this;
   }
   
@@ -1033,8 +1031,8 @@ class KFPartEfficiencies: public TNamed
   
   static const int nParticles = 94;
   int partPDG[nParticles];
-  TString partName[nParticles];
-  TString partTitle[nParticles];
+  std::string partName[nParticles];
+  std::string partTitle[nParticles];
   std::vector<std::vector<int> > partDaughterPdg;
   float partMHistoMin[nParticles];
   float partMHistoMax[nParticles];
@@ -1044,8 +1042,8 @@ class KFPartEfficiencies: public TNamed
   int partCharge[nParticles];
 
  private:
-  std::vector<TString> names; // names counters indexed by index of counter
-  std::map<TString, int> indices; // indices of counters indexed by a counter shortname
+  std::vector<std::string> names; // names counters indexed by index of counter
+  std::map<std::string, int> indices; // indices of counters indexed by a counter shortname
 
   std::map<int, int> fPdgToIndex;
 

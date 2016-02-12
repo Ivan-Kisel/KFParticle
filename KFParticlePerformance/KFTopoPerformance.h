@@ -25,6 +25,7 @@
 
 #include "KFPartMatch.h"
 #include "KFMCParticle.h"
+#include "KFPHistogram/KFPHistogram.h"
 
 class AliHLTTPCCAGBTracker;
 
@@ -72,7 +73,8 @@ class KFTopoPerformance: public KFParticlePerformanceBase
     /// Histograms
     //     virtual void CreateHistos(string histoDir);
   virtual void FillHistos();
-
+  void FillHistos(const KFPHistogram& histograms);
+  
   void AddV0Histos();
   
   void SetTrackMatch(const vector<int>& trackMatch) { fTrackMatch = trackMatch;}

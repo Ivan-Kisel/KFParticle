@@ -589,7 +589,7 @@ void KFTopoPerformance::CalculateEfficiency()
 
     for(int iPart=0; iPart<fParteff.nParticles; iPart++)
       if ( pdg == fParteff.partPDG[iPart] )
-        partEff.IncReco(isGhost, isBG, fParteff.partName[iPart].Data());
+        partEff.IncReco(isGhost, isBG, fParteff.partName[iPart].data());
     
     // Calculate the gost level for V0
     if(abs(pdg) == 310  /*||
@@ -597,7 +597,7 @@ void KFTopoPerformance::CalculateEfficiency()
        CAMath::Abs(pdg) == 421  ||
        CAMath::Abs(pdg) == 22 */)
     {
-      partEff.IncReco(isGhost, 0, fParteff.partName[fParteff.nParticles - 1].Data());
+      partEff.IncReco(isGhost, 0, fParteff.partName[fParteff.nParticles - 1].data());
     }
   }
 
@@ -640,11 +640,11 @@ void KFTopoPerformance::CalculateEfficiency()
         int iPart = iParticle[iPType];
         if(iPart<0) continue;
           
-        partEff.Inc(isReco[iPType], nClones[iPType], isReconstructable[iPType][0], isReconstructable[iPType][1], isReconstructable[iPType][2], fParteff.partName[iPart].Data());
+        partEff.Inc(isReco[iPType], nClones[iPType], isReconstructable[iPType][0], isReconstructable[iPType][1], isReconstructable[iPType][2], fParteff.partName[iPart].data());
         if ( mId == -1 )
-          partEff.Inc(isReco[iPType], nClones[iPType], isReconstructable[iPType][0], isReconstructable[iPType][1], isReconstructable[iPType][2], (fParteff.partName[iPart]+"_prim").Data());
+          partEff.Inc(isReco[iPType], nClones[iPType], isReconstructable[iPType][0], isReconstructable[iPType][1], isReconstructable[iPType][2], (fParteff.partName[iPart]+"_prim").data());
         else
-          partEff.Inc(isReco[iPType], nClones[iPType], isReconstructable[iPType][0], isReconstructable[iPType][1], isReconstructable[iPType][2], (fParteff.partName[iPart]+"_sec").Data());
+          partEff.Inc(isReco[iPType], nClones[iPType], isReconstructable[iPType][0], isReconstructable[iPType][1], isReconstructable[iPType][2], (fParteff.partName[iPart]+"_sec").data());
         
         for(int iEff=0; iEff<3; iEff++)
         {
@@ -1490,6 +1490,21 @@ void KFTopoPerformance::AddV0Histos()
     hPartParamGhost[iV0][iH]->Add(hPartParamGhost[iK0][iH]);
     hPartParamSignal[iV0][iH]->Add(hPartParamSignal[iK0][iH]);
     hPartParamSignal[iV0][iH]->Add(hPartParamBG[iK0][iH]);
+  }
+}
+
+
+void KFTopoPerformance::FillHistos(const KFPHistogram& histograms)
+{
+  for(int iParticle=0; iParticle<KFPartEfficiencies::nParticles; iParticle++)
+  {
+    const int& nHistograms = histograms.GetHistogramSet(0).GetNHisto1D();
+    for(int iHistogram=0; iHistogram<nHistograms; iHistogram++)
+    {
+      const KFPHistogram1D& histogram = histograms.GetHistogram(iParticle,iHistogram);
+      for(int iBin=0; iBin<histogram.Size(); iBin++)
+        hPartParam[iParticle][iHistogram]->SetBinContent( iBin, histogram.GetHistogram()[iBin] );
+    }
   }
 }
 
