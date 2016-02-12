@@ -158,7 +158,7 @@ class KFPInputData
     
     for(int iP=0; iP<3; iP++)
     {
-      for(int iPV=0; iPV<fPV.size(); iPV++)
+      for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
       {
         float& tmpFloat = reinterpret_cast<float&>(data[offset + iPV]);
         tmpFloat = fPV[iPV].Parameter(iP);
@@ -168,7 +168,7 @@ class KFPInputData
     
     for(int iC=0; iC<6; iC++)
     {
-      for(int iPV=0; iPV<fPV.size(); iPV++)
+      for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
       {
         float& tmpFloat = reinterpret_cast<float&>(data[offset + iPV]);
         tmpFloat = fPV[iPV].Covariance(iC);
@@ -193,7 +193,7 @@ class KFPInputData
                 
     for(int iP=0; iP<3; iP++)
     {
-      for(int iPV=0; iPV<fPV.size(); iPV++)
+      for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
       {
         float& tmpFloat = reinterpret_cast<float&>(data[offset + iPV]);
         fPV[iPV].Parameter(iP) = tmpFloat;
@@ -203,7 +203,7 @@ class KFPInputData
     
     for(int iC=0; iC<6; iC++)
     {
-      for(int iPV=0; iPV<fPV.size(); iPV++)
+      for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
       {
         float& tmpFloat = reinterpret_cast<float&>(data[offset + iPV]);
         fPV[iPV].Covariance(iC) = tmpFloat;
@@ -219,15 +219,15 @@ class KFPInputData
     std::cout << "N PV: " << fPV.size() << std::endl;
     
     std::cout << "X: ";
-    for(int iPV=0; iPV<fPV.size(); iPV++)
+    for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
       std::cout << fPV[iPV].X() <<" ";
     std::cout << std::endl;
         std::cout << "Y: ";
-    for(int iPV=0; iPV<fPV.size(); iPV++)
+    for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
       std::cout << fPV[iPV].Y() <<" ";
     std::cout << std::endl;
     std::cout << "Z: ";
-    for(int iPV=0; iPV<fPV.size(); iPV++)
+    for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
       std::cout << fPV[iPV].Z() <<" ";
     std::cout << std::endl;
 
@@ -235,7 +235,7 @@ class KFPInputData
     for(int iC=0; iC<6; iC++)
     {
       std::cout << "  iC " << iC << ":  ";
-      for(int iPV=0; iPV<fPV.size(); iPV++)
+      for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
         std::cout << fPV[iPV].Covariance(iC) <<" ";
       std::cout << std::endl;
     }

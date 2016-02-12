@@ -31,8 +31,9 @@
 
 #define NInputSets 4
 
-#include "KFPVector.h"
-
+#include <Vc/Vc>
+#include <Vc/limits>
+using ::Vc::float_v;
 using ::Vc::double_v;
 using ::Vc::float_v;
 using ::Vc::int_v;
@@ -61,6 +62,7 @@ typedef double Double_t;
 #include "KFPSimdAllocator.h"    
 typedef std::vector<float_v, KFPSimdAllocator<float_v> > kfvector_floatv;
 
+#include "KFPVector.h"
 typedef KFPVector<float> kfvector_float;
 typedef KFPVector<int> kfvector_int;
 typedef KFPVector<unsigned int> kfvector_uint;

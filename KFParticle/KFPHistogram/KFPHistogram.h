@@ -55,7 +55,7 @@ class KFPHistogram
   
   inline void Fill(const KFParticleTopoReconstructor& topoReconstructor)
   {
-    for(int iParticle=0; iParticle<topoReconstructor.GetParticles().size(); iParticle++)
+    for(unsigned int iParticle=0; iParticle<topoReconstructor.GetParticles().size(); iParticle++)
       Fill(topoReconstructor.GetParticles()[iParticle]);
   }
     

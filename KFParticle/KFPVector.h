@@ -33,7 +33,6 @@ class KFPVector
       for(int i=0; i<fSize; i++)
         fData[i] = a.fData[i];
     }
-    return *this;
   }
 
   T& operator= (const T& a)
