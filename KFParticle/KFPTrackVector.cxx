@@ -46,7 +46,7 @@ void KFPTrackVector::SetCovariance(const float_v& value, int iC, int iTr)
     for(int i=0; i<float_v::Size; i++)
     {
       if(iTr + i >= Size()) continue;
-      fP[iC][iTr+i] = value[i];
+      fC[iC][iTr+i] = value[i];
     } 
 }
   

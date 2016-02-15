@@ -333,7 +333,7 @@ class KFParticleBase :public TObject {
                           //* ( used for linearisation of equations )
 
   Bool_t fIsLinearized;   //* Flag shows that the guess is present
-  
+
   char    fQ;     //* Particle charge 
   char fConstructMethod; //* Determines the method for the particle construction. 
   //* 0 - Energy considered as an independent veriable, fitted independently from momentum, without any constraints on mass

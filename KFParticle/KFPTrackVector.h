@@ -78,7 +78,7 @@ class KFPTrackVector
   void SetQ         (int value, int iTr)           { fQ[iTr] = value; }
   void SetPVIndex   (int value, int iTr)           { fPVIndex[iTr] = value; }
   void SetLastElectron(int n) { fNE = n; }
-  void SetLastMoun    (int n) { fNMu = n; }
+  void SetLastMuon    (int n) { fNMu = n; }
   void SetLastPion    (int n) { fNPi = n; }
   void SetLastKaon    (int n) { fNK = n; }
   void SetLastProton  (int n) { fNP = n; }

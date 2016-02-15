@@ -29,7 +29,7 @@
 #include "TObject.h"
 #endif
 
-#define NInputSets 4
+#define NInputSets 8
 
 #include <Vc/Vc>
 #include <Vc/limits>
@@ -62,10 +62,13 @@ typedef double Double_t;
 #include "KFPSimdAllocator.h"    
 typedef std::vector<float_v, KFPSimdAllocator<float_v> > kfvector_floatv;
 
-#include "KFPVector.h"
-typedef KFPVector<float> kfvector_float;
-typedef KFPVector<int> kfvector_int;
-typedef KFPVector<unsigned int> kfvector_uint;
+typedef std::vector<float, KFPSimdAllocator<float> > kfvector_float;
+typedef std::vector<int, KFPSimdAllocator<int> > kfvector_int;
+typedef std::vector<unsigned int, KFPSimdAllocator<unsigned int> > kfvector_uint;
+// #include "KFPVector.h"
+// typedef KFPVector<float> kfvector_float;
+// typedef KFPVector<int> kfvector_int;
+// typedef KFPVector<unsigned int> kfvector_uint;
 
 namespace KFPMath
 {

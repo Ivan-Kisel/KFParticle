@@ -112,7 +112,7 @@ class KFPInputData
       ifile >> tmpInt;
       fTracks[iSet].SetLastElectron(tmpInt);
       ifile >> tmpInt;
-      fTracks[iSet].SetLastMoun    (tmpInt);
+      fTracks[iSet].SetLastMuon    (tmpInt);
       ifile >> tmpInt;
       fTracks[iSet].SetLastPion    (tmpInt);
       ifile >> tmpInt;

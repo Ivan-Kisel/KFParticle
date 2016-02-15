@@ -107,6 +107,8 @@ class KFParticleFinder
                           const float* secCuts,
                           std::vector< std::vector<KFParticle> >* vMotherPrim,
                           std::vector<KFParticle>* vMotherSec );
+  
+  void NeutralDaughterDecay(KFPTrackVector* vTracks, std::vector<KFParticle>& Particles);
 
   void FindTrackV0Decay(std::vector<KFParticle>& vV0,
                         const int V0PDG,

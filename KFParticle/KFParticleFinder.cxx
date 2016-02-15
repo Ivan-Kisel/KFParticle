@@ -116,6 +116,7 @@ void KFParticleFinder::FindParticles(KFPTrackVector* vRTracks, kfvector_float* C
         tmp.SetPDG(pdg);
         tmp.SetId(Particles.size());
         vRTracks[iV].SetId(Particles.size(),iTr);
+        vRTracks[iV+4].SetId(Particles.size(),iTr);
         tmp.AddDaughterId( kfTrack.Id() );
 #ifdef NonhomogeneousField
         for(int iF=0; iF<10; iF++)
@@ -168,6 +169,7 @@ void KFParticleFinder::FindParticles(KFPTrackVector* vRTracks, kfvector_float* C
 
   if(!fMixedEventAnalysis)
   {
+
     for(int iPV=0; iPV<fNPV; iPV++ )
     {
       ExtrapolateToPV(vV0Prim[0][iPV],PrimVtx[iPV]);
@@ -175,6 +177,8 @@ void KFParticleFinder::FindParticles(KFPTrackVector* vRTracks, kfvector_float* C
       ExtrapolateToPV(vV0Prim[2][iPV],PrimVtx[iPV]);
       ExtrapolateToPV(vV0Prim[3][iPV],PrimVtx[iPV]);
     }
+    
+    NeutralDaughterDecay(vRTracks, Particles);
     
     //Xi- -> Lambda pi-, Omega- -> Lambda K-
     FindTrackV0Decay(vV0Sec[1], 3122, vRTracks[1], -1, vRTracks[1].FirstPion(), vRTracks[1].LastKaon(),
@@ -1979,4 +1983,266 @@ void KFParticleFinder::CombinePartPart(vector<KFParticle>& particles1,
   }
   
   if(motherTopo) delete [] motherTopo;
+}
+
+
+void KFParticleFinder::NeutralDaughterDecay(KFPTrackVector* vTracks,
+                                          vector<KFParticle>& Particles)
+{ 
+  KFParticle mother_temp;
+  KFParticleSIMD ChargedDaughter, MotherTrack;
+
+  uint_v idMotherTrack;
+  uint_v idChargedDaughter;
+  int_v ChargedDaughterPDG(-1);
+    
+  int_v pvIndexMother(-1); 
+  
+  int outNeutralDaughterPDG[4][5]; //[iTC][iHypothesis]
+  int outMotherPDG[4][5];
+  
+  int trTypeIndexMother[2] = {6,7};
+  int trTypeIndexDaughter[2] = {0,1};
+
+  for( int iTrTypeDaughter = 0; iTrTypeDaughter<2; iTrTypeDaughter++)
+  {
+    KFPTrackVector& DaughterTracks = vTracks[ trTypeIndexDaughter[iTrTypeDaughter] ];
+    KFPTrackVector& MotherTracks = vTracks[ trTypeIndexMother[iTrTypeDaughter] ];
+
+    int_v DaughterTracksSize = DaughterTracks.Size();
+    int MotherTracksSize = MotherTracks.Size();
+
+    //track categories
+    int nTC = 4;
+    int startTCMother[4] = {0,0,0,0};
+    int endTCMother[4] = {0,0,0,0};
+    int startTCDaughter[4] = {0,0,0,0};
+    int endTCDaughter[4] = {0,0,0,0};
+
+    nTC = 4;
+    vector<int> nMotherHypothesis(nTC,0);
+    vector< vector<int> > motherPDGHypothesis(nTC);
+    vector< vector<float> > neutralDaughterMassHypothesis(nTC);
+
+
+    //mu+, mu-
+    startTCMother[0] = 0; endTCMother[0] = MotherTracksSize;
+    startTCDaughter[0] = DaughterTracks.FirstMuon(); endTCDaughter[0] = DaughterTracks.LastMuon(); 
+
+    nMotherHypothesis[0] = 2;
+
+
+    motherPDGHypothesis[0].push_back(211);
+    motherPDGHypothesis[0].push_back(321);
+
+    neutralDaughterMassHypothesis[0].push_back(0.);
+    neutralDaughterMassHypothesis[0].push_back(0.);
+
+    outNeutralDaughterPDG[0][0]=-7000014;
+    outNeutralDaughterPDG[0][1]=-8000014;
+
+    outMotherPDG[0][0]=-7000211;
+    outMotherPDG[0][1]=-7000321;
+
+    //Pi+, Pi-
+    startTCMother[1] = 0; endTCMother[1] = MotherTracksSize;
+    startTCDaughter[1] = DaughterTracks.FirstPion(); endTCDaughter[1] = DaughterTracks.LastPion();
+
+    nMotherHypothesis[1] = 5;
+
+    motherPDGHypothesis[1].push_back(3112);
+    motherPDGHypothesis[1].push_back(3222);
+    motherPDGHypothesis[1].push_back(3312);
+    motherPDGHypothesis[1].push_back(3334);
+    motherPDGHypothesis[1].push_back(321);
+    
+    neutralDaughterMassHypothesis[1].push_back(0.939565);
+    neutralDaughterMassHypothesis[1].push_back(0.939565);
+    neutralDaughterMassHypothesis[1].push_back(1.115683);
+    neutralDaughterMassHypothesis[1].push_back(1.31486);
+    neutralDaughterMassHypothesis[1].push_back(0.1349766);
+    
+    outNeutralDaughterPDG[1][0]= 7002112;
+    outNeutralDaughterPDG[1][1]=-8002112;
+    outNeutralDaughterPDG[1][2]= 7003122;
+    outNeutralDaughterPDG[1][3]= 7003322;
+    outNeutralDaughterPDG[1][4]=-9000111;
+    
+    outMotherPDG[1][0]= 7003112;
+    outMotherPDG[1][1]=-7003222;
+    outMotherPDG[1][2]= 7003312;
+    outMotherPDG[1][3]= 7003334;
+    outMotherPDG[1][4]=-9000321;
+    
+    //K+, K-
+    startTCMother[2] = 0; endTCMother[2] = MotherTracksSize;
+    startTCDaughter[2] = DaughterTracks.FirstKaon(); endTCDaughter[2] = DaughterTracks.LastKaon();
+
+    nMotherHypothesis[2] = 1;
+    
+    motherPDGHypothesis[2].push_back(3334);
+    
+    neutralDaughterMassHypothesis[2].push_back(1.115683);
+    
+    outNeutralDaughterPDG[2][0]= 8003122;
+    
+    outMotherPDG[2][0]= 8003334;
+
+    //p+, p-
+    startTCMother[3] = 0; endTCMother[3] = MotherTracksSize;
+    startTCDaughter[3] = DaughterTracks.FirstProton(); endTCDaughter[3] = DaughterTracks.LastProton(); 
+
+    nMotherHypothesis[3] = 1;
+    
+    motherPDGHypothesis[3].push_back(3222);
+    
+    neutralDaughterMassHypothesis[3].push_back(0.1349766);
+    
+    outNeutralDaughterPDG[3][0]=-8000111;
+    
+    outMotherPDG[3][0]=-8003222;
+    
+    
+
+    for(int iTC=0; iTC<nTC; iTC++)
+    {
+      for(unsigned short iTrD=startTCDaughter[iTC]; iTrD < endTCDaughter[iTC]; iTrD += float_vLen)
+      {
+        const unsigned short NTracksDaughter = (iTrD + float_vLen < DaughterTracks.Size()) ? float_vLen : (DaughterTracks.Size() - iTrD);
+
+        int_v DaughterInd = int_v::IndexesFromZero() + int(iTrD);
+
+        int_v DaughterPDG = reinterpret_cast<const int_v&>(DaughterTracks.PDG()[iTrD]);
+        int_v DaughterPVIndex = reinterpret_cast<const int_v&>(DaughterTracks.PVIndex()[iTrD]);
+        int_v daughterId = reinterpret_cast<const int_v&>(DaughterTracks.Id()[iTrD]);
+        
+        int_v trackPdgDaughter = DaughterPDG;
+        int_m activeDaughter = (DaughterPDG != -1);
+        
+        if( !((DaughterPDG == -1).isEmpty()) )
+        {
+          trackPdgDaughter(DaughterPVIndex<0 && (DaughterPDG == -1) ) = 211;
+              
+//             activeDaughter |= int_m(DaughterPVIndex < 0) && int_m(DaughterPDG == -1) ;
+        }
+        
+        activeDaughter = (int_v::IndexesFromZero() < int(NTracksDaughter));
+            
+        ChargedDaughter.Load(DaughterTracks, iTrD, DaughterPDG);
+        ChargedDaughter.SetId(daughterId);
+
+        for(unsigned short iTrM=startTCMother[iTC]; iTrM < endTCMother[iTC]; iTrM += float_vLen)
+        {
+          const unsigned short NTracks = (iTrM + float_vLen < MotherTracksSize) ? float_vLen : (MotherTracksSize - iTrM);
+
+          //const int_v& MotherPDG = reinterpret_cast<const int_v&>(MotherTracks.PDG()[iTrM]);
+          //const int_v& MotherPVIndex = reinterpret_cast<const  int_v&>(MotherTracks.PVIndex()[iTrM]);              
+          const int_v& motherTrackId = reinterpret_cast<const  int_v&>(MotherTracks.Id()[iTrM]);
+          
+          for(int iRot = 0; iRot<float_vLen; iRot++)
+          {
+            if(iRot>0)
+            {
+              DaughterPDG = DaughterPDG.rotated(1);
+              DaughterPVIndex = DaughterPVIndex.rotated(1);
+              DaughterInd = DaughterInd.rotated(1);
+              trackPdgDaughter = trackPdgDaughter.rotated(1);
+            
+              ChargedDaughter.Rotate();
+
+              activeDaughter = /*( (DaughterPDG != -1) || ( (DaughterPVIndex < 0) && (DaughterPDG == -1) ) ) &&*/ (DaughterInd < DaughterTracksSize);
+            }
+            
+            
+            int_v trackPdgMother;
+            int_m active = activeDaughter && (int_v::IndexesFromZero() < int(NTracks));
+
+            if(iTC==0)
+              active &= abs(DaughterPDG)==13;
+            if(iTC==1)
+              active &= abs(DaughterPDG)==211;
+            if(iTC==2)
+              active &= abs(DaughterPDG)==321;
+            if(iTC==3)
+              active &= abs(DaughterPDG)==2212;
+            if (active.isEmpty()) continue;
+            
+            
+            for(int iHypothesis=0; iHypothesis<nMotherHypothesis[iTC]; iHypothesis++)
+            {
+              MotherTrack.Load(MotherTracks, iTrM, motherPDGHypothesis[iTC][iHypothesis]);
+              
+              float_v zMother = MotherTrack.Z();
+              float_v zCD = ChargedDaughter.Z();
+              
+              active &= int_m(zCD >= (zMother - float_v(0.5f)));
+              if( active.isEmpty() ) continue;
+              
+              KFParticleSIMD neutralDaughter = MotherTrack;
+              neutralDaughter.AddDaughterId(motherTrackId);
+              neutralDaughter.NDF() = -1;
+              neutralDaughter.Chi2() = 0.f;
+              neutralDaughter.SubtractDaughter(ChargedDaughter);
+              
+              active &= int_m(neutralDaughter.NDF() >= int_v(Vc::Zero));
+              active &= int_m(neutralDaughter.Chi2()/float_v(neutralDaughter.NDF()) <= fCuts2D[1]);
+              if( active.isEmpty() ) continue;
+              
+              KFParticleSIMD neutralDaughterUnconstr = neutralDaughter;
+              neutralDaughter.SetNonlinearMassConstraint(neutralDaughterMassHypothesis[iTC][iHypothesis]);
+              
+              const KFParticleSIMD* daughters[2] = {&neutralDaughter, &ChargedDaughter};
+              KFParticleSIMD mother;
+              mother.Construct(daughters, 2);
+              
+              active &= int_m(mother.NDF() >= int_v(Vc::Zero));
+              active &= int_m(mother.Chi2()/float_v(mother.NDF()) <= fCuts2D[1]);
+              if( active.isEmpty() ) continue;
+
+              for(int iV=0; iV<NTracks; iV++)
+              {
+                if(!active[iV]) continue;
+                
+                neutralDaughterUnconstr.GetKFParticle(mother_temp, iV);
+                int neutralId = Particles.size();
+                mother_temp.SetId(neutralId);
+                // if(iTC==0 && iHypothesis==0 && iTrTypeDaughter==1)
+                if (iTrTypeDaughter==0)
+                  mother_temp.SetPDG(-outNeutralDaughterPDG[iTC][iHypothesis]);
+                else
+                  mother_temp.SetPDG(outNeutralDaughterPDG[iTC][iHypothesis]);
+                Particles.push_back(mother_temp);
+
+//                   for (int i=0; i<mother_temp.NDaughters(); i++){
+//                     std::cout << "Daughter ID="<< mother_temp.DaughterIds()[i] <<std::endl;
+//                     std::cout << "Daughter PDG  "<< Particles[mother_temp.DaughterIds()[i]].GetPDG() <<std::endl;
+//                   }
+// 
+//                    std::cin.get();
+                mother.GetKFParticle(mother_temp, iV);
+                mother_temp.SetId(Particles.size());
+                mother_temp.CleanDaughtersId();
+                mother_temp.AddDaughterId(ChargedDaughter.Id()[iV]);
+                mother_temp.AddDaughterId(neutralId);
+                // if(iTC==0 && iHypothesis==0 && iTrTypeDaughter==1)
+                
+                if (iTrTypeDaughter==0)  
+                  mother_temp.SetPDG(-outMotherPDG[iTC][iHypothesis]);
+                else
+                  mother_temp.SetPDG(outMotherPDG[iTC][iHypothesis]);
+                Particles.push_back(mother_temp);
+                
+//                   for (int i=0; i<mother_temp.NDaughters(); i++){
+//                     std::cout << "Daughter ID="<< mother_temp.DaughterIds()[i] <<std::endl;
+//                     std::cout << "Daughter PDG  "<< Particles[mother_temp.DaughterIds()[i]].GetPDG() <<std::endl;
+//                   }
+// 
+//                    std::cin.get();
+              }
+            }
+          }//iRot
+        }//iTrM
+      }//iTrD
+    }//iTC
+  }//iTrTypeDaughter
 }

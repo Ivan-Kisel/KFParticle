@@ -48,6 +48,14 @@ void KFParticleTopoReconstructor::Init(AliHLTTPCCAGBTracker* tracker, vector<int
   if(!fTracks) 
     fTracks = new KFPTrackVector[NInputSets];
 
+  fTracks[0].Resize(0);
+  fTracks[1].Resize(0);
+  fTracks[2].Resize(0);
+  fTracks[3].Resize(0);
+  fTracks[4].Resize(0);
+  fTracks[5].Resize(0);
+  fTracks[6].Resize(0);
+  fTracks[7].Resize(0);
   
 #ifdef USE_TIMERS
   timer.Start();
@@ -216,6 +224,10 @@ void KFParticleTopoReconstructor::Init(vector<KFParticle> &particles, vector<int
   fTracks[1].Resize(0);
   fTracks[2].Resize(0);
   fTracks[3].Resize(0);
+  fTracks[4].Resize(0);
+  fTracks[5].Resize(0);
+  fTracks[6].Resize(0);
+  fTracks[7].Resize(0);
   
   for(int iTr=0; iTr<nTracks; iTr++)
   {  
@@ -241,7 +253,7 @@ void KFParticleTopoReconstructor::Init(vector<KFParticle> &particles, vector<int
 #endif /// USE_TIMERS
 }
 
-void KFParticleTopoReconstructor::Init(KFPTrackVector &tracks)
+void KFParticleTopoReconstructor::Init(KFPTrackVector &tracks, KFPTrackVector &tracksAtLastPoint)
 {
 #ifdef USE_TIMERS
   timer.Start();
@@ -256,11 +268,14 @@ void KFParticleTopoReconstructor::Init(KFPTrackVector &tracks)
   int nTracks = tracks.Size();
   fTracks[0].Resize(nTracks);
   fTracks[0].Set(tracks, nTracks, 0);
-  
   fTracks[1].Resize(0);
   fTracks[2].Resize(0);
   fTracks[3].Resize(0);
-  
+  fTracks[4].Resize(tracksAtLastPoint.Size());
+  fTracks[4].Set(tracksAtLastPoint, tracksAtLastPoint.Size(), 0);
+  fTracks[5].Resize(0);
+  fTracks[6].Resize(0);
+  fTracks[7].Resize(0);
   fKFParticlePVReconstructor->Init( &fTracks[0], nTracks );
   
 #ifdef USE_TIMERS
@@ -361,70 +376,80 @@ void KFParticleTopoReconstructor::SortTracks()
 #ifdef USE_TIMERS
   timer.Start();
 #endif // USE_TIMERS
-  int Size = fTracks[0].Size();
   
-  vector<KFPTrackIndex> sortedTracks(Size);
-  kfvector_uint trackIndex[NInputSets];
-  for(int iTV=0; iTV<NInputSets; iTV++)
-    trackIndex[iTV].resize(Size);
-  int nTracks[NInputSets] = {0};
+  int offset[2] = {0, 4};
+  int nSets = 2;
   
-  for(int iTr=0; iTr<Size; iTr++)
+  if(fTracks[4].Size() == 0)
+    nSets = 1;
+  
+  for(int iSet=nSets-1; iSet>=0; iSet--)
   {
-    sortedTracks[iTr].fIndex = iTr;
-    sortedTracks[iTr].fPdg = fTracks[0].PDG()[iTr];
-  }
-  
-  std::sort(sortedTracks.begin(), sortedTracks.end(), KFPTrackIndex::Compare);
-  
-  for(int iTr=0; iTr<Size; iTr++)
-  {
-    int iTrSorted = sortedTracks[iTr].fIndex;
+    int Size = fTracks[0].Size();
     
-    int q = fTracks[0].Q()[iTrSorted];
-    if(fTracks[0].PVIndex()[iTrSorted] < 0)
+    vector<KFPTrackIndex> sortedTracks(Size);
+    kfvector_uint trackIndex[4];
+    for(int iTV=0; iTV<4; iTV++)
+      trackIndex[iTV].resize(Size);
+    int nTracks[4] = {0,0,0,0};
+    
+    for(int iTr=0; iTr<Size; iTr++)
     {
+      sortedTracks[iTr].fIndex = iTr;
+      sortedTracks[iTr].fPdg = fTracks[0].PDG()[iTr];
+    }
+    
+    std::sort(sortedTracks.begin(), sortedTracks.end(), KFPTrackIndex::Compare);
+    
+    for(int iTr=0; iTr<Size; iTr++)
+    {
+      int iTrSorted = sortedTracks[iTr].fIndex;
+      
+      int q = fTracks[offset[iSet]].Q()[iTrSorted];
+      if(fTracks[0].PVIndex()[iTrSorted] < 0) //secondary track
+      {
 
-      if(q<0)
-      {
-        trackIndex[1][nTracks[1]] = iTrSorted;
-        nTracks[1]++;
+        if(q<0) //secondary negative track
+        {
+          trackIndex[1][nTracks[1]] = iTrSorted;
+          nTracks[1]++;
+        }
+        else //secondary positive track
+        {
+          trackIndex[0][nTracks[0]] = iTrSorted;
+          nTracks[0]++;
+        }
       }
-      else
+      else //primary track
       {
-        trackIndex[0][nTracks[0]] = iTrSorted;
-        nTracks[0]++;
+        if(q<0) //primary negative track
+        {
+          trackIndex[3][nTracks[3]] = iTrSorted;
+          nTracks[3]++;
+        }
+        else //primary positive track
+        {
+          trackIndex[2][nTracks[2]] = iTrSorted;
+          nTracks[2]++;
+        }
       }
     }
-    else
-    {
-      if(q<0)
-      {
-        trackIndex[3][nTracks[3]] = iTrSorted;
-        nTracks[3]++;
-      }
-      else
-      {
-        trackIndex[2][nTracks[2]] = iTrSorted;
-        nTracks[2]++;
-      }
-    }
+    
+    for(int iTV=1; iTV<4; iTV++)  
+      fTracks[iTV+offset[iSet]].SetTracks(fTracks[offset[iSet]], trackIndex[iTV], nTracks[iTV]);
+      
+    KFPTrackVector positive;
+    positive.SetTracks(fTracks[offset[iSet]], trackIndex[0], nTracks[0]);
+    fTracks[offset[iSet]].Resize(nTracks[0]);
+    fTracks[offset[iSet]].Set(positive,nTracks[0],0);
+      
+    for(int iTV=0; iTV<4; iTV++)
+      fTracks[iTV+offset[iSet]].RecalculateLastIndex();
   }
-  
-  for(int iTV=1; iTV<NInputSets; iTV++)  
-    fTracks[iTV].SetTracks(fTracks[0], trackIndex[iTV], nTracks[iTV]);
-    
-  KFPTrackVector positive;
-  positive.SetTracks(fTracks[0], trackIndex[0], nTracks[0]);
-  fTracks[0].Resize(nTracks[0]);
-  fTracks[0].Set(positive,nTracks[0],0);
-    
-  for(int iTV=0; iTV<NInputSets; iTV++)
-    fTracks[iTV].RecalculateLastIndex();
 
   fChiToPrimVtx[0].resize(fTracks[0].Size(), -1);
   fChiToPrimVtx[1].resize(fTracks[1].Size(), -1);
-
+  
 #ifdef USE_TIMERS
   timer.Stop();
   fStatTime[2] = timer.RealTime();
@@ -436,7 +461,7 @@ void KFParticleTopoReconstructor::TransportPVTracksToPrimVertex()
   float_v point[3];
   KFParticleSIMD tmpPart;
   
-  for(int iTV=2; iTV<NInputSets; iTV++)
+  for(int iTV=2; iTV<4; iTV++)
   {
     unsigned int NTr = fTracks[iTV].Size(); 
     for(unsigned int iTr=0; iTr < NTr; iTr += float_vLen) 

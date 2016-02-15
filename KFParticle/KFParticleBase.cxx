@@ -714,7 +714,7 @@ void KFParticleBase::AddDaughterWithEnergyFit( const KFParticleBase &Daughter )
 
 void KFParticleBase::SubtractDaughter( const KFParticleBase &Daughter )
 {
-  //* Energy considered as an independent veriable, fitted independently from momentum, without any constraints on mass
+  //* Energy considered as an independent variable, fitted independently from momentum, without any constraints on mass
   //* Add daughter 
 
   float m[8], mV[36];
