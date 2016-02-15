@@ -115,7 +115,8 @@ class KFTopoPerformance: public KFParticlePerformanceBase
   vector<int> fTrackMatch;
   vector<KFMCTrack> vMCTracks;  // MC particles
   vector<KFMCParticle> vMCParticles;  // MC particles
-
+  vector<int> fNeutralIndex;
+  
   vector<KFPartMatch> MCtoRParticleId; // array for match MC and reco particles
   vector<KFPartMatch> RtoMCParticleId;
 
