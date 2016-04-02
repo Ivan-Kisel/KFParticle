@@ -1810,6 +1810,9 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
             case   3222: motherType = 1; break; //Sigma+
             case   3006: motherType = 1; break; //He4L
             case   3007: motherType = 1; break; //He5L
+            case   3008: motherType = 1; break; //H4LL
+            case   3009: motherType = 1; break; //H4LL
+            case   3011: motherType = 1; break; //He6LL
             default:   motherType = 2; break; //resonances
           }
           for(int iCut=0; iCut<3; iCut++)
