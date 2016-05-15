@@ -13,6 +13,7 @@
 #include <string>
 #include <cmath>
 #include <iostream>
+#include <cstdlib>
 
 class KFPHistogram1D
 {

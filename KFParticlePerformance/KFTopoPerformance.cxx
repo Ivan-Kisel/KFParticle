@@ -1259,9 +1259,15 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
     
     KFMCTrack &mcDaughter = vMCTracks[mcDaughterId];
     
-    const float mcX =  mcDaughter.X();
-    const float mcY =  mcDaughter.Y();
-    const float mcZ =  mcDaughter.Z();
+    float mcX =  mcTrack.X();
+    float mcY =  mcTrack.Y();
+    float mcZ =  mcTrack.Z();
+    if(histoDSToParticleQA)
+    {
+      mcX =  mcDaughter.X();
+      mcY =  mcDaughter.Y();
+      mcZ =  mcDaughter.Z();
+    }
     const float mcPx = mcTrack.Par(3);
     const float mcPy = mcTrack.Par(4);
     const float mcPz = mcTrack.Par(5);
