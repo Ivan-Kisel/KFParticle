@@ -88,6 +88,8 @@ class KFParticleTopoReconstructor{
   const KFPTrackVector* GetTracks() const { return fTracks; }
   const kfvector_float* GetChiPrim() const { return fChiToPrimVtx; }
   
+  const KFParticleFinder* GetKFParticleFinder() const { return fKFParticleFinder; }
+  
   void AddPV(const KFVertex &pv, const vector<int> &tracks) { 
     fKFParticlePVReconstructor->AddPV(pv,tracks);
     KFParticle pvPart=pv;
@@ -99,7 +101,7 @@ class KFParticleTopoReconstructor{
     fPV.push_back(pvPart);
   }
   void AddParticle(const KFParticle& particle) { fParticles.push_back(particle); }
-    
+  void AddCandidate(const KFParticle& candidate, int iPV = -1) { fKFParticleFinder->AddCandidate(candidate, iPV); }
 
   void SetBeamLine(KFParticle& p) { fKFParticlePVReconstructor->SetBeamLine(p); }
 #ifdef HomogeneousField
