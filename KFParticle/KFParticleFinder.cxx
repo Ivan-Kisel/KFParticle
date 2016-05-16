@@ -2432,9 +2432,9 @@ void KFParticleFinder::AddCandidate(const KFParticle& candidate, int iPV)
   if(candidate.GetPDG() ==  3334) iSet = 7;
   if(candidate.GetPDG() == -3334) iSet = 8;
   
-  if(iSet > -1 && iPV<fNPV)
+  if(iSet > -1)
   {
-    if(iPV >= 0)
+    if(iPV >= 0 && iPV<fNPV)
     {
       if(candidate.NDF() == 2)
         fPrimCandidates[iSet][iPV].push_back(candidate);
@@ -2443,9 +2443,29 @@ void KFParticleFinder::AddCandidate(const KFParticle& candidate, int iPV)
       if(candidate.NDF() == 4)
         fPrimCandidatesTopoMass[iSet][iPV].push_back(candidate);
     }
-    else
+    else if(iPV < 0)
     {
       fSecCandidates[iSet].push_back(candidate);
     }
+  }
+}
+
+void KFParticleFinder::SetNPV(int nPV)
+{
+  fNPV = nPV;
+  
+  for(int iCandidates=0; iCandidates<fNPrimCandidatesSets; iCandidates++)
+  {
+    fPrimCandidates[iCandidates].clear();
+    fPrimCandidates[iCandidates].resize(fNPV);
+  }
+  
+  for(int iCandidates=0; iCandidates<fNPrimCandidatesTopoSets; iCandidates++)
+  {
+    fPrimCandidatesTopo[iCandidates].clear();
+    fPrimCandidatesTopo[iCandidates].resize(fNPV);
+    
+    fPrimCandidatesTopoMass[iCandidates].clear();
+    fPrimCandidatesTopoMass[iCandidates].resize(fNPV);
   }
 }

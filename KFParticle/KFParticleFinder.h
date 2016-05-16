@@ -219,6 +219,7 @@ class KFParticleFinder
   const std::vector< std::vector<KFParticle> >& GetPrimaryTopoMassAntiOmega()  const { return fPrimCandidatesTopoMass[8]; }
   
   void AddCandidate(const KFParticle& candidate, int iPV = -1);
+  void SetNPV(int nPV);
   
  private:
 

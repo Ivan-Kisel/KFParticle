@@ -94,11 +94,13 @@ class KFParticleTopoReconstructor{
     fKFParticlePVReconstructor->AddPV(pv,tracks);
     KFParticle pvPart=pv;
     fPV.push_back(pvPart);
+    fKFParticleFinder->SetNPV(fPV.size());
   }
   void AddPV(const KFVertex &pv) { 
     fKFParticlePVReconstructor->AddPV(pv);
     KFParticle pvPart=pv;
     fPV.push_back(pvPart);
+    fKFParticleFinder->SetNPV(fPV.size());
   }
   void AddParticle(const KFParticle& particle) { fParticles.push_back(particle); }
   void AddCandidate(const KFParticle& candidate, int iPV = -1) { fKFParticleFinder->AddCandidate(candidate, iPV); }
