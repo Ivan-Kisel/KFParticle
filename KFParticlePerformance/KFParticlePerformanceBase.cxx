@@ -137,10 +137,10 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
               gDirectory->mkdir("Primary");
               gDirectory->cd("Primary");
               {
-                CreateParameterSubfolder("NoConstraint (1C-Fit)", hPartParamPrimary, hPartParam2DPrimary, hFitQANoConstraint, iPart);
-                CreateParameterSubfolder("MassConstraint (2C-Fit)", hPartParamPrimaryMass, hPartParam2DPrimaryMass, hFitQAMassConstraint, iPart);
-                CreateParameterSubfolder("PVConstraint (3C-Fit)", hPartParamPrimaryTopo, hPartParam2DPrimaryTopo, hFitQATopoConstraint, iPart);
-                CreateParameterSubfolder("PVMassConstraint (4C-Fit)", hPartParamPrimaryTopoMass, hPartParam2DPrimaryTopoMass, hFitQATopoMassConstraint, iPart);
+                CreateParameterSubfolder("NoConstraint (1C-Fit)", hPartParamPrimary, hPartParam2DPrimary, hFitQANoConstraint, iPart, true);
+                CreateParameterSubfolder("MassConstraint (2C-Fit)", hPartParamPrimaryMass, hPartParam2DPrimaryMass, hFitQAMassConstraint, iPart, true);
+                CreateParameterSubfolder("PVConstraint (3C-Fit)", hPartParamPrimaryTopo, hPartParam2DPrimaryTopo, hFitQATopoConstraint, iPart, true);
+                CreateParameterSubfolder("PVMassConstraint (4C-Fit)", hPartParamPrimaryTopoMass, hPartParam2DPrimaryTopoMass, hFitQATopoMassConstraint, iPart, true);
               }
               gDirectory->cd(".."); // particle directory / Parameters
             }
@@ -150,8 +150,8 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
               gDirectory->mkdir("Secondary");
               gDirectory->cd("Secondary");
               {
-                CreateParameterSubfolder("NoConstraint (1C-Fit)", hPartParamSecondary, hPartParam2DSecondary, 0, iPart);
-                CreateParameterSubfolder("MassConstraint (2C-Fit)", hPartParamSecondaryMass, hPartParam2DSecondaryMass, 0, iPart);
+                CreateParameterSubfolder("NoConstraint (1C-Fit)", hPartParamSecondary, hPartParam2DSecondary, 0, iPart, true);
+                CreateParameterSubfolder("MassConstraint (2C-Fit)", hPartParamSecondaryMass, hPartParam2DSecondaryMass, 0, iPart, true);
               }
               gDirectory->cd(".."); // particle directory / Parameters
             }
@@ -653,9 +653,9 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
 }
 
 void KFParticlePerformanceBase::CreateParameterSubfolder(TString folderName, 
-                                                         TH1F* histoParameters[4][KFPartEfficiencies::nParticles][nHistoPartParam],
-                                                         TH2F* histoParameters2D[4][KFPartEfficiencies::nParticles][nHistoPartParam2D],
-                                                         TH1F* histoFit[KFPartEfficiencies::nParticles][nFitQA], int iPart)
+                                                         TH1F* histoParameters[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam],
+                                                         TH2F* histoParameters2D[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D],
+                                                         TH1F* histoFit[KFPartEfficiencies::nParticles][nFitQA], int iPart, bool withWrongPVHypothesis)
 {
   gDirectory->mkdir(folderName.Data());
   gDirectory->cd(folderName.Data());
@@ -666,6 +666,15 @@ void KFParticlePerformanceBase::CreateParameterSubfolder(TString folderName,
       CreateParameterHistograms(histoParameters[1], histoParameters2D[1], iPart);
     }
     gDirectory->cd("..");
+    if(withWrongPVHypothesis)
+    {
+      gDirectory->mkdir("WrongPVHypothesis");
+      gDirectory->cd("WrongPVHypothesis");
+      {
+        CreateParameterHistograms(histoParameters[4], histoParameters2D[4], iPart);
+      }
+      gDirectory->cd("..");
+    }
     gDirectory->mkdir("Background");
     gDirectory->cd("Background");
     {
