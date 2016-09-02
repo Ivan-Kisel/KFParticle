@@ -219,7 +219,7 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
       gDirectory->cd("Efficiency");
       {
         TString effName[nPVefficiency] = {"effVsNMCPVTracks","effVsNMCPV","effVsNMCTracks","effVsNPVTracks","effVsNPV","effVsNTracks"};
-        int nBinsEff[nPVefficiency]  = { 100 , 100 ,  100 ,  100 , 100 ,  100 };
+        int nBinsEff[nPVefficiency]  = { 100 , 100 ,  100 ,  100 , 100 , 1000 };
         float xMinEff[nPVefficiency] = {   0.,   0.,    0.,    0.,   0.,    0.};
         float xMaxEff[nPVefficiency] = { 100., 100., 1000.,  100., 100., 1000.};
 
@@ -268,7 +268,7 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
         TString pullTrPV = "pullTrPV";
         TString parNameTrPV[nFitPVTracksQA/2] = {"X","Y","Z","Px","Py","Pz"};
         int nBinsTrPV = 100;
-        float xMaxTrPV[nFitPVTracksQA/2] = {2.,2.,5.,0.3,0.3,0.3};
+        float xMaxTrPV[nFitPVTracksQA/2] = {0.5,0.5,0.5,0.05,0.05,0.05};
 
         for( int iH=0; iH<nFitPVTracksQA/2; iH++ ){
           hFitPVTracksQA[iH]   = new TH1F((resTrPV+parNameTrPV[iH]).Data(),
