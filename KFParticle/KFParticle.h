@@ -792,12 +792,20 @@ inline float * KFParticle::CovarianceMatrix()
 
 inline void KFParticle::operator +=( const KFParticle &Daughter )
 {
+#ifdef NonhomogeneousField
+  for(int i=0; i<10; i++)
+    SetFieldCoeff(Daughter.GetFieldCoeff()[i], i);
+#endif
   KFParticleBase::operator +=( Daughter );
 }
   
 
 inline void KFParticle::AddDaughter( const KFParticle &Daughter )
 {
+#ifdef NonhomogeneousField
+  for(int i=0; i<10; i++)
+    SetFieldCoeff(Daughter.GetFieldCoeff()[i], i);
+#endif
   KFParticleBase::AddDaughter( Daughter );
 }
 
