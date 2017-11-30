@@ -1445,7 +1445,7 @@ void KFParticleBase::SetNoDecayLength()
 
 
 void KFParticleBase::Construct( const KFParticleBase* vDaughters[], Int_t nDaughters,
-				   const KFParticleBase *Parent,  float Mass, Bool_t IsConstrained         )
+				   const KFParticleBase *Parent,  float Mass )
 { 
   //* Full reconstruction in one go
   const int maxIter = 1;

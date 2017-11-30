@@ -183,7 +183,7 @@ void KFParticleFinder::FindParticles(KFPTrackVector* vRTracks, kfvector_float* C
   if(!fMixedEventAnalysis)
   {
     //Construct two-particle background from positive primary tracks for subtraction from the resonance spectra
-    ConstructPrimaryBG(vRTracks, ChiToPrimVtx, Particles, PrimVtx, fCuts2D, fSecCuts, fPrimCandidates, fSecCandidates);
+    ConstructPrimaryBG(vRTracks, Particles, PrimVtx, fCuts2D, fSecCuts, fPrimCandidates, fSecCandidates);
     
     for(int iPV=0; iPV<fNPV; iPV++ )
     {
@@ -1154,7 +1154,7 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
   }//iTrTypePos
 }
 
-void KFParticleFinder::ConstructPrimaryBG(KFPTrackVector* vTracks, kfvector_float* ChiToPrimVtx,
+void KFParticleFinder::ConstructPrimaryBG(KFPTrackVector* vTracks,
                                           vector<KFParticle>& Particles,
                                           std::vector<KFParticleSIMD, KFPSimdAllocator<KFParticleSIMD> >& PrimVtx,
                                           const float* cuts,
