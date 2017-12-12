@@ -1,3 +1,4 @@
+#define HomogeneousField 1
 #include "KFParticle.h"
 #include "KFPTrack.h"
 #include "KFPVertex.h"
@@ -8,7 +9,7 @@
 #include <iomanip>
 #include <cmath>
 
-#ifdef KFParticleInRoot
+#ifndef KFParticleStandalone
 ClassImp(KFParticleTest)
 #endif
 
@@ -192,5 +193,9 @@ void KFParticleTest::RunTestSIMD()
 }
 
 void KFParticleTest::CompareSingleAndSIMDResults()
+{
+}
+
+void KFParticleTest::PrintTutorial()
 {
 }

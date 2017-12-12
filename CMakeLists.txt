@@ -59,6 +59,7 @@ set (SOURCES
    KFParticlePerformance/KFParticlePerformanceBase.cxx
    KFParticlePerformance/KFTopoPerformance.cxx
    KFParticlePerformance/KFMCParticle.cxx
+   KFParticleTest/KFParticleTest.cxx
 )
 
 set (HEADERS
@@ -67,6 +68,7 @@ set (HEADERS
    KFParticle/KFVertex.h
    KFParticlePerformance/KFPartEfficiencies.h
    KFParticlePerformance/KFMCParticle.h
+   KFParticleTest/KFParticleTest.h
 )
 
 if(FIXTARGET)

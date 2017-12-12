@@ -10,6 +10,8 @@
 #pragma link C++ class  KFVertex+;
 #pragma link C++ class  KFPartEfficiencies+;
 #pragma link C++ class  KFMCParticle+;
+#pragma link C++ class  KFParticle+;
+#pragma link C++ class  KFParticleTest+;
 
 #endif
 
