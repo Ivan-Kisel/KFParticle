@@ -89,3 +89,30 @@ else(FIXTARGET)
   target_link_libraries(KFParticle ${ROOT_LIBRARIES} ${Vc_LIBRARIES} )
   add_target_property(KFParticle COMPILE_FLAGS "-DDO_TPCCATRACKER_EFF_PERFORMANCE -DHomogeneousField -DUSE_TIMERS")
 endif(FIXTARGET)
+
+Set(NODICT_HEADERS
+  KFParticle/KFParticleTopoReconstructor.h
+  KFParticle/KFParticlePVReconstructor.h
+  KFParticle/KFPVertex.h
+  KFParticle/KFPTrack.h
+  KFParticle/KFParticleFinder.h
+  KFParticle/KFParticleSIMD.h
+  KFParticle/KFParticleBaseSIMD.h
+  KFParticle/KFParticleDef.h
+  KFParticle/KFPSimdAllocator.h
+  KFParticle/KFPTrackVector.h
+  KFParticle/KFPEmcCluster.h
+  KFParticle/KFParticleField.h
+  KFParticle/KFPTrackVector.h
+  KFParticle/KFParticleDatabase.h
+  KFParticlePerformance/KFTopoPerformance.h
+  KFParticlePerformance/KFParticlePerformanceBase.h
+  KFParticlePerformance/KFMCCounter.h
+  KFParticlePerformance/KFPVEfficiencies.h
+  KFParticlePerformance/KFMCVertex.h
+  KFParticlePerformance/KFMCTrack.h
+  KFParticlePerformance/KFPartMatch.h
+)
+
+install(FILES ${HEADERS} ${NODICT_HEADERS} DESTINATION include)
+install(TARGETS KFParticle DESTINATION lib)
