@@ -19,7 +19,7 @@ else ()
     set (CMAKE_CXX_STANDARD 11)
 endif ()
 
-list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
+list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS} ${ROOTSYS})
 
 set(FIXTARGET FALSE CACHE BOOL "Compile for fix target geometry.")
 
