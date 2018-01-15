@@ -24,13 +24,10 @@ list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS} ${ROOTSYS})
 set(FIXTARGET FALSE CACHE BOOL "Compile for fix target geometry.")
 
 find_package(ROOT REQUIRED COMPONENTS Core Hist Matrix Physics EG Gpad Graf Graf3d RIO MathCore)
-find_package(Vc QUIET)
-If(NOT Vc_FOUND)
-  If(DEFINED Vc_INCLUDE_DIR AND Vc_LIBRARIES)
-    Message("Vc found")
-  Else()
-    Message(FATAL_ERROR "Could not find Vc")
-  EndIf()
+If(DEFINED Vc_INCLUDE_DIR AND Vc_LIBRARIES)
+  Message("Vc found")
+Else()
+  find_package(Vc REQUIRED)
 EndIf()
 
 Set(INCLUDE_DIRECTORIES
@@ -38,7 +35,7 @@ Set(INCLUDE_DIRECTORIES
     ${PROJECT_SOURCE_DIR}/KFParticlePerformance
 )
 
-Include_Directories( ${CMAKE_SOURCE_DIR} ${ROOT_INCLUDE_DIRS} ${INCLUDE_DIRECTORIES} ${Vc_INCLUDE_DIR})
+Include_Directories( ${CMAKE_SOURCE_DIR} ${Vc_INCLUDE_DIR} ${ROOT_INCLUDE_DIRS} ${INCLUDE_DIRECTORIES} )
 add_definitions(${ROOT_CXX_FLAGS})
 
 include(${ROOT_USE_FILE})
