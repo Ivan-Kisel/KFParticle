@@ -1,4 +1,3 @@
-#define HomogeneousField 1
 #include "KFParticle.h"
 #include "KFPTrack.h"
 #include "KFPVertex.h"
@@ -77,7 +76,9 @@ void KFParticleTest::RunTestSingle()
 
   ///  *****************************************************************************************
   
+#ifdef HomogeneousField  
   KFParticle::SetField(4.9797992706298828);
+#endif
   float point[3]={0.f};
   float b[3] = {0.f};
   p1.GetFieldValue(point,b);
