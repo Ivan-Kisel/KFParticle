@@ -1,10 +1,13 @@
-//-*- Mode: C++ -*-
-// ************************************************************************
-// This file is property of and copyright by the ALICE HLT Project        *
-// ALICE Experiment at CERN, All rights reserved.                         *
-// See cxx source for full Copyright notice                               *
-//                                                                        *
-//*************************************************************************
+//----------------------------------------------------------------------------
+// Structures with input data for KF Particle Finder
+// .
+// @author  M.Zyzak
+// @version 1.0
+// @since   20.08.13
+// 
+// 
+//  -= Copyright &copy ALICE HLT and CBM L1 Groups =-
+//____________________________________________________________________________
 
 #ifndef KFPINPUTDATA_H
 #define KFPINPUTDATA_H

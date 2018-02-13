@@ -1,10 +1,13 @@
-//-*- Mode: C++ -*-
-// ************************************************************************
-// This file is property of and copyright by the ALICE HLT Project        *
-// ALICE Experiment at CERN, All rights reserved.                         *
-// See cxx source for full Copyright notice                               *
-//                                                                        *
-//*************************************************************************
+//----------------------------------------------------------------------------
+// Structures to collect histograms online
+// .
+// @author  M.Zyzak
+// @version 1.0
+// @since   20.08.13
+// 
+// 
+//  -= Copyright &copy ALICE HLT and CBM L1 Groups =-
+//____________________________________________________________________________
 
 #ifndef KFPHISTOGRAM1D
 #define KFPHISTOGRAM1D

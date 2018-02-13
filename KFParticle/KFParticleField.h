@@ -1,3 +1,14 @@
+//----------------------------------------------------------------------------
+// Class for approximation of the magnetic field for KF Particle
+// .
+// @author  I.Kisel, M.Zyzak
+// @version 1.0
+// @since   20.08.13
+// 
+// 
+//  -= Copyright &copy ALICE HLT and CBM L1 Groups =-
+//____________________________________________________________________________
+
 #ifndef KFParticleField_h
 #define KFParticleField_h 1
 

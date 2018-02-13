@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------
-// Implementation of the KFParticle class
+// Structures to collect histograms online
 // .
 // @author  M.Zyzak
 // @version 1.0
-// @since   06.01.16
+// @since   20.08.13
 // 
 // 
 //  -= Copyright &copy ALICE HLT and CBM L1 Groups =-

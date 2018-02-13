@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-// Implementation of the KFParticle class
+// SIMDised vector approach for track representation
 // .
 // @author  I.Kisel, I.Kulakov, M.Zyzak
 // @version 1.0

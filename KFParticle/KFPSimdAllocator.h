@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-// Implementation of the KFParticle class
+// Allocator for SIMDised KF Particle
 // .
 // @author  I.Kisel, I.Kulakov, M.Zyzak
 // @version 1.0
