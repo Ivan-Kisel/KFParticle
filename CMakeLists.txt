@@ -88,7 +88,7 @@ else(FIXTARGET)
 endif(FIXTARGET)
 
 if (ROOT_VERSION_MAJOR LESS 6)
-    add_custom_target(libKFParticle.rootmap ALL DEPENDS KFParticle COMMAND rlibmap -o libKFParticle.rootmap -l libKFParticle.so -c ../KFLinkDef.h)
+    add_custom_target(libKFParticle.rootmap ALL DEPENDS KFParticle COMMAND rlibmap -o libKFParticle.rootmap -l libKFParticle.so -c ${PROJECT_SOURCE_DIR}/KFLinkDef.h)
 endif (ROOT_VERSION_MAJOR LESS 6)
 
 Set(NODICT_HEADERS
