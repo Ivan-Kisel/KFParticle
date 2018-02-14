@@ -3,20 +3,20 @@ cmake_minimum_required(VERSION 2.8.8 FATAL_ERROR)
 project(KFParticleLibrary)
 
 macro(add_target_property _target _prop _value)
-   get_target_property(_oldprop "${_target}" ${_prop})
-   if(NOT _oldprop)
-      set_target_properties("${_target}" PROPERTIES ${_prop} "${_value}")
-   else(NOT _oldprop)
-      set_target_properties("${_target}" PROPERTIES ${_prop} "${_oldprop} ${_value}")
-   endif(NOT _oldprop)
+  get_target_property(_oldprop "${_target}" ${_prop})
+  if(NOT _oldprop)
+    set_target_properties("${_target}" PROPERTIES ${_prop} "${_value}")
+  else(NOT _oldprop)
+    set_target_properties("${_target}" PROPERTIES ${_prop} "${_oldprop} ${_value}")
+  endif(NOT _oldprop)
 endmacro(add_target_property)
 
 if (CMAKE_VERSION VERSION_LESS "3.1")
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set (CMAKE_CXX_FLAGS "--std=gnu++11 ${CMAKE_CXX_FLAGS}")
+  set (CMAKE_CXX_FLAGS "--std=gnu++11 ${CMAKE_CXX_FLAGS}")
 endif ()
 else ()
-    set (CMAKE_CXX_STANDARD 11)
+  set (CMAKE_CXX_STANDARD 11)
 endif ()
 
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS} ${ROOTSYS})
@@ -31,8 +31,8 @@ Else()
 EndIf()
 
 Set(INCLUDE_DIRECTORIES
-    ${PROJECT_SOURCE_DIR}/KFParticle
-    ${PROJECT_SOURCE_DIR}/KFParticlePerformance
+  ${PROJECT_SOURCE_DIR}/KFParticle
+  ${PROJECT_SOURCE_DIR}/KFParticlePerformance
 )
 
 include(${ROOT_USE_FILE})
@@ -47,32 +47,32 @@ set(LINK_DIRECTORIES
 link_directories( ${LINK_DIRECTORIES})
 
 set (SOURCES
-   KFParticle/KFParticleTopoReconstructor.cxx
-   KFParticle/KFVertex.cxx	
-   KFParticle/KFPTrack.cxx
-   KFParticle/KFPTrackVector.cxx
-   KFParticle/KFPVertex.cxx
-   KFParticle/KFParticlePVReconstructor.cxx
-   KFParticle/KFParticleDatabase.cxx
-   KFParticle/KFParticleBase.cxx
-   KFParticle/KFParticleBaseSIMD.cxx
-   KFParticle/KFParticle.cxx
-   KFParticle/KFParticleSIMD.cxx
-   KFParticle/KFParticleFinder.cxx
-   KFParticlePerformance/KFMCVertex.cxx
-   KFParticlePerformance/KFParticlePerformanceBase.cxx
-   KFParticlePerformance/KFTopoPerformance.cxx
-   KFParticlePerformance/KFMCParticle.cxx
-   KFParticleTest/KFParticleTest.cxx
+  KFParticle/KFParticleTopoReconstructor.cxx
+  KFParticle/KFVertex.cxx
+  KFParticle/KFPTrack.cxx
+  KFParticle/KFPTrackVector.cxx
+  KFParticle/KFPVertex.cxx
+  KFParticle/KFParticlePVReconstructor.cxx
+  KFParticle/KFParticleDatabase.cxx
+  KFParticle/KFParticleBase.cxx
+  KFParticle/KFParticleBaseSIMD.cxx
+  KFParticle/KFParticle.cxx
+  KFParticle/KFParticleSIMD.cxx
+  KFParticle/KFParticleFinder.cxx
+  KFParticlePerformance/KFMCVertex.cxx
+  KFParticlePerformance/KFParticlePerformanceBase.cxx
+  KFParticlePerformance/KFTopoPerformance.cxx
+  KFParticlePerformance/KFMCParticle.cxx
+  KFParticleTest/KFParticleTest.cxx
 )
 
 set (HEADERS
-   KFParticle/KFParticleBase.h
-   KFParticle/KFParticle.h
-   KFParticle/KFVertex.h
-   KFParticlePerformance/KFPartEfficiencies.h
-   KFParticlePerformance/KFMCParticle.h
-   KFParticleTest/KFParticleTest.h
+  KFParticle/KFParticleBase.h
+  KFParticle/KFParticle.h
+  KFParticle/KFVertex.h
+  KFParticlePerformance/KFPartEfficiencies.h
+  KFParticlePerformance/KFMCParticle.h
+  KFParticleTest/KFParticleTest.h
 )
 
 if(FIXTARGET)
@@ -86,6 +86,10 @@ else(FIXTARGET)
   target_link_libraries(KFParticle ${ROOT_LIBRARIES} ${Vc_LIBRARIES} )
   add_target_property(KFParticle COMPILE_FLAGS "-DDO_TPCCATRACKER_EFF_PERFORMANCE -DHomogeneousField -DUSE_TIMERS")
 endif(FIXTARGET)
+
+if (ROOT_VERSION_MAJOR LESS 6)
+    add_custom_target(libKFParticle.rootmap ALL DEPENDS KFParticle COMMAND rlibmap -o libKFParticle.rootmap -l libKFParticle.so -c ../KFLinkDef.h)
+endif (ROOT_VERSION_MAJOR LESS 6)
 
 Set(NODICT_HEADERS
   KFParticle/KFParticleTopoReconstructor.h
@@ -113,5 +117,5 @@ Set(NODICT_HEADERS
 
 install(FILES ${HEADERS} ${NODICT_HEADERS} DESTINATION include)
 install(FILES ${CMAKE_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}KFParticle_rdict.pcm DESTINATION lib OPTIONAL)
-install(FILES ${CMAKE_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}KFParticle.rootmap DESTINATION lib OPTIONAL)
+install(FILES ${CMAKE_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}KFParticle.rootmap DESTINATION lib)
 install(TARGETS KFParticle DESTINATION lib)
