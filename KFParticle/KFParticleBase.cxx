@@ -61,7 +61,7 @@ void KFParticleBase::Print(Option_t *opt) const {
 
 std::ostream&  operator<<(std::ostream& os, const KFParticleBase& particle) {
   static const Char_t *vn[14] = {"x","y","z","px","py","pz","E","S","M","t","p","Q","Chi2","NDF"};
-  os << Form("p(%4i,%4i,%4i)",particle.GetID(),particle.GetParentID(),particle.IdParentMcVx());
+  os << Form("p(%4i,%4i,%4i)",particle.Id(),particle.GetParentID(),particle.IdParentMcVx());
   for (Int_t i = 0; i < 8; i++) {
     if (i == 6) continue;                                    // E
     if (i == 7 && particle.GetParameter(i) <= 0.0) continue; // S
@@ -71,17 +71,26 @@ std::ostream&  operator<<(std::ostream& os, const KFParticleBase& particle) {
     else 
       os << Form(" %s:%8.3f", vn[i], particle.GetParameter(i));
   }
-  float Mtp[3], MtpErr[3];
+  float Mtp[3] = {0.f, 0.f, 0.f}, MtpErr[3] = {0.f, 0.f, 0.f};
   particle.GetMass(Mtp[0], MtpErr[0]);     if (MtpErr[0] < 1e-7 || MtpErr[0] > 1e10) MtpErr[0] = -13;
   particle.GetLifeTime(Mtp[1], MtpErr[1]); if (MtpErr[1] <=   0 || MtpErr[1] > 1e10) MtpErr[1] = -13;
   particle.GetMomentum(Mtp[2], MtpErr[2]); if (MtpErr[2] <=   0 || MtpErr[2] > 1e10) MtpErr[2] = -13;
   for (Int_t i = 8; i < 11; i++) {
     if (i == 9 && Mtp[i-8] <= 0.0) continue; // t
-    if (MtpErr[i-8] > 0 && MtpErr[i-8] < 1e10) os << Form(" %s:%8.3f+/-%7.3f", vn[i],Mtp[i-8],MtpErr[i-8]);
+    if (MtpErr[i-8] > 0 && MtpErr[i-8] <  9e2) os << Form(" %s:%8.3f+/-%7.3f", vn[i],Mtp[i-8],MtpErr[i-8]);
     else                                       os << Form(" %s:%8.3f", vn[i],Mtp[i-8]);
   }
   os << Form(" pdg:%5i Q:%2i  chi2/NDF :%8.2f/%2i",particle.GetPDG(),particle.GetQ(),particle.GetChi2(),particle.GetNDF());
   if (particle.IdTruth()) os << Form(" IdT:%4i/%3i",particle.IdTruth(),particle.QaTruth());
+  int nd = particle.NDaughters();
+  if (nd > 1) {
+    os << " ND: " << nd << ":";
+    if (nd > 3) nd = 3;
+    for (int d = 0; d < nd; d++) {
+      os << particle.DaughterIds()[d];
+      if (d < nd-1) os << ",";
+    }
+  }
   return os;
 }
 #endif
@@ -599,6 +608,7 @@ void KFParticleBase::AddDaughterWithEnergyFit( const KFParticleBase &Daughter )
     float dChi2 = (mS[0]*zeta[0] + mS[1]*zeta[1] + mS[3]*zeta[2])*zeta[0]
            +      (mS[1]*zeta[0] + mS[2]*zeta[1] + mS[4]*zeta[2])*zeta[1]
            +      (mS[3]*zeta[0] + mS[4]*zeta[1] + mS[5]*zeta[2])*zeta[2]; 
+    if (dChi2 > 1e9) return;
 //     if(fNDF > 100 && dChi2 > 9) return;
     
     float K[3][3];
@@ -682,7 +692,7 @@ void KFParticleBase::AddDaughterWithEnergyFit( const KFParticleBase &Daughter )
         }
       }
     
-    float M[3][3];
+    double M[3][3];
     for(int i=0; i<3; i++)
       for(int j=0; j<3; j++)
       {
@@ -818,7 +828,7 @@ void KFParticleBase::SubtractDaughter( const KFParticleBase &Daughter )
       }
     }
   
-  float M[3][3];
+  double M[3][3];
   for(int i=0; i<3; i++)
     for(int j=0; j<3; j++)
     {
@@ -1042,7 +1052,7 @@ void KFParticleBase::AddDaughterWithEnergyFitMC( const KFParticleBase &Daughter 
         }
       }
     
-    float M[3][3];
+    double M[3][3];
     for(int i=0; i<3; i++)
       for(int j=0; j<3; j++)
       {
@@ -1184,7 +1194,7 @@ void KFParticleBase::SetProductionVertex( const KFParticleBase &Vtx )
       }
     }
   
-  float M[3][3];
+  double M[3][3];
   for(int i=0; i<3; i++)
     for(int j=0; j<3; j++)
     {
@@ -1851,26 +1861,42 @@ void KFParticleBase::GetDStoParticleBz( float Bz, const KFParticleBase &p, float
     float b = bq1*k11*d1*bq1 - k21*c1;
     for(int iP=0; iP<6; iP++)
     {
-      const float dadr1 = bq1*( dk11dr1[iP]*c1 + k11*dc1dr1[iP] + dk21dr1[iP]*d1 + k21*dd1dr1[iP] );
-      const float dadr2 = bq1*( dk11dr2[iP]*c1 + k11*dc1dr2[iP] + dk21dr2[iP]*d1 + k21*dd1dr2[iP] );
-      const float dbdr1 = bq1*bq1*( dk11dr1[iP]*d1 + k11*dd1dr1[iP] ) - ( dk21dr1[iP]*c1 + k21*dc1dr1[iP] );
-      const float dbdr2 = bq1*bq1*( dk11dr2[iP]*d1 + k11*dd1dr2[iP] ) - ( dk21dr2[iP]*c1 + k21*dc1dr2[iP] );
+      if(( b*b + a*a ) > 0)
+      {
+        const float dadr1 = bq1*( dk11dr1[iP]*c1 + k11*dc1dr1[iP] + dk21dr1[iP]*d1 + k21*dd1dr1[iP] );
+        const float dadr2 = bq1*( dk11dr2[iP]*c1 + k11*dc1dr2[iP] + dk21dr2[iP]*d1 + k21*dd1dr2[iP] );
+        const float dbdr1 = bq1*bq1*( dk11dr1[iP]*d1 + k11*dd1dr1[iP] ) - ( dk21dr1[iP]*c1 + k21*dc1dr1[iP] );
+        const float dbdr2 = bq1*bq1*( dk11dr2[iP]*d1 + k11*dd1dr2[iP] ) - ( dk21dr2[iP]*c1 + k21*dc1dr2[iP] );
       
-      dS1dR1[0][iP] = 1/bq1 * 1/( b*b + a*a ) * ( dadr1*b - dbdr1*a );
-      dS1dR2[0][iP] = 1/bq1 * 1/( b*b + a*a ) * ( dadr2*b - dbdr2*a );
+        dS1dR1[0][iP] = 1/bq1 * 1/( b*b + a*a ) * ( dadr1*b - dbdr1*a );
+        dS1dR2[0][iP] = 1/bq1 * 1/( b*b + a*a ) * ( dadr2*b - dbdr2*a );
+      }
+      else
+      {
+        dS1dR1[0][iP] = 0;
+        dS1dR2[0][iP] = 0;
+      }
     }
     
     a = bq1*(k11*c1 - k21*d1);
     b = -bq1*k11*d1*bq1 - k21*c1;
     for(int iP=0; iP<6; iP++)
     {
-      const float dadr1 = bq1*( dk11dr1[iP]*c1 + k11*dc1dr1[iP] - (dk21dr1[iP]*d1 + k21*dd1dr1[iP]) );
-      const float dadr2 = bq1*( dk11dr2[iP]*c1 + k11*dc1dr2[iP] - (dk21dr2[iP]*d1 + k21*dd1dr2[iP]) );
-      const float dbdr1 = -bq1*bq1*( dk11dr1[iP]*d1 + k11*dd1dr1[iP] ) - ( dk21dr1[iP]*c1 + k21*dc1dr1[iP] );
-      const float dbdr2 = -bq1*bq1*( dk11dr2[iP]*d1 + k11*dd1dr2[iP] ) - ( dk21dr2[iP]*c1 + k21*dc1dr2[iP] );
+      if(( b*b + a*a ) > 0)
+      {
+        const float dadr1 = bq1*( dk11dr1[iP]*c1 + k11*dc1dr1[iP] - (dk21dr1[iP]*d1 + k21*dd1dr1[iP]) );
+        const float dadr2 = bq1*( dk11dr2[iP]*c1 + k11*dc1dr2[iP] - (dk21dr2[iP]*d1 + k21*dd1dr2[iP]) );
+        const float dbdr1 = -bq1*bq1*( dk11dr1[iP]*d1 + k11*dd1dr1[iP] ) - ( dk21dr1[iP]*c1 + k21*dc1dr1[iP] );
+        const float dbdr2 = -bq1*bq1*( dk11dr2[iP]*d1 + k11*dd1dr2[iP] ) - ( dk21dr2[iP]*c1 + k21*dc1dr2[iP] );
       
-      dS1dR1[1][iP] = 1/bq1 * 1/( b*b + a*a ) * ( dadr1*b - dbdr1*a );
-      dS1dR2[1][iP] = 1/bq1 * 1/( b*b + a*a ) * ( dadr2*b - dbdr2*a );
+        dS1dR1[1][iP] = 1/bq1 * 1/( b*b + a*a ) * ( dadr1*b - dbdr1*a );
+        dS1dR2[1][iP] = 1/bq1 * 1/( b*b + a*a ) * ( dadr2*b - dbdr2*a );
+      }
+      else
+      {
+        dS1dR1[1][iP] = 0;
+        dS1dR2[1][iP] = 0;
+      }
     }
   }
   if(!isStraight2)
@@ -1882,26 +1908,42 @@ void KFParticleBase::GetDStoParticleBz( float Bz, const KFParticleBase &p, float
     float b = bq2*k12*d2*bq2 - k22*c2;
     for(int iP=0; iP<6; iP++)
     {
-      const float dadr1 = bq2*( dk12dr1[iP]*c2 + k12*dc2dr1[iP] + dk22dr1[iP]*d1 + k22*dd1dr1[iP] );
-      const float dadr2 = bq2*( dk12dr2[iP]*c2 + k12*dc2dr2[iP] + dk22dr2[iP]*d1 + k22*dd1dr2[iP] );
-      const float dbdr1 = bq2*bq2*( dk12dr1[iP]*d1 + k12*dd1dr1[iP] ) - (dk22dr1[iP]*c2 + k22*dc2dr1[iP]);
-      const float dbdr2 = bq2*bq2*( dk12dr2[iP]*d1 + k12*dd1dr2[iP] ) - (dk22dr2[iP]*c2 + k22*dc2dr2[iP]);
+      if(( b*b + a*a ) > 0)
+      {
+        const float dadr1 = bq2*( dk12dr1[iP]*c2 + k12*dc2dr1[iP] + dk22dr1[iP]*d1 + k22*dd1dr1[iP] );
+        const float dadr2 = bq2*( dk12dr2[iP]*c2 + k12*dc2dr2[iP] + dk22dr2[iP]*d1 + k22*dd1dr2[iP] );
+        const float dbdr1 = bq2*bq2*( dk12dr1[iP]*d1 + k12*dd1dr1[iP] ) - (dk22dr1[iP]*c2 + k22*dc2dr1[iP]);
+        const float dbdr2 = bq2*bq2*( dk12dr2[iP]*d1 + k12*dd1dr2[iP] ) - (dk22dr2[iP]*c2 + k22*dc2dr2[iP]);
       
-      dS2dR1[0][iP] = 1/bq2 * 1/( b*b + a*a ) * ( dadr1*b - dbdr1*a );
-      dS2dR2[0][iP] = 1/bq2 * 1/( b*b + a*a ) * ( dadr2*b - dbdr2*a );
+        dS2dR1[0][iP] = 1/bq2 * 1/( b*b + a*a ) * ( dadr1*b - dbdr1*a );
+        dS2dR2[0][iP] = 1/bq2 * 1/( b*b + a*a ) * ( dadr2*b - dbdr2*a );
+      }
+      else
+      {
+        dS2dR1[0][iP] = 0;
+        dS2dR2[0][iP] = 0;
+      }
     }
     
     a = bq2*(k12*c2 - k22*d2);
     b = -bq2*k12*d2*bq2 - k22*c2;
     for(int iP=0; iP<6; iP++)
     {
-      const float dadr1 = bq2*( dk12dr1[iP]*c2 + k12*dc2dr1[iP] - (dk22dr1[iP]*d1 + k22*dd1dr1[iP]) );
-      const float dadr2 = bq2*( dk12dr2[iP]*c2 + k12*dc2dr2[iP] - (dk22dr2[iP]*d1 + k22*dd1dr2[iP]) );
-      const float dbdr1 = -bq2*bq2*( dk12dr1[iP]*d1 + k12*dd1dr1[iP] ) - (dk22dr1[iP]*c2 + k22*dc2dr1[iP]);
-      const float dbdr2 = -bq2*bq2*( dk12dr2[iP]*d1 + k12*dd1dr2[iP] ) - (dk22dr2[iP]*c2 + k22*dc2dr2[iP]);
+      if(( b*b + a*a ) > 0)
+      {
+        const float dadr1 = bq2*( dk12dr1[iP]*c2 + k12*dc2dr1[iP] - (dk22dr1[iP]*d1 + k22*dd1dr1[iP]) );
+        const float dadr2 = bq2*( dk12dr2[iP]*c2 + k12*dc2dr2[iP] - (dk22dr2[iP]*d1 + k22*dd1dr2[iP]) );
+        const float dbdr1 = -bq2*bq2*( dk12dr1[iP]*d1 + k12*dd1dr1[iP] ) - (dk22dr1[iP]*c2 + k22*dc2dr1[iP]);
+        const float dbdr2 = -bq2*bq2*( dk12dr2[iP]*d1 + k12*dd1dr2[iP] ) - (dk22dr2[iP]*c2 + k22*dc2dr2[iP]);
       
-      dS2dR1[1][iP] = 1/bq2 * 1/( b*b + a*a ) * ( dadr1*b - dbdr1*a );
-      dS2dR2[1][iP] = 1/bq2 * 1/( b*b + a*a ) * ( dadr2*b - dbdr2*a );
+        dS2dR1[1][iP] = 1/bq2 * 1/( b*b + a*a ) * ( dadr1*b - dbdr1*a );
+        dS2dR2[1][iP] = 1/bq2 * 1/( b*b + a*a ) * ( dadr2*b - dbdr2*a );
+      }
+      else
+      {
+        dS2dR1[1][iP] = 0;
+        dS2dR2[1][iP] = 0;
+      }
     }
   }
   if(isStraight1 && (pt12>0.f) )
@@ -1914,25 +1956,41 @@ void KFParticleBase::GetDStoParticleBz( float Bz, const KFParticleBase &p, float
     
     for(int iP=0; iP<6; iP++)
     {
-      const float dadr1 = ( dk11dr1[iP]*c1 + k11*dc1dr1[iP] + dk21dr1[iP]*d1 + k21*dd1dr1[iP] );
-      const float dadr2 = ( dk11dr2[iP]*c1 + k11*dc1dr2[iP] + dk21dr2[iP]*d1 + k21*dd1dr2[iP] );
-      const float dbdr1 = -( dk21dr1[iP]*c1 + k21*dc1dr1[iP] );
-      const float dbdr2 = -( dk21dr2[iP]*c1 + k21*dc1dr2[iP] );
+      if(b*b > 0)
+      {
+        const float dadr1 = ( dk11dr1[iP]*c1 + k11*dc1dr1[iP] + dk21dr1[iP]*d1 + k21*dd1dr1[iP] );
+        const float dadr2 = ( dk11dr2[iP]*c1 + k11*dc1dr2[iP] + dk21dr2[iP]*d1 + k21*dd1dr2[iP] );
+        const float dbdr1 = -( dk21dr1[iP]*c1 + k21*dc1dr1[iP] );
+        const float dbdr2 = -( dk21dr2[iP]*c1 + k21*dc1dr2[iP] );
     
-      dS1dR1[0][iP] = dadr1/b - dbdr1*a/(b*b) ;
-      dS1dR2[0][iP] = dadr2/b - dbdr2*a/(b*b) ;
+        dS1dR1[0][iP] = dadr1/b - dbdr1*a/(b*b) ;
+        dS1dR2[0][iP] = dadr2/b - dbdr2*a/(b*b) ;
+      }
+      else
+      {
+        dS1dR1[0][iP] = 0;
+        dS1dR2[0][iP] = 0;
+      }
     }
     
     a = k11*c1 - k21*d1;
     for(int iP=0; iP<6; iP++)
     {
-      const float dadr1 = ( dk11dr1[iP]*c1 + k11*dc1dr1[iP] - dk21dr1[iP]*d1 - k21*dd1dr1[iP] );
-      const float dadr2 = ( dk11dr2[iP]*c1 + k11*dc1dr2[iP] - dk21dr2[iP]*d1 - k21*dd1dr2[iP] );
-      const float dbdr1 = -( dk21dr1[iP]*c1 + k21*dc1dr1[iP] );
-      const float dbdr2 = -( dk21dr2[iP]*c1 + k21*dc1dr2[iP] );
-      
-      dS1dR1[1][iP] = dadr1/b - dbdr1*a/(b*b) ;
-      dS1dR2[1][iP] = dadr2/b - dbdr2*a/(b*b) ;
+      if(b*b > 0)
+      {
+        const float dadr1 = ( dk11dr1[iP]*c1 + k11*dc1dr1[iP] - dk21dr1[iP]*d1 - k21*dd1dr1[iP] );
+        const float dadr2 = ( dk11dr2[iP]*c1 + k11*dc1dr2[iP] - dk21dr2[iP]*d1 - k21*dd1dr2[iP] );
+        const float dbdr1 = -( dk21dr1[iP]*c1 + k21*dc1dr1[iP] );
+        const float dbdr2 = -( dk21dr2[iP]*c1 + k21*dc1dr2[iP] );
+       
+        dS1dR1[1][iP] = dadr1/b - dbdr1*a/(b*b) ;
+        dS1dR2[1][iP] = dadr2/b - dbdr2*a/(b*b) ;
+      }
+      else
+      {
+        dS1dR1[1][iP] = 0;
+        dS1dR2[1][iP] = 0;
+      }
     }
   }
   if(isStraight2 && (pt22>0.f) )
@@ -1945,25 +2003,41 @@ void KFParticleBase::GetDStoParticleBz( float Bz, const KFParticleBase &p, float
     
     for(int iP=0; iP<6; iP++)
     {
-      const float dadr1 = ( dk12dr1[iP]*c2 + k12*dc2dr1[iP] + dk22dr1[iP]*d1 + k22*dd1dr1[iP] );
-      const float dadr2 = ( dk12dr2[iP]*c2 + k12*dc2dr2[iP] + dk22dr2[iP]*d1 + k22*dd1dr2[iP] );
-      const float dbdr1 = -( dk22dr1[iP]*c2 + k22*dc2dr1[iP] );
-      const float dbdr2 = -( dk22dr2[iP]*c2 + k22*dc2dr2[iP] );
+      if(b*b > 0)
+      {
+        const float dadr1 = ( dk12dr1[iP]*c2 + k12*dc2dr1[iP] + dk22dr1[iP]*d1 + k22*dd1dr1[iP] );
+        const float dadr2 = ( dk12dr2[iP]*c2 + k12*dc2dr2[iP] + dk22dr2[iP]*d1 + k22*dd1dr2[iP] );
+        const float dbdr1 = -( dk22dr1[iP]*c2 + k22*dc2dr1[iP] );
+        const float dbdr2 = -( dk22dr2[iP]*c2 + k22*dc2dr2[iP] );
     
-      dS2dR1[0][iP] = dadr1/b - dbdr1*a/(b*b) ;
-      dS2dR2[0][iP] = dadr2/b - dbdr2*a/(b*b) ;
+        dS2dR1[0][iP] = dadr1/b - dbdr1*a/(b*b) ;
+        dS2dR2[0][iP] = dadr2/b - dbdr2*a/(b*b) ;
+      }
+      else
+      {
+        dS2dR1[0][iP] = 0;
+        dS2dR2[0][iP] = 0;
+      }
     }
     
     a = k12*c2 - k22*d1;
     for(int iP=0; iP<6; iP++)
     {
-      const float dadr1 = ( dk12dr1[iP]*c2 + k12*dc2dr1[iP] - dk22dr1[iP]*d1 - k22*dd1dr1[iP] );
-      const float dadr2 = ( dk12dr2[iP]*c2 + k12*dc2dr2[iP] - dk22dr2[iP]*d1 - k22*dd1dr2[iP] );
-      const float dbdr1 = -( dk22dr1[iP]*c2 + k22*dc2dr1[iP] );
-      const float dbdr2 = -( dk22dr2[iP]*c2 + k22*dc2dr2[iP] );
+      if(b*b > 0)
+      {
+        const float dadr1 = ( dk12dr1[iP]*c2 + k12*dc2dr1[iP] - dk22dr1[iP]*d1 - k22*dd1dr1[iP] );
+        const float dadr2 = ( dk12dr2[iP]*c2 + k12*dc2dr2[iP] - dk22dr2[iP]*d1 - k22*dd1dr2[iP] );
+        const float dbdr1 = -( dk22dr1[iP]*c2 + k22*dc2dr1[iP] );
+        const float dbdr2 = -( dk22dr2[iP]*c2 + k22*dc2dr2[iP] );
     
-      dS2dR1[1][iP] = dadr1/b - dbdr1*a/(b*b) ;
-      dS2dR2[1][iP] = dadr2/b - dbdr2*a/(b*b) ;
+        dS2dR1[1][iP] = dadr1/b - dbdr1*a/(b*b) ;
+        dS2dR2[1][iP] = dadr2/b - dbdr2*a/(b*b) ;
+      }
+      else
+      {
+        dS2dR1[1][iP] = 0;
+        dS2dR2[1][iP] = 0;
+      }
     }
   }
   

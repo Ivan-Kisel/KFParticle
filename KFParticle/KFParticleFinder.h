@@ -20,6 +20,7 @@
 #include "KFPEmcCluster.h"
 
 #include <vector>
+#include <map>
 
 class KFParticleFinder
 {
@@ -28,6 +29,7 @@ class KFParticleFinder
   KFParticleFinder();
   ~KFParticleFinder() {};
   
+  void Init(int nPV);
   void SetNThreads(short int n) { fNThreads = n;}
 
   /// Find particles with 2-body decay channel from input tracks vRTracks with primary vertex PrimVtx:
@@ -153,19 +155,7 @@ class KFParticleFinder
                        std::vector<KFParticle>* vMotherSec = 0,
                        float massMotherPDG = 0.f,
                        float massMotherPDGSigma = 0.f);
-  
-  //set cuts
-  void Set2DCuts(const float chi2Prim = 3.f, const float chi2 = 3.f, const float ldl = 5.f) {
-    fCuts2D[0] = chi2Prim; 
-    fCuts2D[1] = chi2;      
-    fCuts2D[2] = ldl;
-  } 
-  void SetSecondaryCuts(const float sigmaMass = 3.f, const float chi2Topo = 5.f, const float ldl = 10.f) {
-    fSecCuts[0] = sigmaMass;
-    fSecCuts[1] = chi2Topo;
-    fSecCuts[2] = ldl;
-  }
-  
+
   //Set Emc clusters containing gammas
   void SetEmcClusters(KFPEmcCluster* clusters) { fEmcClusters = clusters; }
   
@@ -221,19 +211,59 @@ class KFParticleFinder
   void AddCandidate(const KFParticle& candidate, int iPV = -1);
   void SetNPV(int nPV);
   
+  //Functionality to change cuts, all cuts have default values set in the constructor
+  void SetMaxDistanceBetweenParticlesCut(float cut) { fDistanceCut = cut; }
+  void SetLCut(float cut) { fLCut = cut; }
+  
+  void SetChiPrimaryCut2D(float cut) { fCuts2D[0] = cut; }
+  void SetChi2Cut2D(float cut)       { fCuts2D[1] = cut; }
+  void SetLdLCut2D(float cut)        { fCuts2D[2] = cut; }
+  
+  void SetSecondaryCuts(const float sigmaMass = 3.f, const float chi2Topo = 5.f, const float ldl = 10.f) {
+    fSecCuts[0] = sigmaMass;
+    fSecCuts[1] = chi2Topo;
+    fSecCuts[2] = ldl;
+  }
+  
+  void SetLdLCutXiOmega(float cut)      { fCutsTrackV0[0][0] = cut; }
+  void SetChi2TopoCutXiOmega(float cut) { fCutsTrackV0[0][1] = cut; }
+  void SetChi2CutXiOmega(float cut)     { fCutsTrackV0[0][2] = cut; }
+
+  void SetChi2TopoCutResonances(float cut) { fCutsTrackV0[2][1] = cut; }
+  void SetChi2CutResonances(float cut)     { fCutsTrackV0[2][2] = cut; }
+
+  void SetPtCutLMVM(float cut) { fCutLVMPt = cut; }
+  void SetPCutLMVM(float cut)  { fCutLVMP = cut; }
+  void SetPtCutJPsi(float cut) { fCutJPsiPt = cut; }
+  
+  void SetPtCutCharm(float cut)         { fCutCharmPt = cut; }
+  void SetChiPrimaryCutCharm(float cut) { fCutCharmChiPrim = cut; }
+  void SetLdLCutCharmManybodyDecays(float cut)      { fCutsTrackV0[1][0] = cut; }
+  void SetChi2TopoCutCharmManybodyDecays(float cut) { fCutsTrackV0[1][1] = cut; }
+  void SetChi2CutCharmManybodyDecays(float cut)     { fCutsTrackV0[1][2] = cut; }
+
+  void SetLdLCutCharm2D(float cut)      { fCutsCharm[1] = cut; }
+  void SetChi2TopoCutCharm2D(float cut) { fCutsCharm[2] = cut; }
+  void SetChi2CutCharm2D(float cut)     { fCutsCharm[0] = cut; }
+  
+  void AddDecayToReconstructionList(int pdg) { fDecayReconstructionList[pdg] = true; }
+    
  private:
 
   short int fNPV;
   short int fNThreads;
   
+  float fDistanceCut;
+  float fLCut;
+
   float fCuts2D[3]; //chi2_prim, chi2_geo, l/dl
   float fSecCuts[3]; //mass, chi2_topo, l/dl
-  float fCutsTrackV0[3][3];
-  float fCutsPartPart[2][3];
+  float fCutsTrackV0[3][3]; //ldl, chi2_topo, chi2_geo
+  float fCutsPartPart[2][3]; //ldl, chi2_topo, chi2_geo
   
-  //cuts on charm particles
+  //cuts on open charm particles with 2 daughters
   float fCutCharmPt, fCutCharmChiPrim; //cuts on tracks
-  float fCutsCharm[3]; //cuts on reconstructed charm candidates
+  float fCutsCharm[3]; //cuts on reconstructed charm candidates: chi2, l/dl, chi2_topo
   
   //cuts on LVM
   float fCutLVMPt, fCutLVMP;
@@ -246,8 +276,17 @@ class KFParticleFinder
   std::vector<KFParticle> fD0bar;
   std::vector<KFParticle> fD04;
   std::vector<KFParticle> fD04bar;
+  std::vector<KFParticle> fD0KK;
+  std::vector<KFParticle> fD0pipi;
   std::vector<KFParticle> fDPlus;
   std::vector<KFParticle> fDMinus;
+  std::vector<KFParticle> fDPlus3Pi;
+  std::vector<KFParticle> fDMinus3Pi;
+  std::vector<KFParticle> fDsPlusK2Pi;
+  std::vector<KFParticle> fDsMinusK2Pi;
+  std::vector<KFParticle> fLcPlusP2Pi;
+  std::vector<KFParticle> fLcMinusP2Pi;
+  
   //vectors with temporary particles for H0
   std::vector<KFParticle> fLPi; //Lambda Pi+ combination
   std::vector<int> fLPiPIndex; //index of the proton in Labmda
@@ -259,9 +298,6 @@ class KFParticleFinder
   std::vector<KFParticle> fHe5L;
   std::vector<KFParticle> fLLn;
   std::vector<KFParticle> fH5LL;
-  std::vector<KFParticle> fK0PiPlus;
-  std::vector<int> fK0PiMinusIndex;
-  std::vector<KFParticle> fK0PiPi;
   
   //vectors of candidates with the mass constraint
   static const int fNSecCandidatesSets = 5;
@@ -277,9 +313,10 @@ class KFParticleFinder
 
   bool fMixedEventAnalysis;
   
+  std::map<int,bool> fDecayReconstructionList;
+  
   KFParticleFinder(const KFParticleFinder&);
   KFParticleFinder& operator=(const KFParticleFinder&);
-
 };
 
 #endif /* !KFParticleFinder_h */

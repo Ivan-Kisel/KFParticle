@@ -41,12 +41,10 @@
 #include <map>
 #include <algorithm>
 using std::sort;
-using std::endl;
-using std::cout;
 
 KFTopoPerformance::KFTopoPerformance():KFParticlePerformanceBase(),fTopoReconstructor(0),fPrimVertices(0), fMCTrackToMCPVMatch(0), 
   fPVPurity(0), fNCorrectPVTracks(0), fTrackMatch(0), vMCTracks(0), vMCParticles(0), fNeutralIndex(0), MCtoRParticleId(0), RtoMCParticleId(0), 
-  MCtoRPVId(0), RtoMCPVId(0), fPrintEffFrequency(1), fPartInfo()
+  MCtoRPVId(0), RtoMCPVId(0), fPrintEffFrequency(1), fPartInfo(), fCentralityBin(-1), fCentralityWeight(0.f)
 {
 }
 
@@ -382,6 +380,85 @@ void KFTopoPerformance::GetMCParticles()
       }
     }
   }
+  
+  //clean Lambda c daughters
+  for(unsigned int iMC=0; iMC < vMCParticles.size(); iMC++)
+  {
+    KFMCParticle &part = vMCParticles[iMC];
+
+//     if(abs(part.GetPDG()) == 4122)
+    {
+      //add daughters into one pool
+      vector<int> newDaughters;
+      for(unsigned int iD=0; iD<part.GetDaughterIds().size(); iD++)
+      {
+        KFMCParticle &d = vMCParticles[part.GetDaughterIds()[iD]];
+        if( abs(d.GetPDG())==3224 || 
+            abs(d.GetPDG())==3114 || 
+            abs(d.GetPDG())==113  ||
+            abs(d.GetPDG())==313  ||
+            abs(d.GetPDG())==323  ||
+            abs(d.GetPDG())==2224 ||
+            abs(d.GetPDG())==2214 ||
+            abs(d.GetPDG())==2114 ||
+            abs(d.GetPDG())==1114
+          )
+        {
+          for(unsigned int iDaughter=0; iDaughter<d.GetDaughterIds().size(); iDaughter++)
+          {
+            newDaughters.push_back(d.GetDaughterIds()[iDaughter]);
+            vMCParticles[d.GetDaughterIds()[iDaughter]].SetMotherId(iMC);
+          }
+        }
+        else
+//         if(d.GetDaughterIds().size() == 0 || abs(d.GetPDG())==310 || abs(d.GetPDG())==3122)
+          newDaughters.push_back(part.GetDaughterIds()[iD]);
+      }
+      part.CleanDaughters();
+      for(unsigned int iDaughter=0; iDaughter<newDaughters.size(); iDaughter++)
+        part.AddDaughter(newDaughters[iDaughter]);
+      
+      //change PDG to separate channels
+      int indexPDG = fParteff.GetParticleIndex(part.GetPDG());
+      for(int iPDG=indexPDG; iPDG<indexPDG+10; iPDG++)
+      {
+        const int nDaughters = part.GetDaughterIds().size();
+        
+        if(int(fParteff.partDaughterPdg[iPDG].size()) != nDaughters)
+          continue;
+        
+        vector<bool> isDaughterFound(nDaughters);
+        vector<bool> isDaughterUsed(nDaughters);
+        for(int iDMC=0; iDMC<nDaughters; iDMC++)
+        {
+          isDaughterFound[iDMC] = 0;
+          isDaughterUsed[iDMC] = 0;
+        }
+        
+        bool isCorrectPDG = 1;
+        for(int iDMC=0; iDMC<nDaughters; iDMC++)
+          for(int iD=0; iD<nDaughters; iD++)
+          {
+            if(isDaughterUsed[iD]) continue;
+            if(vMCParticles[part.GetDaughterIds()[iD]].GetPDG() == fParteff.partDaughterPdg[iPDG][iDMC]) 
+            {
+              isDaughterUsed[iD] = 1;
+              isDaughterFound[iDMC] = 1;
+              break;
+            }
+          }
+
+        for(int iDMC=0; iDMC<nDaughters; iDMC++)
+          isCorrectPDG &= isDaughterFound[iDMC];
+        
+        if(isCorrectPDG)
+        {
+          part.SetPDG(fParteff.partPDG[iPDG]);
+          break;
+        }
+      }
+    }
+  }
 }
 
 void KFTopoPerformance::FindReconstructableMCParticles()
@@ -703,7 +780,7 @@ void KFTopoPerformance::MatchParticles()
         if( mmPart.GetPDG()     == rPart.GetPDG()     &&
             mmPart.NDaughters() == rPart.NDaughters() ) {
           MCtoRParticleId[mmId].ids.push_back(iRP);
-          RtoMCParticleId[iRP].ids.push_back(mmId);
+          RtoMCParticleId[iRP].ids.push_back(mmId);        
         }
         else {
           MCtoRParticleId[mmId].idsMI.push_back(iRP);
@@ -997,16 +1074,19 @@ void KFTopoPerformance::CalculateEfficiency()
             Z = mcDaughter.Z();
           }
 
-          hPartEfficiency[iPart][iEff][0]->Fill( mcTrack.P(), isReco[iPType] );
-          hPartEfficiency[iPart][iEff][1]->Fill( mcTrack.Pt(), isReco[iPType] );
-          hPartEfficiency[iPart][iEff][2]->Fill( Y, isReco[iPType] );
-          hPartEfficiency[iPart][iEff][3]->Fill( Z, isReco[iPType] );
-          hPartEfficiency[iPart][iEff][6]->Fill( L, isReco[iPType] );
-          hPartEfficiency[iPart][iEff][7]->Fill( R, isReco[iPType] );
-          hPartEfficiency[iPart][iEff][8]->Fill( Mt_mc, isReco[iPType] );
-          
-          hPartEfficiency2D[iPart][iEff][0]->Fill( Y, mcTrack.Pt(), isReco[iPType] );
-          hPartEfficiency2D[iPart][iEff][1]->Fill( Y, Mt_mc, isReco[iPType] );
+          if(fStoreMCHistograms)
+          {
+            hPartEfficiency[iPart][iEff][0]->Fill( mcTrack.P(), isReco[iPType] );
+            hPartEfficiency[iPart][iEff][1]->Fill( mcTrack.Pt(), isReco[iPType] );
+            hPartEfficiency[iPart][iEff][2]->Fill( Y, isReco[iPType] );
+            hPartEfficiency[iPart][iEff][3]->Fill( Z, isReco[iPType] );
+            hPartEfficiency[iPart][iEff][6]->Fill( L, isReco[iPType] );
+            hPartEfficiency[iPart][iEff][7]->Fill( R, isReco[iPType] );
+            hPartEfficiency[iPart][iEff][8]->Fill( Mt_mc, isReco[iPType] );
+            
+            hPartEfficiency2D[iPart][iEff][0]->Fill( Y, mcTrack.Pt(), isReco[iPType] );
+            hPartEfficiency2D[iPart][iEff][1]->Fill( Y, Mt_mc, isReco[iPType] );
+          }
         }
       }
     }
@@ -1159,7 +1239,7 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
                                                TH1F* histoFitDaughtersQA[KFPartEfficiencies::nParticles][nFitQA],
                                                TH1F* histoDSToParticleQA[KFPartEfficiencies::nParticles][nDSToParticleQA],
                                                vector<int>* multiplicities)
-{
+{ 
   float M, M_t, ErrM;
   float dL, ErrdL; // decay length
   float cT, ErrcT; // c*tau
@@ -1195,8 +1275,41 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
   float_v l,dl;
   KFParticleSIMD pv(fTopoReconstructor->GetPrimVertex(iPV));
   tempSIMDPart.GetDistanceToVertexLine(pv, l, dl);
+#ifdef __ROOT__
+  if( (l[0] > 0.2 || Pt < 0.) && (abs( TempPart.GetPDG() ) ==   4122 ||
+                                  abs( TempPart.GetPDG() ) == 104122 ||
+                                  abs( TempPart.GetPDG() ) == 204122 ||
+                                  abs( TempPart.GetPDG() ) == 304122 ||
+                                  abs( TempPart.GetPDG() ) == 404122 || 
+                                  abs( TempPart.GetPDG() ) == 504122 )  ) return;
+  if( (l[0] > 0.2 || Pt < 0.) && (abs( TempPart.GetPDG() ) == 421 ||
+                                  abs( TempPart.GetPDG() ) == 420 ||
+                                  abs( TempPart.GetPDG() ) == 425 ||
+                                  abs( TempPart.GetPDG() ) == 426 ||
+                                  abs( TempPart.GetPDG() ) == 427 ||
+                                  abs( TempPart.GetPDG() ) == 429)  ) return;
+  if( (l[0] > 0.4 || Pt < 0.) && (abs( TempPart.GetPDG() ) ==    411 ||
+                                  abs( TempPart.GetPDG() ) == 100411 ||
+                                  abs( TempPart.GetPDG() ) == 200411 ||
+                                  abs( TempPart.GetPDG() ) == 300411)  ) return;
+  if( (l[0] > 0.2 || Pt < 0.) && (abs( TempPart.GetPDG() ) ==    431 ||
+                                  abs( TempPart.GetPDG() ) == 100431 ||
+                                  abs( TempPart.GetPDG() ) == 200431 ||
+                                  abs( TempPart.GetPDG() ) == 300431 ||
+                                  abs( TempPart.GetPDG() ) == 400431)  ) return;
   
+//   if(Pt < 2. && (abs( TempPart.GetPDG() ) ==    443 ||
+//                  abs( TempPart.GetPDG() ) == 100443 ||
+//                  abs( TempPart.GetPDG() ) == 200443 ||
+//                  abs( TempPart.GetPDG() ) == 300443 ||
+//                  abs( TempPart.GetPDG() ) == 400443 ||
+//                  abs( TempPart.GetPDG() ) == 500443) ) return;
+  
+  if(Pt < 0.5 && (abs( TempPart.GetPDG() ) == 3000 ||
+                  abs( TempPart.GetPDG() ) == 3001) ) return;
+#endif
   float parameters[17] = {M, P, Pt, Rapidity, dL, cT, chi2/ndf, prob, Theta, Phi, X, Y, Z, R, l[0], l[0]/dl[0], M_t };
+
   //for all particle-candidates
   for(int iParam=0; iParam<17; iParam++)
     histoParameters[0][iParticle][iParam]->Fill(parameters[iParam]);
@@ -1207,13 +1320,21 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
   histoParameters2D[0][iParticle][0]->Fill(Rapidity,Pt,1);
   histoParameters2D[0][iParticle][3]->Fill(Rapidity,M_t,1);
   
-  bool drawZR = ((iParticle<5) || (iParticle==41)) && histoDSToParticleQA;
-  if(drawZR)
+  const bool drawZR = IsCollectZRHistogram(iParticle);
+  if(histoParameters2D[0][iParticle][1])
   {
     histoParameters2D[0][iParticle][1]->Fill(Z,R,1);
-    
+  }
+
+  if(TempPart.NDaughters() == 2 && IsCollectArmenteros(iParticle))
+  {
     int index1 = TempPart.DaughterIds()[0];
     int index2 = TempPart.DaughterIds()[1];
+    if(index1 >= int(fTopoReconstructor->GetParticles().size()) || 
+        index2 >= int(fTopoReconstructor->GetParticles().size()) || 
+        index1 < 0 || index2 < 0 ) 
+      return;
+      
     KFParticle posDaughter, negDaughter;
     if(int(fTopoReconstructor->GetParticles()[index1].Q()) > 0)
     {
@@ -1232,16 +1353,22 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
     
     histoParameters2D[0][iParticle][2]->Fill(QtAlpha[1],QtAlpha[0],1);
   }
-
+    
   //Fill 3D histograms for multi differential analysis
-  if( (iParticle<5 || iParticle==98 || iParticle==104 || iParticle==106 || iParticle==124 || iParticle==114 || iParticle==116) && histoParameters3D)
+  if( histoParameters3D && IsCollect3DHistogram(iParticle))
   {
     histoParameters3D[0][iParticle][0]->Fill(Rapidity,Pt,M,1);
     histoParameters3D[0][iParticle][1]->Fill(Rapidity,M_t,M,1);
+    if(fCentralityBin>=0)
+    {
+      histoParameters3D[0][iParticle][2]->Fill(fCentralityBin, Pt, M, fCentralityWeight);
+      histoParameters3D[0][iParticle][3]->Fill(fCentralityBin, Rapidity, M, fCentralityWeight);
+      histoParameters3D[0][iParticle][4]->Fill(fCentralityBin, M_t, M, fCentralityWeight);
+    }
   }
   
   //Fill histograms for the side bands analysis
-  if(histoDSToParticleQA)
+  if(histoDSToParticleQA && IsCollect3DHistogram(iParticle))
   {
     if(fabs(fPartInfo.GetMass(iParticle)-M) < 3.f*fPartInfo.GetMassSigma(iParticle))//SignalReco
     {
@@ -1256,8 +1383,10 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
       
       if(drawZR)
       {
-        histoParameters2D[4][iParticle][1]->Fill(Z,R,1);
-        histoParameters2D[4][iParticle][2]->Fill(QtAlpha[1],QtAlpha[0],1);
+        if(histoParameters2D[4][iParticle][1])
+          histoParameters2D[4][iParticle][1]->Fill(Z,R,1);
+        if(histoParameters2D[4][iParticle][2])
+          histoParameters2D[4][iParticle][2]->Fill(QtAlpha[1],QtAlpha[0],1);
       }
     }
     
@@ -1275,12 +1404,16 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
       
       if(drawZR)
       {
-        histoParameters2D[5][iParticle][1]->Fill(Z,R,1);
-        histoParameters2D[5][iParticle][2]->Fill(QtAlpha[1],QtAlpha[0],1);
+        if(histoParameters2D[5][iParticle][1])
+          histoParameters2D[5][iParticle][1]->Fill(Z,R,1);
+        if(histoParameters2D[5][iParticle][2])
+          histoParameters2D[5][iParticle][2]->Fill(QtAlpha[1],QtAlpha[0],1);
       }
     }
   }
   
+  if(!fStoreMCHistograms) return;
+
   int iSet = 1;
   if(!RtoMCParticleId[iP].IsMatchedWithPdg()) //background
   {
@@ -1330,13 +1463,15 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
   histoParameters2D[iSet][iParticle][0]->Fill(Rapidity,Pt,1);
   if(drawZR)
   {
-    histoParameters2D[iSet][iParticle][1]->Fill(Z,R,1);
-    histoParameters2D[iSet][iParticle][2]->Fill(QtAlpha[1],QtAlpha[0],1);
+    if(histoParameters2D[iSet][iParticle][1])
+      histoParameters2D[iSet][iParticle][1]->Fill(Z,R,1);
+    if(histoParameters2D[iSet][iParticle][2])
+      histoParameters2D[iSet][iParticle][2]->Fill(QtAlpha[1],QtAlpha[0],1);
   }
   histoParameters2D[iSet][iParticle][3]->Fill(Rapidity,M_t,1);
   
   if(iSet != 1) return;
-
+  
   int iMCPart = RtoMCParticleId[iP].GetBestMatchWithPdg();
   KFMCParticle &mcPart = vMCParticles[iMCPart];
   // Fit quality of the mother particle
@@ -1562,63 +1697,65 @@ void KFTopoPerformance::FillHistos()
                            hFitQA, hFitDaughtersQA, hDSToParticleQA, multiplicities);
   }
   
-  for(int iSet=0; iSet<KFParticleFinder::GetNSecondarySets(); iSet++)
+  if(fStoreMCHistograms)
   {
-    const std::vector<KFParticle>& SecondaryCandidates = fTopoReconstructor->GetKFParticleFinder()->GetSecondaryCandidates()[iSet];
-    for(unsigned int iP=0; iP<SecondaryCandidates.size(); iP++)
+    for(int iSet=0; iSet<KFParticleFinder::GetNSecondarySets(); iSet++)
     {
-      KFParticle TempPart = SecondaryCandidates[iP];
-      int iParticle = fParteff.GetParticleIndex(TempPart.GetPDG());
-      if(iParticle < 0) continue;
-      
-      const int id = TempPart.Id();
-      FillParticleParameters(TempPart, iParticle, id, 0, hPartParamSecondaryMass, hPartParam2DSecondaryMass, 0);
-      
-      TempPart = fTopoReconstructor->GetParticles()[id];
-      FillParticleParameters(TempPart, iParticle, id, 0, hPartParamSecondary, hPartParam2DSecondary, 0);
-    }
-  }
-  
-  for(int iSet=0; iSet<KFParticleFinder::GetNPrimarySets(); iSet++)
-  {
-    for(int iPV=0; iPV<fTopoReconstructor->NPrimaryVertices(); iPV++)
-    {
-      const std::vector<KFParticle>& PrimaryCandidates = fTopoReconstructor->GetKFParticleFinder()->GetPrimaryCandidates()[iSet][iPV];
-      for(unsigned int iP=0; iP<PrimaryCandidates.size(); iP++)
+      const std::vector<KFParticle>& SecondaryCandidates = fTopoReconstructor->GetKFParticleFinder()->GetSecondaryCandidates()[iSet];
+      for(unsigned int iP=0; iP<SecondaryCandidates.size(); iP++)
       {
-        KFParticle TempPart =  PrimaryCandidates[iP];
+        KFParticle TempPart = SecondaryCandidates[iP];
         int iParticle = fParteff.GetParticleIndex(TempPart.GetPDG());
         if(iParticle < 0) continue;
         
         const int id = TempPart.Id();
-        FillParticleParameters(TempPart,iParticle, id, iPV, hPartParamPrimaryMass, hPartParam2DPrimaryMass, 0, hFitQAMassConstraint);
+        FillParticleParameters(TempPart, iParticle, id, 0, hPartParamSecondaryMass, hPartParam2DSecondaryMass, 0);
         
         TempPart = fTopoReconstructor->GetParticles()[id];
-        FillParticleParameters(TempPart,iParticle, id, iPV, hPartParamPrimary, hPartParam2DPrimary, 0, hFitQANoConstraint);
+        FillParticleParameters(TempPart, iParticle, id, 0, hPartParamSecondary, hPartParam2DSecondary, 0);
       }
-      
-      const std::vector<KFParticle>& PrimaryCandidatesTopo = fTopoReconstructor->GetKFParticleFinder()->GetPrimaryTopoCandidates()[iSet][iPV];
-      for(unsigned int iP=0; iP<PrimaryCandidatesTopo.size(); iP++)
+    }
+    
+    for(int iSet=0; iSet<KFParticleFinder::GetNPrimarySets(); iSet++)
+    {
+      for(int iPV=0; iPV<fTopoReconstructor->NPrimaryVertices(); iPV++)
       {
-        KFParticle TempPart =  PrimaryCandidatesTopo[iP];
-        int iParticle = fParteff.GetParticleIndex(TempPart.GetPDG());
-        if(iParticle < 0) continue;
+        const std::vector<KFParticle>& PrimaryCandidates = fTopoReconstructor->GetKFParticleFinder()->GetPrimaryCandidates()[iSet][iPV];
+        for(unsigned int iP=0; iP<PrimaryCandidates.size(); iP++)
+        {
+          KFParticle TempPart =  PrimaryCandidates[iP];
+          int iParticle = fParteff.GetParticleIndex(TempPart.GetPDG());
+          if(iParticle < 0) continue;
+          
+          const int id = TempPart.Id();
+          FillParticleParameters(TempPart,iParticle, id, iPV, hPartParamPrimaryMass, hPartParam2DPrimaryMass, 0, hFitQAMassConstraint);
+          
+          TempPart = fTopoReconstructor->GetParticles()[id];
+          FillParticleParameters(TempPart,iParticle, id, iPV, hPartParamPrimary, hPartParam2DPrimary, 0, hFitQANoConstraint);
+        }
         
-        FillParticleParameters(TempPart,iParticle, TempPart.Id(), iPV, hPartParamPrimaryTopo, hPartParam2DPrimaryTopo, 0, hFitQATopoConstraint);
-      }
-      
-      const std::vector<KFParticle>& PrimaryCandidatesTopoMass = fTopoReconstructor->GetKFParticleFinder()->GetPrimaryTopoMassCandidates()[iSet][iPV];
-      for(unsigned int iP=0; iP<PrimaryCandidatesTopoMass.size(); iP++)
-      {
-        KFParticle TempPart =  PrimaryCandidatesTopoMass[iP];
-        int iParticle = fParteff.GetParticleIndex(TempPart.GetPDG());
-        if(iParticle < 0) continue;
+        const std::vector<KFParticle>& PrimaryCandidatesTopo = fTopoReconstructor->GetKFParticleFinder()->GetPrimaryTopoCandidates()[iSet][iPV];
+        for(unsigned int iP=0; iP<PrimaryCandidatesTopo.size(); iP++)
+        {
+          KFParticle TempPart =  PrimaryCandidatesTopo[iP];
+          int iParticle = fParteff.GetParticleIndex(TempPart.GetPDG());
+          if(iParticle < 0) continue;
+          
+          FillParticleParameters(TempPart,iParticle, TempPart.Id(), iPV, hPartParamPrimaryTopo, hPartParam2DPrimaryTopo, 0, hFitQATopoConstraint);
+        }
         
-        FillParticleParameters(TempPart,iParticle, TempPart.Id(), iPV, hPartParamPrimaryTopoMass, hPartParam2DPrimaryTopoMass, 0, hFitQATopoMassConstraint);
+        const std::vector<KFParticle>& PrimaryCandidatesTopoMass = fTopoReconstructor->GetKFParticleFinder()->GetPrimaryTopoMassCandidates()[iSet][iPV];
+        for(unsigned int iP=0; iP<PrimaryCandidatesTopoMass.size(); iP++)
+        {
+          KFParticle TempPart =  PrimaryCandidatesTopoMass[iP];
+          int iParticle = fParteff.GetParticleIndex(TempPart.GetPDG());
+          if(iParticle < 0) continue;
+          
+          FillParticleParameters(TempPart,iParticle, TempPart.Id(), iPV, hPartParamPrimaryTopoMass, hPartParam2DPrimaryTopoMass, 0, hFitQATopoMassConstraint);
+        }
       }
     }
   }
-    
   //fill histograms with ChiPrim for every particle
   for(unsigned int iP=0; iP<fTopoReconstructor->GetParticles().size(); iP++)
   {
@@ -1878,11 +2015,17 @@ void KFTopoPerformance::FillHistos()
     }
   }
   
-  for(int iV=0; iV<6; iV++)
+  if(fStoreMCHistograms)
+  {
+    for(int iV=0; iV<6; iV++)
+      for(int iP=0; iP < KFPartEfficiencies::nParticles; iP++)
+        if(hPartParam[iV][iP][17])
+          hPartParam[iV][iP][17]->Fill(multiplicities[iV][iP]);
+    FillMCHistos();
+  }
+  else
     for(int iP=0; iP < KFPartEfficiencies::nParticles; iP++)
-      hPartParam[iV][iP][17]->Fill(multiplicities[iV][iP]);
-    
-  FillMCHistos();
+      hPartParam[0][iP][17]->Fill(multiplicities[0][iP]);  
 } // void KFTopoPerformance::FillHistos()
 
 void KFTopoPerformance::FillMCHistos()
@@ -1930,43 +2073,40 @@ void KFTopoPerformance::FillMCHistos()
     hPartParam2D[6][iPDG][0]->Fill(Rapidity,Pt,1);
     hPartParam2D[6][iPDG][3]->Fill(Rapidity,M_t,1);
     
-    bool drawZR = (iPDG<5) || (iPDG==41);
-    if(drawZR)
-    {
+    if(IsCollectZRHistogram(iPDG))
       hPartParam2D[6][iPDG][1]->Fill(Z,R,1);
-      
-      if( part.IsReconstructable(2) )
+    
+    if( part.IsReconstructable(2) && IsCollectArmenteros(iPDG))
+    {
+      int index1 = part.GetDaughterIds()[0];
+      int index2 = part.GetDaughterIds()[1];
+      KFMCTrack positive, negative;
+      if(vMCTracks[index1].Par(6) > 0)
       {
-        int index1 = part.GetDaughterIds()[0];
-        int index2 = part.GetDaughterIds()[1];
-        KFMCTrack positive, negative;
-        if(vMCTracks[index1].Par(6) > 0)
-        {
-          positive = vMCTracks[index1];
-          negative = vMCTracks[index2];
-        }
-        else
-        {
-          negative = vMCTracks[index1];
-          positive = vMCTracks[index2];
-        }
+        positive = vMCTracks[index1];
+        negative = vMCTracks[index2];
+      }
+      else
+      {
+        negative = vMCTracks[index1];
+        positive = vMCTracks[index2];
+      }
 
-        float alpha = 0., qt = 0.;
-        float spx = positive.Px() + negative.Px();
-        float spy = positive.Py() + negative.Py();
-        float spz = positive.Pz() + negative.Pz();
-        float sp  = sqrt(spx*spx + spy*spy + spz*spz);
-        float pn, pln, plp;
-        pn = sqrt(negative.Px()*negative.Px() + negative.Py()*negative.Py() + negative.Pz()*negative.Pz());
-        pln  = (negative.Px()*spx+negative.Py()*spy+negative.Pz()*spz)/sp;
-        plp  = (positive.Px()*spx+positive.Py()*spy+positive.Pz()*spz)/sp;
-        float ptm  = (1.-((pln/pn)*(pln/pn)));
-        qt= (ptm>=0.)?  pn*sqrt(ptm) :0;
-        alpha = (plp-pln)/(plp+pln);
-        
-        hPartParam2D[6][iPDG][2]->Fill(alpha,qt,1);
-      }  
-    }
+      float alpha = 0., qt = 0.;
+      float spx = positive.Px() + negative.Px();
+      float spy = positive.Py() + negative.Py();
+      float spz = positive.Pz() + negative.Pz();
+      float sp  = sqrt(spx*spx + spy*spy + spz*spz);
+      float pn, pln, plp;
+      pn = sqrt(negative.Px()*negative.Px() + negative.Py()*negative.Py() + negative.Pz()*negative.Pz());
+      pln  = (negative.Px()*spx+negative.Py()*spy+negative.Pz()*spz)/sp;
+      plp  = (positive.Px()*spx+positive.Py()*spy+positive.Pz()*spz)/sp;
+      float ptm  = (1.-((pln/pn)*(pln/pn)));
+      qt= (ptm>=0.)?  pn*sqrt(ptm) :0;
+      alpha = (plp-pln)/(plp+pln);
+      
+      hPartParam2D[6][iPDG][2]->Fill(alpha,qt,1);
+    }  
   }
 }
 

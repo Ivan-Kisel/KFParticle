@@ -63,7 +63,7 @@ class KFParticleTopoReconstructor{
 #ifdef KFPWITHTRACKER
   void Init(AliHLTTPCCAGBTracker* tracker, vector<int>* pdg=0); // init array of particles
 #endif
-  void Init(vector<KFParticle> &particles, vector<int>* pdg=0);
+  void Init(vector<KFParticle> &particles, vector<int>* pdg=0, vector<int>* nPixelHits=0);
   void Init(const KFPTrackVector *particles, const std::vector<KFParticle>& pv);
   void Init(KFPTrackVector &tracks, KFPTrackVector &tracksAtLastPoint);
 
@@ -87,11 +87,16 @@ class KFParticleTopoReconstructor{
   vector<int>& GetPVTrackIndexArray(int iPV=0) const { return fKFParticlePVReconstructor->GetPVTrackIndexArray(iPV); }
   
   vector<KFParticle> const &GetParticles() const { return fParticles; }
+  void RemoveParticle(const unsigned int iParticle) { if(iParticle>=0 && iParticle<fParticles.size()) fParticles[iParticle].SetPDG(-1); } 
   const KFPTrackVector* GetTracks() const { return fTracks; }
   const kfvector_float* GetChiPrim() const { return fChiToPrimVtx; }
   
+  KFParticleFinder* GetKFParticleFinder() { return fKFParticleFinder; }
   const KFParticleFinder* GetKFParticleFinder() const { return fKFParticleFinder; }
   
+  void CleanPV() {
+    fKFParticlePVReconstructor->CleanPV();
+  }
   void AddPV(const KFVertex &pv, const vector<int> &tracks) { 
     fKFParticlePVReconstructor->AddPV(pv,tracks);
     KFParticle pvPart=pv;
@@ -103,6 +108,13 @@ class KFParticleTopoReconstructor{
     KFParticle pvPart=pv;
     fPV.push_back(pvPart);
     fKFParticleFinder->SetNPV(fPV.size());
+  }
+  void FillPVIndices()
+  {
+    if(fTracks)
+      for(int iPV=0; iPV<NPrimaryVertices(); iPV++)
+        for(unsigned int iPVTrack=0; iPVTrack<GetPVTrackIndexArray(iPV).size(); iPVTrack++)
+          fTracks[0].SetPVIndex(iPV,GetPVTrackIndexArray(iPV)[iPVTrack]);
   }
   void AddParticle(const KFParticle& particle) { fParticles.push_back(particle); }
   void AddCandidate(const KFParticle& candidate, int iPV = -1) { fKFParticleFinder->AddCandidate(candidate, iPV); }
@@ -125,9 +137,12 @@ class KFParticleTopoReconstructor{
   
   void SetChi2PrimaryCut(float chi) {
     fKFParticlePVReconstructor->SetChi2PrimaryCut(chi); 
-    fKFParticleFinder->Set2DCuts(chi);
+    fKFParticleFinder->SetChiPrimaryCut2D(chi);
   }
   
+  void GetListOfDaughterTracks(const KFParticle& particle, vector<int>& daughters);
+  bool ParticleHasRepeatingDaughters(const KFParticle& particle);
+
   const KFParticleTopoReconstructor &operator=(const KFParticleTopoReconstructor& a)
   {
     fKFParticlePVReconstructor = 0;

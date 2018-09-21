@@ -100,7 +100,7 @@ void KFPEmcCluster::SetTracks(const KFPEmcCluster& track, const kfvector_uint& t
     }
     const uint_v& index = reinterpret_cast<const uint_v&>(trackIndex[iElement]);
     int_v& vec = reinterpret_cast<int_v&>(fId[iElement]);
-    vec.gather(&(track.fId[0]), index, float_m(iElement+uint_v::IndexesFromZero()<nIndexes));
+    vec.gather(&(track.fId[0]), index, int_m(iElement+uint_v::IndexesFromZero()<nIndexes));
   }
 }
 

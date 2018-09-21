@@ -46,7 +46,7 @@ class TH1;
 class TH1F;
 class TH2F;
 class TH3F;
-class TFile;
+class TDirectory;
 
 class KFParticle;
 class TProfile;
@@ -65,11 +65,13 @@ class KFParticlePerformanceBase
   virtual ~KFParticlePerformanceBase(){};
     
     /// Histograms
-  virtual void CreateHistos(string histoDir = "", TFile* outFile = 0);
+  virtual void CreateHistos(string histoDir = "", TDirectory* outFile = 0);
 #ifndef KFPWITHTRACKER
   TDirectory* GetHistosDirectory() { return fHistoDir; }
 #endif
 
+  void DoNotStoreMCHistograms() { fStoreMCHistograms = 0; }
+  
 // efficiencies
   KFPartEfficiencies fParteff;
   KFPVEfficiencies fPVeff;
@@ -90,6 +92,7 @@ class KFParticlePerformanceBase
   TDirectory* histodir;
 
   int fNEvents;
+  bool fStoreMCHistograms;
 
 //histos
   static const int nFitQA = 16;
@@ -122,8 +125,8 @@ class KFParticlePerformanceBase
   TH2F *hPartParam2DSecondary[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D];
   TH2F *hPartParam2DSecondaryMass[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D];
 
-  static const int nHistoPartParam3D = 2;
-  TH3F *hPartParam3D[1][KFPartEfficiencies::nParticles][nHistoPartParam3D]; // y-pt-M, y-mt-M
+  static const int nHistoPartParam3D = 5;
+  TH3F *hPartParam3D[1][KFPartEfficiencies::nParticles][nHistoPartParam3D]; // y-pt-M, y-mt-M, b-pt-M, b-y-M, b-mt-M
 
   static const int nPartEfficiency = 9;
   //1 index - particle index, 2 - index of efficiency, 3 - histogram dependency (vs p, pt ..)
@@ -159,6 +162,10 @@ class KFParticlePerformanceBase
   void SetHistoCreated(bool v = 1) { fIsHistoCreated = v; }
 #endif
 
+  bool IsCollectZRHistogram(int iParticle) const;
+  bool IsCollect3DHistogram(int iParticle) const;
+  bool IsCollectArmenteros(int iParticle) const;
+  
  private:
   const KFParticlePerformanceBase& operator = (const KFParticlePerformanceBase&);
   KFParticlePerformanceBase(const KFParticlePerformanceBase&);

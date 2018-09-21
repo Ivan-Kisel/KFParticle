@@ -191,7 +191,7 @@ void KFParticleTopoReconstructor::Init(AliHLTTPCCAGBTracker* tracker, vector<int
       
       if(ok)
       {
-        short trackPDG = -1;  
+        int trackPDG = -1;  
         if(pdg)
           trackPDG = (*pdg)[iTr];
       
@@ -237,7 +237,7 @@ void KFParticleTopoReconstructor::Init(AliHLTTPCCAGBTracker* tracker, vector<int
 } // void KFParticleTopoReconstructor::Init(AliHLTTPCCAGBTracker* tracker)
 #endif
 
-void KFParticleTopoReconstructor::Init(vector<KFParticle> &particles, vector<int>* pdg)
+void KFParticleTopoReconstructor::Init(vector<KFParticle> &particles, vector<int>* pdg, vector<int>* nPixelHits)
 {
 #ifdef USE_TIMERS
   timer.Start();
@@ -261,20 +261,26 @@ void KFParticleTopoReconstructor::Init(vector<KFParticle> &particles, vector<int
   
   for(int iTr=0; iTr<nTracks; iTr++)
   {  
-    short trackPDG = -1;
+    int trackPDG = -1;
     if(pdg)
       trackPDG = (*pdg)[iTr];
+    
+    int npixelhits = 0;
+    if(nPixelHits)
+      npixelhits = nPixelHits->at(iTr);
     
     for(int iP=0; iP<6; iP++)
       fTracks[0].SetParameter(particles[iTr].Parameters()[iP], iP, iTr);
     for(int iC=0; iC<21; iC++)
       fTracks[0].SetCovariance(particles[iTr].CovarianceMatrix()[iC], iC, iTr);
-    fTracks[0].SetId(iTr, iTr);
+//     fTracks[0].SetId(iTr, iTr);
+    fTracks[0].SetId(particles[iTr].Id(), iTr);
     fTracks[0].SetPDG(trackPDG, iTr);
     fTracks[0].SetQ(particles[iTr].Q(), iTr);
     fTracks[0].SetPVIndex(-1, iTr);
+    fTracks[0].SetNPixelHits(npixelhits,iTr);
   }
-  
+
   fKFParticlePVReconstructor->Init( &fTracks[0], nTracks );
   
 #ifdef USE_TIMERS
@@ -617,13 +623,59 @@ void KFParticleTopoReconstructor::SelectParticleCandidates()
 
   for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
   {
-    KFParticle tmp = fParticles[iParticle];
     if(!UseParticleInCompetition(fParticles[iParticle].GetPDG())) continue;
-    tmp.SetProductionVertex(GetPrimVertex());
-    if(tmp.Chi2()/tmp.NDF()>3)
+    
+    bool isSecondary = 1;
+    for(int iPV=0; iPV<NPrimaryVertices(); iPV++)
+    {
+      KFParticle tmp = fParticles[iParticle];
+      tmp.SetProductionVertex(GetPrimVertex(iPV));
+      if(tmp.Chi2()/tmp.NDF()<5)
+        isSecondary=0;
+    }
+    if(isSecondary)
       deleteCandidate[iParticle] = true;
   }
+
+//   for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
+//   {
+//     if(abs(fParticles[iParticle].GetPDG()) == 431 || abs(fParticles[iParticle].GetPDG()) == 4122)
+//     {
+//       vector<int> daughterIds(fParticles[iParticle].NDaughters());
+//       for(int iDaughter=0; iDaughter<fParticles[iParticle].NDaughters(); iDaughter++)
+//         daughterIds[iDaughter] = fParticles[fParticles[iParticle].DaughterIds()[iDaughter]].DaughterIds()[0];
+//       std::sort(daughterIds.begin(), daughterIds.end());
+//       
+//       for(unsigned int jParticle=0; jParticle<fParticles.size(); jParticle++)
+//       {
+//         if(abs(fParticles[jParticle].GetPDG()) == 411)
+//         {
+//           vector<int> daughterIdsDPlus(fParticles[jParticle].NDaughters());
+//           for(int iDaughter=0; iDaughter<fParticles[jParticle].NDaughters(); iDaughter++)
+//             daughterIdsDPlus[iDaughter] = fParticles[fParticles[jParticle].DaughterIds()[iDaughter]].DaughterIds()[0];
+//           std::sort(daughterIdsDPlus.begin(), daughterIdsDPlus.end());
+//           
+//           if(daughterIdsDPlus.size() != daughterIds.size()) continue;
+//           
+//           bool isSameParticle=1;
+//           for(unsigned int iDaughter=0; iDaughter<daughterIds.size(); iDaughter++)
+//             isSameParticle &= daughterIds[iDaughter] == daughterIdsDPlus[iDaughter];
+//           if(!isSameParticle) continue; 
+//       
+//           float mass, massSigma;
+//           fParticles[jParticle].GetMass(mass, massSigma);
+//           
+//           if(fabs(mass - KFParticleDatabase::Instance()->GetDPlusMass()) < 3*KFParticleDatabase::Instance()->GetDPlusMassSigma())
+//           {
+//             deleteCandidate[iParticle] = true;
+//             break;
+//           }
+//         }
+//       }
+//     }
+//   }
   
+
   //clean K0 and Lambda
   for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
   {
@@ -856,10 +908,38 @@ void KFParticleTopoReconstructor::SelectParticleCandidates()
         break;
       }
   }
-  
+
   for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
     if(deleteCandidate[iParticle])
       fParticles[iParticle].SetPDG(-1);
+}
+
+bool KFParticleTopoReconstructor::ParticleHasRepeatingDaughters(const KFParticle& particle)
+{
+  if(particle.NDaughters() < 2) return 0;
+  
+  vector<int> daughters;
+  GetListOfDaughterTracks(particle, daughters);
+  std::sort(daughters.begin(), daughters.end());
+  bool sameDaughter=0;
+  for(unsigned int iDaughter=1; iDaughter<daughters.size(); iDaughter++)
+  {
+    if(daughters[iDaughter] == daughters[iDaughter-1])
+    {
+      sameDaughter = 1;
+      break;
+    }
+  }
+  return sameDaughter;
+}
+
+void KFParticleTopoReconstructor::GetListOfDaughterTracks(const KFParticle& particle, vector<int>& daughters)
+{
+  if(particle.NDaughters() == 1)
+    daughters.push_back( particle.DaughterIds()[0] );
+  else
+    for(int iDaughter=0; iDaughter<particle.NDaughters(); iDaughter++)
+      GetListOfDaughterTracks( fParticles[ particle.DaughterIds()[iDaughter] ], daughters);
 }
 
 void KFParticleTopoReconstructor::ReconstructParticles()
@@ -880,9 +960,13 @@ void KFParticleTopoReconstructor::ReconstructParticles()
   fKFParticleFinder->FindParticles(fTracks, fChiToPrimVtx, fParticles, fPV, fPV.size());
 // #pragma omp critical 
 //   std::cout << "NPart " << fParticles.size() << " " << fTracks[0].Size() << " "<< fTracks[1].Size() << " " << fTracks[2].Size() << " " << fTracks[3].Size()<< std::endl;
-
+    
+//   for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
+//     if(ParticleHasRepeatingDaughters(fParticles[iParticle]))
+//       fParticles[iParticle].SetPDG(-1);
+//     
 //   SelectParticleCandidates();
-  
+      
 #ifdef USE_TIMERS
   timer.Stop();
   fStatTime[3] = timer.RealTime();
