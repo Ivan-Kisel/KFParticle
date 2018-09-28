@@ -20,8 +20,7 @@ using std::vector;
 #include <iomanip>
 
 KFParticleFinder::KFParticleFinder():
-//  fNPV(-1),fNThreads(1),fCutCharmPt(0.2f),fCutCharmChiPrim(6.f),fCutLVMPt(0.2f),fCutLVMP(1.0f),fCutJPsiPt(1.0f),
-  fNPV(-1),fNThreads(1),fDistanceCut(1.f),fLCut(5.f),fCutCharmPt(0.6f),fCutCharmChiPrim(85.f),fCutLVMPt(0.0f),fCutLVMP(0.0f),fCutJPsiPt(1.0f),
+  fNPV(-1),fNThreads(1),fDistanceCut(1.f),fLCut(-5.f),fCutCharmPt(0.2f),fCutCharmChiPrim(85.f),fCutLVMPt(0.0f),fCutLVMP(0.0f),fCutJPsiPt(1.0f),
   fD0(0), fD0bar(0), fD04(0), fD04bar(0), fD0KK(0), fD0pipi(0), fDPlus(0), fDMinus(0), 
   fDPlus3Pi(0), fDMinus3Pi(0), fDsPlusK2Pi(0), fDsMinusK2Pi(0), fLcPlusP2Pi(0), fLcMinusP2Pi(0),
   fLPi(0), fLPiPIndex(0), fHe3Pi(0), fHe3PiBar(0), fHe4Pi(0), fHe4PiBar(0), 
@@ -656,13 +655,13 @@ inline void KFParticleFinder::ConstructV0(KFPTrackVector* vTracks,
   KFParticleSIMD negDaughter(vTracks[iTrTypeNeg],idNegDaughters, daughterNegPDG);
   trackId.gather( &(vTracks[iTrTypeNeg].Id()[0]), idNegDaughters );
   negDaughter.SetId(trackId);   
-
-//   float_v ds[2] = {0.f,0.f};
-//   float_v dsdr[4][6];
-//   negDaughter.GetDStoParticle( posDaughter, ds, dsdr );
-//   negDaughter.TransportToDS(ds[0], dsdr[0]);
-//   posDaughter.TransportToDS(ds[1], dsdr[3]);
-    
+#ifdef CBM
+  float_v ds[2] = {0.f,0.f};
+  float_v dsdr[4][6];
+  negDaughter.GetDStoParticle( posDaughter, ds, dsdr );
+  negDaughter.TransportToDS(ds[0], dsdr[0]);
+  posDaughter.TransportToDS(ds[1], dsdr[3]);
+#endif
   const KFParticleSIMD* vDaughtersPointer[2] = {&negDaughter, &posDaughter};
   mother.Construct(vDaughtersPointer, 2, 0);
   
@@ -886,8 +885,11 @@ inline void KFParticleFinder::SaveV0PrimSecCand(KFParticleSIMD& mother,
   }
   
   isPrim |= ( ( isPrimaryPart ) && (isK0 || isLambda || isGamma) );
+#ifdef __ROOT__
   isSec  |= ( (!isPrimaryPart ) && (isK0 || isLambda || isGamma) && (chi2TopoMin < float_v(500.f)) );
-//   isSec  |= ( (!isPrimaryPart ) && (isK0 || isLambda || isGamma) );
+#else
+  isSec  |= ( (!isPrimaryPart ) && (isK0 || isLambda || isGamma) );
+#endif
   
   mother.SetNonlinearMassConstraint(massMotherPDG);
 
@@ -1577,12 +1579,13 @@ void KFParticleFinder::ConstructTrackV0Cand(KFPTrackVector& vTracks,
                                    (abs(mother.PDG()) ==    int_v(3011)) );
   if( isSameParticle.isEmpty() )
   {
-//     float_v ds[2] = {0.f,0.f};
-//     float_v dsdr[4][6];
-//     track.GetDStoParticle( V0, ds, dsdr );
-//     track.TransportToDS(ds[0], dsdr[0]);
-//     V0.TransportToDS(ds[1], dsdr[3]);
-
+#ifdef CBM
+    float_v ds[2] = {0.f,0.f};
+    float_v dsdr[4][6];
+    track.GetDStoParticle( V0, ds, dsdr );
+    track.TransportToDS(ds[0], dsdr[0]);
+    V0.TransportToDS(ds[1], dsdr[3]);
+#endif
     const KFParticleSIMD* vDaughtersPointer[2] = {&track, &V0};
     mother.Construct(vDaughtersPointer, 2, 0);
   }

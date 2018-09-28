@@ -1321,7 +1321,7 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
   histoParameters2D[0][iParticle][3]->Fill(Rapidity,M_t,1);
   
   const bool drawZR = IsCollectZRHistogram(iParticle);
-  if(histoParameters2D[0][iParticle][1])
+  if(histoParameters2D[0][iParticle][1] && drawZR)
   {
     histoParameters2D[0][iParticle][1]->Fill(Z,R,1);
   }

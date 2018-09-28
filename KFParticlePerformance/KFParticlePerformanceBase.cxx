@@ -31,6 +31,101 @@ KFParticlePerformanceBase::KFParticlePerformanceBase():
   ,fHistoDir(0), fIsHistoCreated(0)
 #endif
 {
+  for(int iParticle=0; iParticle<KFPartEfficiencies::nParticles; iParticle++)
+  {
+    for(int iFitQA=0; iFitQA<nFitQA; iFitQA++)
+    {
+      hFitDaughtersQA         [iParticle][iFitQA] = NULL;
+      hFitQA                  [iParticle][iFitQA] = NULL;
+      hFitQANoConstraint      [iParticle][iFitQA] = NULL;
+      hFitQAMassConstraint    [iParticle][iFitQA] = NULL;
+      hFitQATopoConstraint    [iParticle][iFitQA] = NULL;
+      hFitQATopoMassConstraint[iParticle][iFitQA] = NULL;
+    }
+  }
+
+  for(int iParticle=0; iParticle<KFPartEfficiencies::nParticles; iParticle++)
+    for(int iQA=0; iQA<nDSToParticleQA; iQA++)
+      hDSToParticleQA[iParticle][iQA] = NULL;
+  
+  for(int iParameterSet=0; iParameterSet<nParametersSet; iParameterSet++)
+  {
+    for(int iParticle=0; iParticle<KFPartEfficiencies::nParticles; iParticle++)
+    {
+      for(int iHisto=0; iHisto<nHistoPartParam; iHisto++)
+      {
+        hPartParam               [iParameterSet][iParticle][iHisto] = NULL;
+        hPartParamPrimary        [iParameterSet][iParticle][iHisto] = NULL;
+        hPartParamPrimaryMass    [iParameterSet][iParticle][iHisto] = NULL;
+        hPartParamPrimaryTopo    [iParameterSet][iParticle][iHisto] = NULL;
+        hPartParamPrimaryTopoMass[iParameterSet][iParticle][iHisto] = NULL;
+        hPartParamSecondary      [iParameterSet][iParticle][iHisto] = NULL;
+        hPartParamSecondaryMass  [iParameterSet][iParticle][iHisto] = NULL;
+      }
+    }
+  }
+
+  for(int iParameterSet=0; iParameterSet<nParametersSet; iParameterSet++)
+  {
+    for(int iParticle=0; iParticle<KFPartEfficiencies::nParticles; iParticle++)
+    {
+      for(int iHisto=0; iHisto<nHistoPartParam2D; iHisto++)
+      {
+        hPartParam2D               [iParameterSet][iParticle][iHisto] = NULL;
+        hPartParam2DPrimary        [iParameterSet][iParticle][iHisto] = NULL;
+        hPartParam2DPrimaryMass    [iParameterSet][iParticle][iHisto] = NULL;
+        hPartParam2DPrimaryTopo    [iParameterSet][iParticle][iHisto] = NULL;
+        hPartParam2DPrimaryTopoMass[iParameterSet][iParticle][iHisto] = NULL;
+        hPartParam2DSecondary      [iParameterSet][iParticle][iHisto] = NULL;
+        hPartParam2DSecondaryMass  [iParameterSet][iParticle][iHisto] = NULL;
+      }
+    }
+  }
+
+  for(int iParticle=0; iParticle<KFPartEfficiencies::nParticles; iParticle++)
+    for(int iHisto=0; iHisto<nHistoPartParam3D; iHisto++)
+      hPartParam3D[0][iParticle][iHisto] = NULL;
+
+  for(int iParticle=0; iParticle<KFPartEfficiencies::nParticles; iParticle++)
+    for(int iEffSet=0; iEffSet<3; iEffSet++)
+      for(int iEff=0; iEff<nPartEfficiency; iEff++)
+        hPartEfficiency[iParticle][iEffSet][iEff] = NULL;
+        
+  for(int iParticle=0; iParticle<KFPartEfficiencies::nParticles; iParticle++)
+    for(int iEffSet=0; iEffSet<3; iEffSet++)
+      for(int iEff=0; iEff<nPartEfficiency2D; iEff++)
+        hPartEfficiency2D[iParticle][iEffSet][iEff] = NULL;
+  
+  for(int iEffSet=0; iEffSet<2; iEffSet++)
+    for(int iHistoPV=0; iHistoPV<nHistosPV; iHistoPV++)
+      hPVFitQa[iEffSet][iHistoPV] = NULL;
+
+  for(int iEffSet1=0; iEffSet1<2; iEffSet1++)
+    for(int iEffSet2=0; iEffSet2<2; iEffSet2++)
+      for(int iHistoPV=0; iHistoPV<nHistosPV-1; iHistoPV++)
+        hPVFitQa2D[iEffSet1][iEffSet2][iHistoPV] = NULL;
+
+  for(int iParam=0; iParam<nHistosPVParam; iParam++)
+  {
+    hPVParam      [iParam] = NULL;
+    hPVParamGhost [iParam] = NULL;
+    hPVParamSignal[iParam] = NULL;
+    hPVParamPileup[iParam] = NULL;
+    hPVParamBG    [iParam] = NULL;
+  }
+  
+  for(int iParam=0; iParam<nHistosPVParam2D; iParam++)
+    hPVParam2D[iParam] = NULL;
+  
+  for(int iFitQA=0; iFitQA<nFitPVTracksQA; iFitQA++)
+    hFitPVTracksQA[iFitQA] = NULL;
+  
+  for(int iTP=0; iTP<nHistosTP; iTP++)
+    hTrackParameters[iTP] = NULL;
+
+  for(int iEffSet=0; iEffSet<4; iEffSet++)
+    for(int iEff=0; iEff<nPVefficiency; iEff++)
+      hPVefficiency[iEffSet][iEff] = NULL;
 }
 
 void KFParticlePerformanceBase::CreateHistos(string histoDir, TDirectory* outFile)
@@ -725,6 +820,8 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
     histoParameters2D[iPart][1]->GetXaxis()->SetTitle("Z [cm]");
     histoParameters2D[iPart][1]->GetYaxis()->SetTitle("R [cm]");
   }
+  else
+    histoParameters2D[iPart][1] = NULL;
   
   //create armenteros plot
   if(IsCollectArmenteros(iPart))
@@ -735,6 +832,8 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
     histoParameters2D[iPart][2]->GetXaxis()->SetTitle("#alpha (p_{L}^{+}-p_{L}^{-})/(p_{L}^{+}+p_{L}^{-})");
     histoParameters2D[iPart][2]->GetYaxis()->SetTitle("q_{t} [GeV/c]");
   }
+  else
+    histoParameters2D[iPart][2] = NULL;
   //create y-mt plot
   histoParameters2D[iPart][3] = new TH2F(parName2D[3].Data(),parTitle2D[3].Data(),
                                          nBins[3],xMin[3], xMax[3],     //y
@@ -772,6 +871,13 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
       histoParameters3D[iPart][2+iCH]->GetYaxis()->SetTitle(parAxisName[centralityHisto[iCH]]);
       histoParameters3D[iPart][2+iCH]->GetZaxis()->SetTitle("M");
     }
+  }
+  else if(histoParameters3D)
+  {
+    histoParameters3D[iPart][0] = NULL;
+    histoParameters3D[iPart][1] = NULL;
+    for(int iCH = 0; iCH<3; iCH++)
+      histoParameters3D[iPart][2+iCH] = NULL;
   }
 }
 
