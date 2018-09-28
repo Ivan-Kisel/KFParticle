@@ -892,18 +892,18 @@ bool KFParticlePerformanceBase::IsCollectZRHistogram(int iParticle) const
 
 bool KFParticlePerformanceBase::IsCollect3DHistogram(int iParticle) const
 {
-//   return abs(fParteff.partPDG[iParticle]) == 310 ||
-//          abs(fParteff.partPDG[iParticle]) == 3122 ||
-//          abs(fParteff.partPDG[iParticle]) == 3312 ||
-//          abs(fParteff.partPDG[iParticle]) == 3334 ||
-// #ifdef CBM
-//          abs(fParteff.partPDG[iParticle]) == 7003112 ||
-//          abs(fParteff.partPDG[iParticle]) == 7003222 ||
-//          abs(fParteff.partPDG[iParticle]) == 7003312 ||
-//          abs(fParteff.partPDG[iParticle]) == 8003222 ||
-//          abs(fParteff.partPDG[iParticle]) == 9000321;
-// #else
-  return abs(fParteff.partPDG[iParticle]) == 421 ||
+  return abs(fParteff.partPDG[iParticle]) == 310 ||
+         abs(fParteff.partPDG[iParticle]) == 3122 ||
+         abs(fParteff.partPDG[iParticle]) == 3312 ||
+         abs(fParteff.partPDG[iParticle]) == 3334 ||
+#ifdef CBM
+         abs(fParteff.partPDG[iParticle]) == 7003112 ||
+         abs(fParteff.partPDG[iParticle]) == 7003222 ||
+         abs(fParteff.partPDG[iParticle]) == 7003312 ||
+         abs(fParteff.partPDG[iParticle]) == 8003222 ||
+         abs(fParteff.partPDG[iParticle]) == 9000321;
+#else
+         abs(fParteff.partPDG[iParticle]) == 421 ||
          abs(fParteff.partPDG[iParticle]) == 429 ||
          abs(fParteff.partPDG[iParticle]) == 426 ||
          abs(fParteff.partPDG[iParticle]) == 411 ||
@@ -911,7 +911,7 @@ bool KFParticlePerformanceBase::IsCollect3DHistogram(int iParticle) const
          abs(fParteff.partPDG[iParticle]) == 4122 ||
          abs(fParteff.partPDG[iParticle]) == 521 ||
          abs(fParteff.partPDG[iParticle]) == 511;
-// #endif
+#endif
 }
 
 bool KFParticlePerformanceBase::IsCollectArmenteros(int iParticle) const
