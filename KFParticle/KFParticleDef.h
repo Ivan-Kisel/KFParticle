@@ -77,10 +77,10 @@ namespace KFPMath
   {
     const float_v pi(3.1415926535897932f);
     const float_v nTurnsF = (phi + pi) / (float_v(2.f)*pi);
-    int_v nTurns = int_v( nTurnsF );
-    nTurns( (nTurns<=int_v(Vc::Zero)) && int_m(phi<-pi)) -= 1;
+    int_v nTurns = simd_cast<int_v>( nTurnsF );
+    nTurns( (nTurns<=int_v(Vc::Zero)) && simd_cast<int_m>(phi<-pi)) -= 1;
     
-    const float_v& x = phi - float_v(nTurns)*(float_v(2.f)*pi);
+    const float_v& x = phi - simd_cast<float_v>(nTurns)*(float_v(2.f)*pi);
     
     const float_v& B = 4.f/pi;
     const float_v& C = -B/pi;
