@@ -162,6 +162,8 @@ class KFParticleTopoReconstructor{
     ;
   }
   
+  //copy cuts from KF Particle Finder of another topology reconstructor object
+  void CopyCuts(const KFParticleTopoReconstructor* topo) { fKFParticleFinder->CopyCuts(topo->fKFParticleFinder); }
  private:
 
   void GetChiToPrimVertex(KFParticleSIMD* pv, const int nPV);

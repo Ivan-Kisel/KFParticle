@@ -246,6 +246,63 @@ class KFParticleFinder
   void SetChi2TopoCutCharm2D(float cut) { fCutsCharm[2] = cut; }
   void SetChi2CutCharm2D(float cut)     { fCutsCharm[0] = cut; }
   
+  void CopyCuts(const KFParticleFinder* finder)
+  {
+    fDistanceCut = finder->fDistanceCut;
+    fLCut = finder->fLCut;
+    for(int iCut=0; iCut<3; iCut++)
+      fCuts2D[iCut] = finder->fCuts2D[iCut];
+    for(int iCut=0; iCut<3; iCut++)
+      fSecCuts[iCut] = finder->fSecCuts[iCut];
+    for(int iCut=0; iCut<3; iCut++)
+      for(int jCut=0; jCut<3; jCut++)
+        fCutsTrackV0[iCut][jCut] = finder->fCutsTrackV0[iCut][jCut];
+    for(int iCut=0; iCut<2; iCut++)
+      for(int jCut=0; jCut<3; jCut++)
+        fCutsPartPart[iCut][jCut] = finder->fCutsPartPart[iCut][jCut];
+    fCutCharmPt = finder->fCutCharmPt;
+    fCutCharmChiPrim = finder->fCutCharmChiPrim;
+    for(int iCut=0; iCut<3; iCut++)
+      fCutsCharm[iCut] = finder->fCutsCharm[iCut];  
+    fCutLVMPt = finder->fCutLVMPt;
+    fCutLVMP = finder->fCutLVMP;
+    fCutJPsiPt = finder->fCutJPsiPt;
+  }
+  
+  //Functionality to check the cuts
+  const float GetMaxDistanceBetweenParticlesCut() const { return fDistanceCut; }
+  const float GetLCut() const { return fLCut; }
+  
+  const float GetChiPrimaryCut2D() const { return fCuts2D[0]; }
+  const float GetChi2Cut2D()       const { return fCuts2D[1]; }
+  const float GetLdLCut2D()        const { return fCuts2D[2]; }
+  
+  const float GetSecondarySigmaMassCut() const { return fSecCuts[0]; }
+  const float GetSecondaryChi2TopoCut()  const { return fSecCuts[1]; }
+  const float GetSecondaryLdLCut()       const { return fSecCuts[2]; }
+  
+  const float GetLdLCutXiOmega()      const { return fCutsTrackV0[0][0]; }
+  const float GetChi2TopoCutXiOmega() const { return fCutsTrackV0[0][1]; }
+  const float GetChi2CutXiOmega()     const { return fCutsTrackV0[0][2]; }
+
+  const float GetChi2TopoCutResonances() const { return fCutsTrackV0[2][1]; }
+  const float GetChi2CutResonances()     const { return fCutsTrackV0[2][2]; }
+
+  const float GetPtCutLMVM() const { return fCutLVMPt; }
+  const float GetPCutLMVM()  const { return fCutLVMP; }
+  const float GetPtCutJPsi() const { return fCutJPsiPt; }
+  
+  const float GetPtCutCharm()         const { return fCutCharmPt; }
+  const float GetChiPrimaryCutCharm() const { return fCutCharmChiPrim; }
+  const float GetLdLCutCharmManybodyDecays()      const { return fCutsTrackV0[1][0]; }
+  const float GetChi2TopoCutCharmManybodyDecays() const { return fCutsTrackV0[1][1]; }
+  const float GetChi2CutCharmManybodyDecays()     const { return fCutsTrackV0[1][2]; }
+
+  const float GetLdLCutCharm2D()      const { return fCutsCharm[1]; }
+  const float GetChi2TopoCutCharm2D() const { return fCutsCharm[2]; }
+  const float GetChi2CutCharm2D()     const { return fCutsCharm[0]; }
+  
+  //Add decay to the reconstruction list. If at least one is added - only these channels are considered. Otherwise - all decays are reconstructed.
   void AddDecayToReconstructionList(int pdg) { fDecayReconstructionList[pdg] = true; }
     
  private:
