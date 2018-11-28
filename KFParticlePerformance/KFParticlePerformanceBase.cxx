@@ -560,6 +560,27 @@ void KFParticlePerformanceBase::CreateFitHistograms(TH1F* histo[nFitQA], int iPa
   TString res = "res";
   TString pull = "pull";
   
+  TString AxisNameResidual[nFitQA/2];
+  TString AxisNamePull[nFitQA/2];
+
+  AxisNameResidual[0] = "Residual (x^{reco} - x^{mc}) [cm]";
+  AxisNameResidual[1] = "Residual (y^{reco} - y^{mc}) [cm]";
+  AxisNameResidual[2] = "Residual (z^{reco} - z^{mc}) [cm]";
+  AxisNameResidual[3] = "Residual (P_{x}^{reco} - P_{x}^{mc}) [GeV/c]";
+  AxisNameResidual[4] = "Residual (P_{y}^{reco} - P_{y}^{mc}) [GeV/c]";
+  AxisNameResidual[5] = "Residual (P_{z}^{reco} - P_{z}^{mc}) [GeV/c]";
+  AxisNameResidual[6] = "Residual (E^{reco} - E^{mc}) [GeV/c^{2}]";
+  AxisNameResidual[7] = "Residual (M^{reco} - M^{mc}) [GeV/c^{2}]"; 
+
+  AxisNamePull[0] = "Pull x";
+  AxisNamePull[1] = "Pull y";
+  AxisNamePull[2] = "Pull z";
+  AxisNamePull[3] = "Pull P_{x}";
+  AxisNamePull[4] = "Pull P_{y}";
+  AxisNamePull[5] = "Pull P_{z}";
+  AxisNamePull[6] = "Pull E";
+  AxisNamePull[7] = "Pull M";
+  
   gDirectory->mkdir("FitQA");
   gDirectory->cd("FitQA");
   {
@@ -594,13 +615,16 @@ void KFParticlePerformanceBase::CreateFitHistograms(TH1F* histo[nFitQA], int iPa
         mult[iMult] = 4;
     }
     
-    for( int iH=0; iH<nFitQA/2; iH++ ){
+    for( int iH=0; iH<nFitQA/2; iH++ )
+    {
       histo[iH]   = new TH1F((res+parName[iH]).Data(),
                              (GetDirectoryPath()+res+parName[iH]).Data(), 
                              nBins, -mult[iH]*xMax[iH],mult[iH]*xMax[iH]);
+      histo[iH]->GetXaxis()->SetTitle(AxisNameResidual[iH].Data());
       histo[iH+8] = new TH1F((pull+parName[iH]).Data(),
                              (GetDirectoryPath()+pull+parName[iH]).Data(), 
                              nBins, -6,6);
+      histo[iH+8]->GetXaxis()->SetTitle(AxisNamePull[iH+8].Data());
     }
   }
   gDirectory->cd("..");

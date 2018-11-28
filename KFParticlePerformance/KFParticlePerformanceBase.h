@@ -72,6 +72,9 @@ class KFParticlePerformanceBase
 
   void DoNotStoreMCHistograms() { fStoreMCHistograms = 0; }
   
+  const TH1F* GetDecayResidual(const int iDecay, const int iParameter) const { return hFitQA[iDecay][iParameter];          }
+  const TH1F* GetDecayPull(const int iDecay, const int iParameter)     const { return hFitQA[iDecay][iParameter+nFitQA/2]; }
+  
 // efficiencies
   KFPartEfficiencies fParteff;
   KFPVEfficiencies fPVeff;
