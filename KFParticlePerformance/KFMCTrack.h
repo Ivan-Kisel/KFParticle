@@ -26,7 +26,7 @@ using std::istream;
 class KFMCTrack
 {
  public:
-  KFMCTrack():fMotherId(-1),fPDG(0),fNMCPoints(0),fIsReconstructed(0),fIsOutOfDetector(0) {};
+  KFMCTrack():fMotherId(-1),fPDG(0),fNMCPoints(0), fNMCPixelPoints(0), fIsReconstructed(0),fIsOutOfDetector(0) {};
 
   int MotherId()          const { return fMotherId; }
   int    PDG()            const { return fPDG;}

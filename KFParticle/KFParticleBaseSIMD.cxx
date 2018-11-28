@@ -1471,7 +1471,7 @@ float_v KFParticleBaseSIMD::GetDStoPointBz( float_v B, const float_v xyz[3], flo
   const float_v& pz = param[5];
   
   const float_v kCLight = 0.000299792458f;
-  float_v bq = B*float_v(fQ)*kCLight;
+  float_v bq = B*simd_cast<float_v>(fQ)*kCLight;
   float_v pt2 = param[3]*param[3] + param[4]*param[4];
   float_v p2 = pt2 + param[5]*param[5];  
   
@@ -1536,7 +1536,8 @@ float_v KFParticleBaseSIMD::GetDStoPointBz( float_v B, const float_v xyz[3], flo
   dS(!mask) += sz;
   
   bs= bq*dS;
-  s = sin(bs), c = cos(bs);
+  s = sin(bs);
+  c = cos(bs);
   
   float_v sB, cB;
   const float_v kOvSqr6 = 1.f/sqrt(float_v(6.f));
@@ -1607,8 +1608,8 @@ void KFParticleBaseSIMD::GetMaxDistanceToParticleBz(const float_v& B, const KFPa
   //* Get maxium distance between to particles in XY plane
   const float_v kCLight = 0.000299792458f;
   
-  const float_v& bq1 = B*float_v(fQ)*kCLight;
-  const float_v& bq2 = B*float_v(p.fQ)*kCLight;
+  const float_v& bq1 = B*simd_cast<float_v>(fQ)*kCLight;
+  const float_v& bq2 = B*simd_cast<float_v>(p.fQ)*kCLight;
   const float_m& isStraight1 = abs(bq1) < float_v(1.e-8f);
   const float_m& isStraight2 = abs(bq2) < float_v(1.e-8f);
   
@@ -1660,8 +1661,8 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
 
   //in XY plane
   //first root    
-  const float_v& bq1 = B*float_v(fQ)*kCLight;
-  const float_v& bq2 = B*float_v(p.fQ)*kCLight;
+  const float_v& bq1 = B*simd_cast<float_v>(fQ)*kCLight;
+  const float_v& bq2 = B*simd_cast<float_v>(p.fQ)*kCLight;
 
   const float_m& isStraight1 = abs(bq1) < float_v(1.e-8f);
   const float_m& isStraight2 = abs(bq2) < float_v(1.e-8f);
@@ -2319,8 +2320,8 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
 
   //in XY plane
   //first root    
-  const float_v& bq1 = B*float_v(fQ)*kCLight;
-  const float_v& bq2 = B*float_v(p.fQ)*kCLight;
+  const float_v& bq1 = B*simd_cast<float_v>(fQ)*kCLight;
+  const float_v& bq2 = B*simd_cast<float_v>(p.fQ)*kCLight;
 
   const float_m& isStraight1 = abs(bq1) < float_v(1.e-8f);
   const float_m& isStraight2 = abs(bq2) < float_v(1.e-8f);
@@ -2745,8 +2746,8 @@ void KFParticleBaseSIMD::GetDStoParticleCBM( const KFParticleBaseSIMD &p, float_
   float_v fld[3];
   GetFieldValue( fP, fld );
 
-  const float_v& bq1 = fld[1]*float_v(fQ);
-  const float_v& bq2 = fld[1]*float_v(p.fQ);
+  const float_v& bq1 = fld[1]*simd_cast<float_v>(fQ);
+  const float_v& bq2 = fld[1]*simd_cast<float_v>(p.fQ);
   const float_m& isStraight1 = abs(bq1) < float_v(1.e-8f);
   const float_m& isStraight2 = abs(bq2) < float_v(1.e-8f);
   
@@ -2763,8 +2764,8 @@ void KFParticleBaseSIMD::GetDStoParticleCBM( const KFParticleBaseSIMD &p, float_
   float_v fld[3];
   GetFieldValue( fP, fld );
 
-  const float_v& bq1 = fld[1]*float_v(fQ);
-  const float_v& bq2 = fld[1]*float_v(p.fQ);
+  const float_v& bq1 = fld[1]*simd_cast<float_v>(fQ);
+  const float_v& bq2 = fld[1]*simd_cast<float_v>(p.fQ);
   const float_m& isStraight1 = abs(bq1) < float_v(1.e-8f);
   const float_m& isStraight2 = abs(bq2) < float_v(1.e-8f);
   
@@ -2785,7 +2786,7 @@ void KFParticleBaseSIMD::TransportCBM( float_v dS, const float_v* dsdr, float_v 
 
   const float_v kCLight = 0.000299792458f;
 
-  float_v c = float_v(fQ)*kCLight;
+  float_v c = simd_cast<float_v>(fQ)*kCLight;
 
   // construct coefficients 
 
@@ -2970,7 +2971,7 @@ void KFParticleBaseSIMD::TransportCBM( float_v dS, float_v P[] ) const
 
   const float_v kCLight = 0.000299792458f;
 
-  float_v c = float_v(fQ)*kCLight;
+  float_v c = simd_cast<float_v>(fQ)*kCLight;
 
   // construct coefficients 
 
@@ -3191,7 +3192,7 @@ void KFParticleBaseSIMD::TransportBz( float_v b, float_v t, const float_v* dsdr,
   //* Transport the particle on dS, output to P[],C[], for Bz field
  
   const float_v kCLight = 0.000299792458f;
-  b = b*float_v(fQ)*kCLight;
+  b = b*simd_cast<float_v>(fQ)*kCLight;
   float_v bs= b*t;
   float_v s = sin(bs), c = cos(bs);
 
@@ -3348,7 +3349,7 @@ void KFParticleBaseSIMD::TransportBz( float_v b, float_v t, float_v p[] ) const
   //* Transport the particle on dS, output to P[],C[], for Bz field
  
   const float_v kCLight = 0.000299792458f;
-  b = b*float_v(fQ)*kCLight;
+  b = b*simd_cast<float_v>(fQ)*kCLight;
   float_v bs= b*t;
   float_v s = KFPMath::Sin(bs), c = KFPMath::Cos(bs);
 

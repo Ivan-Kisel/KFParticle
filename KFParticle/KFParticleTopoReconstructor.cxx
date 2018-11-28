@@ -561,14 +561,14 @@ void KFParticleTopoReconstructor::GetChiToPrimVertex(KFParticleSIMD* pv, const i
       tmpPart.Create(fTracks[iTV],trackIndex, pdg);
       
       float_v& chi2 = reinterpret_cast<float_v&>(fChiToPrimVtx[iTV][iTr]);
-      chi2(float_m(trackIndex<NTr)) = 10000.f;
+      chi2(simd_cast<float_m>(trackIndex<NTr)) = 10000.f;
 
       for(int iPV=0; iPV<nPV; iPV++)
       {
         const float_v point[3] = {pv[iPV].X(), pv[iPV].Y(), pv[iPV].Z()};
         tmpPart.TransportToPoint(point);
         const float_v& chiVec = tmpPart.GetDeviationFromVertex(pv[iPV]);
-        chi2( (chi2>chiVec) && float_m(trackIndex<NTr) ) = chiVec;
+        chi2( (chi2>chiVec) && simd_cast<float_m>(trackIndex<NTr) ) = chiVec;
       }
     } 
   }
