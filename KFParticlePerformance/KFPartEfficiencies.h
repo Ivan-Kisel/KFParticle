@@ -1161,12 +1161,12 @@ class KFPartEfficiencies :public TObject
     std::cout.flags(original_flags); 
   };
   
-  float GetTotal4piEfficiency(int iDecay) { return ratio_reco1.counters[iDecay]; }
-  float GetTotalKFPEfficiency(int iDecay) { return ratio_reco3.counters[iDecay]; }
-  float GetPrimary4piEfficiency(int iDecay) { return ratio_reco1.counters[iDecay+1]; }
-  float GetPrimaryKFPEfficiency(int iDecay) { return ratio_reco3.counters[iDecay+1]; }
-  float GetSecondary4piEfficiency(int iDecay) { return ratio_reco1.counters[iDecay+2]; }
-  float GetSecondaryKFPEfficiency(int iDecay) { return ratio_reco3.counters[iDecay+2]; }
+  float GetTotal4piEfficiency(int iDecay) { return ratio_reco1.counters[3*iDecay]; }
+  float GetTotalKFPEfficiency(int iDecay) { return ratio_reco3.counters[3*iDecay]; }
+  float GetPrimary4piEfficiency(int iDecay) { return ratio_reco1.counters[3*iDecay+1]; }
+  float GetPrimaryKFPEfficiency(int iDecay) { return ratio_reco3.counters[3*iDecay+1]; }
+  float GetSecondary4piEfficiency(int iDecay) { return ratio_reco1.counters[3*iDecay+2]; }
+  float GetSecondaryKFPEfficiency(int iDecay) { return ratio_reco3.counters[3*iDecay+2]; }
 
   friend std::fstream & operator<<(std::fstream &strm, KFPartEfficiencies &a) 
   {
