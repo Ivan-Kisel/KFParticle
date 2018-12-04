@@ -92,17 +92,17 @@ class KFPartEfficiencies :public TObject
       KFEfficiencyParticleInfo("Xi0b",             "Xi0 b         ",      -3322, 1.0f, 3.0f, 1.31486    , 2.9e-10,    0, 0.0030), //6
       KFEfficiencyParticleInfo("Omega-",           "Omega-        ",       3334, 1.0f, 3.0f, 1.67245    , 0.821e-10, -1, 0.0022), //7
       KFEfficiencyParticleInfo("Omega+",           "Omega+        ",      -3334, 1.0f, 3.0f, 1.67245    , 0.821e-10,  1, 0.0022), //8
-      KFEfficiencyParticleInfo("#Sigma^0",         "Sigma0        ",       3212, 1.0f, 3.0f, 1.192642   , 7.4e-20,    0, 0.0030), //9
-      KFEfficiencyParticleInfo("#Sigma^0b",        "Sigma0 b      ",      -3212, 1.0f, 3.0f, 1.192642   , 7.4e-20,    0, 0.0030), //10
-      KFEfficiencyParticleInfo("#Sigma^+",         "Sigma+        ",       3222, 1.0f, 3.0f, 1.18937    , 0.8018e-10, 1, 0.0030), //11
-      KFEfficiencyParticleInfo("#Sigma^-b",        "Sigma- b      ",      -3222, 1.0f, 3.0f, 1.18937    , 0.8018e-10,-1, 0.0030), //12
+      KFEfficiencyParticleInfo("Sigma^0",          "Sigma0        ",       3212, 1.0f, 3.0f, 1.192642   , 7.4e-20,    0, 0.0030), //9
+      KFEfficiencyParticleInfo("Sigma^0b",         "Sigma0 b      ",      -3212, 1.0f, 3.0f, 1.192642   , 7.4e-20,    0, 0.0030), //10
+      KFEfficiencyParticleInfo("Sigma^+",          "Sigma+        ",       3222, 1.0f, 3.0f, 1.18937    , 0.8018e-10, 1, 0.0030), //11
+      KFEfficiencyParticleInfo("Sigma^-b",         "Sigma- b      ",      -3222, 1.0f, 3.0f, 1.18937    , 0.8018e-10,-1, 0.0030), //12
       KFEfficiencyParticleInfo("K*0",              "K*0           ",        313, 0.6f, 2.6f, 0.8958     , 1.38e-23,   0, 0.0300), //13
       KFEfficiencyParticleInfo("K*0b",             "K*0 b         ",       -313, 0.6f, 2.6f, 0.8958     , 1.38e-23,   0, 0.0300), //14
       KFEfficiencyParticleInfo("K*+",              "K*+           ",        323, 0.6f, 2.6f, 0.89166    , 1.30e-23,   1, 0.0300), //15
       KFEfficiencyParticleInfo("K*-",              "K*-           ",       -323, 0.6f, 2.6f, 0.89166    , 1.30e-23,  -1, 0.0300), //16
-      KFEfficiencyParticleInfo("K*0_{K0,#pi0}",    "K*0_K0pi0     ",     100313, 0.6f, 2.6f, 0.8958     , 1.38e-23,   0, 0.0030), //17
-      KFEfficiencyParticleInfo("K*+_{K+,#pi0}",    "K*+_K+pi0     ",     100323, 0.6f, 2.6f, 0.89166    , 1.30e-23,   1, 0.0030), //18
-      KFEfficiencyParticleInfo("K*-_{K-,#pi0}",    "K*-_K-pi0     ",    -100323, 0.6f, 2.6f, 0.89166    , 1.30e-23,  -1, 0.0030), //19
+      KFEfficiencyParticleInfo("K*0_K0,pi0",       "K*0_K0pi0     ",     100313, 0.6f, 2.6f, 0.8958     , 1.38e-23,   0, 0.0030), //17
+      KFEfficiencyParticleInfo("K*+_K+,pi0",       "K*+_K+pi0     ",     100323, 0.6f, 2.6f, 0.89166    , 1.30e-23,   1, 0.0030), //18
+      KFEfficiencyParticleInfo("K*-_K-,pi0",       "K*-_K-pi0     ",    -100323, 0.6f, 2.6f, 0.89166    , 1.30e-23,  -1, 0.0030), //19
       KFEfficiencyParticleInfo("Sigma*+",          "Sigma*+       ",       3224, 1.0f, 3.0f, 1.3828     , 1.83e-23,   1, 0.0100), //20
       KFEfficiencyParticleInfo("Sigma*-",          "Sigma*-       ",       3114, 1.0f, 3.0f, 1.3872     , 1.67e-23,  -1, 0.0100), //21
       KFEfficiencyParticleInfo("Sigma*+b",         "Sigma*+ b     ",      -3114, 1.0f, 3.0f, 1.3828     , 1.83e-23,  -1, 0.0100), //22
@@ -113,19 +113,19 @@ class KFPartEfficiencies :public TObject
       KFEfficiencyParticleInfo("Lambda*b",         "Lambda* b     ",      -3124, 1.4f, 3.4f, 1.5195     , 4.22e-23,   0, 0.0100), //27
       KFEfficiencyParticleInfo("Xi*0",             "Xi*0          ",       3324, 1.4f, 3.4f, 1.53180    , 7.23e-23,   0, 0.0100), //28
       KFEfficiencyParticleInfo("Xi*0b",            "Xi*0 b        ",      -3324, 1.4f, 3.4f, 1.53180    , 7.23e-23,   0, 0.0100), //29
-      KFEfficiencyParticleInfo("Xi*-_{LK}",        "Xi*-_lk       ",    1003314, 1.4f, 3.4f, 1.823      , 2.74e-23,  -1, 0.0030), //30
-      KFEfficiencyParticleInfo("Xi*+_{LK}",        "Xi*+_lk       ",   -1003314, 1.4f, 3.4f, 1.823      , 2.74e-23,   1, 0.0030), //31
-      KFEfficiencyParticleInfo("Xi*-_{xi-,pi0}",   "Xi*-_XiPi     ",       3314, 1.4f, 3.4f, 1.535      , 6.65e-23,  -1, 0.0030), //32
-      KFEfficiencyParticleInfo("Xi*+_{xi+,pi0}",   "Xi*+_XiPi     ",      -3314, 1.4f, 3.4f, 1.535      , 6.65e-23,   1, 0.0030), //33
+      KFEfficiencyParticleInfo("Xi*-_LK",          "Xi*-_lk       ",    1003314, 1.4f, 3.4f, 1.823      , 2.74e-23,  -1, 0.0030), //30
+      KFEfficiencyParticleInfo("Xi*+_LK",          "Xi*+_lk       ",   -1003314, 1.4f, 3.4f, 1.823      , 2.74e-23,   1, 0.0030), //31
+      KFEfficiencyParticleInfo("Xi*-_xi-,pi0",     "Xi*-_XiPi     ",       3314, 1.4f, 3.4f, 1.535      , 6.65e-23,  -1, 0.0030), //32
+      KFEfficiencyParticleInfo("Xi*+_xi+,pi0",     "Xi*+_XiPi     ",      -3314, 1.4f, 3.4f, 1.535      , 6.65e-23,   1, 0.0030), //33
       KFEfficiencyParticleInfo("Omega*-",          "Omega*-       ",    1003334, 1.8f, 3.8f, 2.252      , 1.2e-23,   -1, 0.0030), //34
       KFEfficiencyParticleInfo("Omega*+",          "Omega*+       ",   -1003334, 1.8f, 3.8f, 2.252      , 1.2e-23,    1, 0.0030), //35
-      KFEfficiencyParticleInfo("H0_{LL}",          "H0_LL         ",       3000, 1.5f, 3.5f, 2.21       , 1.32e-10,   0, 0.0030), //36
-      KFEfficiencyParticleInfo("phi_{KK}",         "phi_KK        ",        333, 0.8f, 2.8f, 1.019455   , 1.55e-22,   0, 0.0030), //37
-      KFEfficiencyParticleInfo("rho_{#pi#pi}",     "rho_pipi      ",        113, 0.0f, 2.0f, 0.77526    , 4.45e-24,   0, 0.0030), //38
-      KFEfficiencyParticleInfo("rho_{ee}",         "rho_ee        ",     100113, 0.0f, 2.0f, 0.77526    , 4.45e-24,   0, 0.0030), //39
-      KFEfficiencyParticleInfo("rho_{#mu#mu}",     "rho_mm        ",     200113, 0.0f, 2.0f, 0.77526    , 4.45e-24,   0, 0.0030), //40
+      KFEfficiencyParticleInfo("H0_LL",            "H0_LL         ",       3000, 1.5f, 3.5f, 2.21       , 1.32e-10,   0, 0.0030), //36
+      KFEfficiencyParticleInfo("phi_KK",           "phi_KK        ",        333, 0.8f, 2.8f, 1.019455   , 1.55e-22,   0, 0.0030), //37
+      KFEfficiencyParticleInfo("rho_pipi",         "rho_pipi      ",        113, 0.0f, 2.0f, 0.77526    , 4.45e-24,   0, 0.0030), //38
+      KFEfficiencyParticleInfo("rho_ee",           "rho_ee        ",     100113, 0.0f, 2.0f, 0.77526    , 4.45e-24,   0, 0.0030), //39
+      KFEfficiencyParticleInfo("rho_mm",           "rho_mm        ",     200113, 0.0f, 2.0f, 0.77526    , 4.45e-24,   0, 0.0030), //40
       KFEfficiencyParticleInfo("gamma",            "gamma         ",         22, 0.0f, 3.0f, 0.         , 1.e20,      0, 0.0030), //41
-      KFEfficiencyParticleInfo("#pi^{0}",          "pi0           ",        111, 0.0f, 3.0f, 0.1349766  , 8.52e-17,   0, 0.0030), //42
+      KFEfficiencyParticleInfo("pi0",              "pi0           ",        111, 0.0f, 3.0f, 0.1349766  , 8.52e-17,   0, 0.0030), //42
       KFEfficiencyParticleInfo("eta",              "eta           ",        221, 0.0f, 3.0f, 0.547862   , 5.0e-19,    0, 0.0030), //43
 //Delta and N resonances
       KFEfficiencyParticleInfo("Delta0",           "Delta0        ",       2114, 1.0f, 3.0f, 1.232      , 5.63e-24,   0, 0.0030), //44
@@ -133,11 +133,11 @@ class KFPartEfficiencies :public TObject
       KFEfficiencyParticleInfo("Delta++",          "Delta++       ",       2224, 1.0f, 3.0f, 1.232      , 5.63e-24,   2, 0.0030), //46
       KFEfficiencyParticleInfo("Delta-- b",        "Delta-- b     ",      -2224, 1.0f, 3.0f, 1.232      , 5.63e-24,  -2, 0.0030), //47
 //charmonium
-      KFEfficiencyParticleInfo("J#Psi_ee",         "JPsi_ee       ",        443, 1.0f, 4.0f, 3.096916   , 7.1e-21,    0, 0.0030), //48
-      KFEfficiencyParticleInfo("J#Psi_mumu",       "JPsi_mm       ",     100443, 1.0f, 4.0f, 3.096916   , 7.1e-21,    0, 0.0030), //49
-      KFEfficiencyParticleInfo("J#Psi_pp",         "JPsi_pp       ",     200443, 1.0f, 4.0f, 3.096916   , 7.1e-21,    0, 0.0030), //50
-      KFEfficiencyParticleInfo("J#Psi_LL",         "JPsi_LL       ",     300443, 2.0f, 5.0f, 3.096916   , 7.1e-21,    0, 0.0030), //51
-      KFEfficiencyParticleInfo("J#Psi_XiXi",       "JPsi_XiXi     ",     400443, 2.0f, 5.0f, 3.096916   , 7.1e-21,    0, 0.0030), //52
+      KFEfficiencyParticleInfo("JPsi_ee",          "JPsi_ee       ",        443, 1.0f, 4.0f, 3.096916   , 7.1e-21,    0, 0.0030), //48
+      KFEfficiencyParticleInfo("JPsi_mumu",        "JPsi_mm       ",     100443, 1.0f, 4.0f, 3.096916   , 7.1e-21,    0, 0.0030), //49
+      KFEfficiencyParticleInfo("JPsi_pp",          "JPsi_pp       ",     200443, 1.0f, 4.0f, 3.096916   , 7.1e-21,    0, 0.0030), //50
+      KFEfficiencyParticleInfo("JPsi_LL",          "JPsi_LL       ",     300443, 2.0f, 5.0f, 3.096916   , 7.1e-21,    0, 0.0030), //51
+      KFEfficiencyParticleInfo("JPsi_XiXi",        "JPsi_XiXi     ",     400443, 2.0f, 5.0f, 3.096916   , 7.1e-21,    0, 0.0030), //52
       KFEfficiencyParticleInfo("Psi_OO",           "Psi_OO        ",     500443, 3.0f, 6.0f, 3.686109   , 2.1e-22,    0, 0.0030), //53
 //open charm
       KFEfficiencyParticleInfo("D0",               "D0            ",        421, 0.6f, 3.6f, 1.86486    , 4.1e-13,    0, 0.0154), //54
@@ -149,7 +149,7 @@ class KFPartEfficiencies :public TObject
       KFEfficiencyParticleInfo("D0_K0pipi",        "D0_K0pipi     ",        425, 0.6f, 3.6f, 1.86486    , 4.1e-13,    0, 0.0150), //60
       KFEfficiencyParticleInfo("D0_KK",            "D0_KK         ",        426, 0.6f, 3.6f, 1.86486    , 4.1e-13,    0, 0.0130), //61
       KFEfficiencyParticleInfo("D0_KKK0",          "D0_KKK0       ",        427, 0.6f, 3.6f, 1.86486    , 4.1e-13,    0, 0.0154), //62
-      KFEfficiencyParticleInfo("D0_{pi0}",         "D0_#pi0       ",        428, 1.0f, 3.0f, 1.86486    , 4.1e-13,    0, 0.0030), //63
+      KFEfficiencyParticleInfo("D0_pi0",           "D0_#pi0       ",        428, 1.0f, 3.0f, 1.86486    , 4.1e-13,    0, 0.0030), //63
       KFEfficiencyParticleInfo("D+",               "D+            ",        411, 1.0f, 3.0f, 1.86962    , 1.04e-13,   1, 0.0114), //64
       KFEfficiencyParticleInfo("D-",               "D-            ",       -411, 1.0f, 3.0f, 1.86962    , 1.04e-13,  -1, 0.0114), //65
       KFEfficiencyParticleInfo("D+_K0pi+",         "D+_K0pi+      ",     100411, 0.6f, 4.6f, 1.86962    , 1.04e-13,   1, 0.0030), //66
@@ -188,7 +188,7 @@ class KFPartEfficiencies :public TObject
       KFEfficiencyParticleInfo("D*-",              "D*-           ",     -10411, 1.8f, 3.8f, 2.01029    , 6.86e-21,  -1, 0.0030), //99
       KFEfficiencyParticleInfo("D*+_4",            "D*+_4         ",      20411, 1.8f, 3.8f, 2.01029    , 6.86e-21,   1, 0.0030), //100
       KFEfficiencyParticleInfo("D*-_4",            "D*-_4         ",     -20411, 1.8f, 3.8f, 2.01029    , 6.86e-21,  -1, 0.0030), //101
-      KFEfficiencyParticleInfo("D0*_{#pi0}",       "D0*_#pi0      ",      10428, 1.8f, 3.8f, 2.00699    , 6.86e-21,   0, 0.0030), //102
+      KFEfficiencyParticleInfo("D0*_pi0",          "D0*_#pi0      ",      10428, 1.8f, 3.8f, 2.00699    , 6.86e-21,   0, 0.0030), //102
 //B mesons
       KFEfficiencyParticleInfo("B_Jpsi_ee",        "B_Jpsi_ee     ",        500, 1.0f, 4.0f, 3.096916   , 7.1e-21,    0, 0.0030), //103
       KFEfficiencyParticleInfo("B_Jpsi_mm",        "B_Jpsi_mm     ",        501, 1.0f, 4.0f, 3.096916   , 7.1e-21,    0, 0.0030), //104
