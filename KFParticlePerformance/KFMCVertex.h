@@ -14,9 +14,6 @@
 
 #include <iostream>
 #include <vector>
-using std::ostream;
-using std::istream;
-
 
 /**
  * @class KFMCVertex
@@ -72,8 +69,8 @@ class KFMCVertex
   bool IsTriggerPV() const { return fIsTriggerPV; }
   void SetTriggerPV() { fIsTriggerPV = 1; }
   
-  friend ostream& operator<<(ostream& out, const KFMCVertex &a);
-  friend istream& operator>>(istream& in, KFMCVertex &a);
+  friend std::ostream& operator<<(std::ostream& out, const KFMCVertex &a);
+  friend std::istream& operator>>(std::istream& in, KFMCVertex &a);
 
  protected:
 

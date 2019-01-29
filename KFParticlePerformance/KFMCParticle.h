@@ -13,7 +13,6 @@
 #define _KFMCParticle_h_
 
 #include <vector>
-using std::vector;
 
 #ifdef HLTCA_STANDALONE
 #include "RootTypesDef.h"
@@ -29,7 +28,7 @@ class KFMCParticle :public TObject
 
   void AddDaughter( int i );
   int  NDaughters() const { return fDaughterIds.size(); }
-  const vector<int>&  GetDaughterIds() const { return fDaughterIds; }
+  const std::vector<int>&  GetDaughterIds() const { return fDaughterIds; }
   void CleanDaughters() { fDaughterIds.resize(0); }
 
   void SetPDG(int pdg) {fPDG = pdg;}
@@ -49,7 +48,7 @@ class KFMCParticle :public TObject
   void SetInitialParticleId(int i) {fInitialParticleId = i;}
   int InitialParticleId() const {return fInitialParticleId;}
  private: //data
-  vector<int> fDaughterIds;
+  std::vector<int> fDaughterIds;
   int fMCTrackID; // sim id of MC track, which corresponds to the particle
   int fMotherId;  // index in L1 array of mother particle
   int fPDG;

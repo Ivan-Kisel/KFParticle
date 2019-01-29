@@ -25,6 +25,7 @@
 #include "string"
 using std::string;
 using std::ofstream;
+using std::vector;
 
 #include "KFPInputData.h"
 

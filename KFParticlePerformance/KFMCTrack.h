@@ -12,13 +12,6 @@
 #ifndef KFMCTRACK_H
 #define KFMCTRACK_H
 
-#include <iostream>
-#include <vector>
-#include <cmath>
-using std::ostream;
-using std::istream;
-
-
 /**
  * @class KFMCTrack
  * store MC track information for Performance

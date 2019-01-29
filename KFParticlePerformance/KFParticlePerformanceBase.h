@@ -25,19 +25,11 @@
 #include "AliHLTTPCCAMCPoint.h"
 #endif
 
-#include <fstream>
-#include <cstdio>
-#include <map>
-
 #include "KFPartEfficiencies.h"
 #include "KFPVEfficiencies.h"
 
+#include <map>
 #include <string>
-using std::string;
-
-#include <iostream>
-using std::ostream;
-using std::istream;
 
 class TObject;
 class TParticle;
@@ -65,7 +57,7 @@ class KFParticlePerformanceBase
   virtual ~KFParticlePerformanceBase(){};
     
     /// Histograms
-  virtual void CreateHistos(string histoDir = "", TDirectory* outFile = 0);
+  virtual void CreateHistos(std::string histoDir = "", TDirectory* outFile = 0);
 #ifndef KFPWITHTRACKER
   TDirectory* GetHistosDirectory() { return fHistoDir; }
 #endif

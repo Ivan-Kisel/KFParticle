@@ -23,7 +23,6 @@
 #include "KFPTrack.h"
 
 #include <vector>
-using std::vector;
 
 class KFParticle;
 class KFPTrackVector;
@@ -41,13 +40,13 @@ class KFParticlePVReconstructor{
   int NPrimaryVertices() const { return fPrimVertices.size(); }
   KFParticle &GetPrimVertex(int iPV=0)   { return fPrimVertices[iPV]; };
   KFVertex   &GetPrimKFVertex(int iPV=0)   { return fPrimVertices[iPV]; };
-  vector<int>& GetPVTrackIndexArray(int iPV=0) { return fClusters[iPV].fTracks; }
+  std::vector<int>& GetPVTrackIndexArray(int iPV=0) { return fClusters[iPV].fTracks; }
   KFParticle &GetParticle(int i){ assert( i < fNParticles );          return fParticles[i];    };
   
   void SetBeamLine(KFParticle& p) { fBeamLine = p; fIsBeamLine = 1; }
   bool IsBeamLine() const { return fIsBeamLine; }
   
-  void AddPV(const KFVertex &pv, const vector<int> &tracks);
+  void AddPV(const KFVertex &pv, const std::vector<int> &tracks);
   void AddPV(const KFVertex &pv);
   void CleanPV() { fClusters.clear(); fPrimVertices.clear(); }
 
@@ -60,23 +59,23 @@ class KFParticlePVReconstructor{
 
   void FindPrimaryClusters( int cutNDF = 1);
 
-  vector<KFParticle> fParticles; // input particles
+  std::vector<KFParticle> fParticles; // input particles
   int fNParticles;           // number of input particles
 
-  vector<float> fWeight;
+  std::vector<float> fWeight;
   
   KFParticle fBeamLine;
   bool fIsBeamLine;
   
   struct KFParticleCluster {
     KFParticleCluster():fTracks(0) {};
-    vector<int> fTracks;
+    std::vector<int> fTracks;
     float fP[3];
     float fC[6];
   };
 
-  vector< KFParticleCluster > fClusters;
-  vector<KFVertex> fPrimVertices;  // created primary vertex(-es) (currently only one primary vertex in possible
+  std::vector< KFParticleCluster > fClusters;
+  std::vector<KFVertex> fPrimVertices;  // created primary vertex(-es) (currently only one primary vertex in possible
   
   float fChi2CutPreparation;
   float fChi2Cut;

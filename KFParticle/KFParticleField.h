@@ -14,10 +14,6 @@
 
 #include "KFParticleDef.h"
 #include <iostream>
-using std::cout;
-using std::ostream;
-using std::endl;
-
 
 class KFParticleFieldValue{
 
@@ -34,7 +30,7 @@ class KFParticleFieldValue{
       z+= w*( B.z - z );
     }
 
-    friend ostream& operator<<(ostream& out, KFParticleFieldValue &B){
+    friend std::ostream& operator<<(std::ostream& out, KFParticleFieldValue &B){
       return out << B.x[0] << " | " << B.y[0] << " | " << B.z[0];
     };
 };

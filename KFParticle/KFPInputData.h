@@ -15,16 +15,9 @@
 #include "KFPTrackVector.h"
 #include "KFParticle.h"
 
-#include <iostream>
 #include <vector>
 #include <string>
-using std::string;
-
 #include <fstream>
-using std::ofstream;
-using std::ifstream;
-
-#include <algorithm>
 
 struct KFPTrackIndex
 {
@@ -54,9 +47,9 @@ class KFPInputData
   KFPInputData():fPV(0),fBz(0.f) {};
   ~KFPInputData() {};
 
-  bool ReadDataFromFile( string prefix )
+  bool ReadDataFromFile( std::string prefix )
   {
-    ifstream ifile(prefix.data());
+    std::ifstream ifile(prefix.data());
     if ( !ifile.is_open() ) return 0;
     int nSets;
     ifile >> fBz;

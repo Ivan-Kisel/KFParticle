@@ -17,14 +17,14 @@ KFMCVertex::KFMCVertex():fDaughterTracks(0),fIsReconstructable(0),fIsMCReconstru
 }
 
 
-ostream& operator<<(ostream& out, const KFMCVertex &a)
+std::ostream& operator<<(std::ostream& out, const KFMCVertex &a)
 {
   for (int i = 0; i < 3; i++) out << a.fPar[i] << std::endl;
   return out;
 }
 
 
-istream& operator>>(istream& in, KFMCVertex &a)
+std::istream& operator>>(std::istream& in, KFMCVertex &a)
 {
   for (int i = 0; i < 3; i++) in >> a.fPar[i];
   return in;

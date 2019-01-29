@@ -19,7 +19,6 @@
 
 #include "KFMCVertex.h"
 #include "KFMCTrack.h"
-#include <fstream>
 #include <cstdio>
 #include <map>
 
@@ -79,8 +78,8 @@ class KFTopoPerformance: public KFParticlePerformanceBase
 
   void AddV0Histos();
   
-  void SetTrackMatch(const vector<int>& trackMatch) { fTrackMatch = trackMatch;}
-  void SetMCTracks(const vector<KFMCTrack>& mcTracks)
+  void SetTrackMatch(const std::vector<int>& trackMatch) { fTrackMatch = trackMatch;}
+  void SetMCTracks(const std::vector<KFMCTrack>& mcTracks)
   { 
     
     vMCTracks = mcTracks;
@@ -89,11 +88,11 @@ class KFTopoPerformance: public KFParticlePerformanceBase
   const KFPartEfficiencies GetEfficiency() const { return fParteff; }
   void SetPrintEffFrequency(int n) { fPrintEffFrequency = n;}
 
-  const vector<KFMCVertex> GetPrimVertices() { return fPrimVertices; }
-  const vector<KFMCParticle>& MCParticles() { return vMCParticles; }
-  const vector<KFPartMatch>& ParticlesMatch() { return RtoMCParticleId; }
-  const vector<KFPartMatch>& GetMCtoRPVId() { return MCtoRPVId; }
-  const vector<KFPartMatch>& GetRtoMCPVId() { return RtoMCPVId; }
+  const std::vector<KFMCVertex> GetPrimVertices() { return fPrimVertices; }
+  const std::vector<KFMCParticle>& MCParticles() { return vMCParticles; }
+  const std::vector<KFPartMatch>& ParticlesMatch() { return RtoMCParticleId; }
+  const std::vector<KFPartMatch>& GetMCtoRPVId() { return MCtoRPVId; }
+  const std::vector<KFPartMatch>& GetRtoMCPVId() { return RtoMCPVId; }
   const KFMCTrack& GetMCTrack(const int iRecoTrack)
   { 
     int iMCTrack = 0;
@@ -128,26 +127,26 @@ class KFTopoPerformance: public KFParticlePerformanceBase
                               TH1F* histoFit[KFPartEfficiencies::nParticles][nFitQA] = 0,
                               TH1F* histoFitDaughtersQA[KFPartEfficiencies::nParticles][nFitQA] = 0,
                               TH1F* histoDSToParticleQA[KFPartEfficiencies::nParticles][nDSToParticleQA] = 0,
-                              vector<int>* multiplicities = 0);
+                              std::vector<int>* multiplicities = 0);
   
   const KFParticleTopoReconstructor *fTopoReconstructor;
 
-  vector<KFMCVertex> fPrimVertices; // primary vertex positions (currently only one vertex is implemented)
-  vector<int> fMCTrackToMCPVMatch; // match between MC tracks and PV 
-  vector<double> fPVPurity;
-  vector<double> fPVTracksRate[4]; //0 - ghost tracks, 1 - from trigger PV, 2 - from pileup, 3 - from physics bg
-  vector<int> fNCorrectPVTracks;
+  std::vector<KFMCVertex> fPrimVertices; // primary vertex positions (currently only one vertex is implemented)
+  std::vector<int> fMCTrackToMCPVMatch; // match between MC tracks and PV 
+  std::vector<double> fPVPurity;
+  std::vector<double> fPVTracksRate[4]; //0 - ghost tracks, 1 - from trigger PV, 2 - from pileup, 3 - from physics bg
+  std::vector<int> fNCorrectPVTracks;
 
-  vector<int> fTrackMatch;
-  vector<KFMCTrack> vMCTracks;  // MC particles
-  vector<KFMCParticle> vMCParticles;  // MC particles
-  vector<int> fNeutralIndex;
+  std::vector<int> fTrackMatch;
+  std::vector<KFMCTrack> vMCTracks;  // MC particles
+  std::vector<KFMCParticle> vMCParticles;  // MC particles
+  std::vector<int> fNeutralIndex;
   
-  vector<KFPartMatch> MCtoRParticleId; // array for match MC and reco particles
-  vector<KFPartMatch> RtoMCParticleId;
+  std::vector<KFPartMatch> MCtoRParticleId; // array for match MC and reco particles
+  std::vector<KFPartMatch> RtoMCParticleId;
 
-  vector<KFPartMatch> MCtoRPVId; // array for match MC and reco PV
-  vector<KFPartMatch> RtoMCPVId;
+  std::vector<KFPartMatch> MCtoRPVId; // array for match MC and reco PV
+  std::vector<KFPartMatch> RtoMCPVId;
   
   int fPrintEffFrequency;
   

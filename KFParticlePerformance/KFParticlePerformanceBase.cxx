@@ -128,7 +128,7 @@ KFParticlePerformanceBase::KFParticlePerformanceBase():
       hPVefficiency[iEffSet][iEff] = NULL;
 }
 
-void KFParticlePerformanceBase::CreateHistos(string histoDir, TDirectory* outFile)
+void KFParticlePerformanceBase::CreateHistos(std::string histoDir, TDirectory* outFile)
 {
   TDirectory *curdir = gDirectory;
   if (outFile) {
