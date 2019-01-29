@@ -10,6 +10,7 @@
 //____________________________________________________________________________
 
 #include "KFPEmcCluster.h"
+#include <iostream>
 
 void KFPEmcCluster::SetParameter(const float_v& value, int iP, int iTr)
 { 
@@ -18,7 +19,7 @@ void KFPEmcCluster::SetParameter(const float_v& value, int iP, int iTr)
   else
   {
     const uint_v index(uint_v::IndexesFromZero());
-    (reinterpret_cast<float_v&>(fP[iP][iTr])).gather(reinterpret_cast<const float*>(&value), index, float_m(index<(Size() - iTr)));
+    (reinterpret_cast<float_v&>(fP[iP][iTr])).gather(reinterpret_cast<const float*>(&value), index, simd_cast<float_m>(index<(Size() - iTr)));
   }
 }
 void KFPEmcCluster::SetCovariance(const float_v& value, int iC, int iTr) 
@@ -28,7 +29,7 @@ void KFPEmcCluster::SetCovariance(const float_v& value, int iC, int iTr)
   else
   {
     const uint_v index(uint_v::IndexesFromZero());
-    (reinterpret_cast<float_v&>(fC[iC][iTr])).gather(reinterpret_cast<const float*>(&value), index, float_m(index<(Size() - iTr)));
+    (reinterpret_cast<float_v&>(fC[iC][iTr])).gather(reinterpret_cast<const float*>(&value), index, simd_cast<float_m>(index<(Size() - iTr)));
   }
 }
 
@@ -74,7 +75,7 @@ void KFPEmcCluster::SetTracks(const KFPEmcCluster& track, const kfvector_uint& t
     }
     const uint_v& index = reinterpret_cast<const uint_v&>(trackIndex[iElement]);
     float_v& vec = reinterpret_cast<float_v&>(fP[iP][iElement]);
-    vec.gather(&(track.fP[iP][0]), index, float_m(iElement+uint_v::IndexesFromZero()<nIndexes));
+    vec.gather(&(track.fP[iP][0]), index, simd_cast<float_m>(iElement+uint_v::IndexesFromZero()<nIndexes));
     
   }
   for(int iC=0; iC<10; iC++)
@@ -88,7 +89,7 @@ void KFPEmcCluster::SetTracks(const KFPEmcCluster& track, const kfvector_uint& t
     }
     const uint_v& index = reinterpret_cast<const uint_v&>(trackIndex[iElement]);
     float_v& vec = reinterpret_cast<float_v&>(fC[iC][iElement]);
-    vec.gather(&(track.fC[iC][0]), index, float_m(iElement+uint_v::IndexesFromZero()<nIndexes));
+    vec.gather(&(track.fC[iC][0]), index, simd_cast<float_m>(iElement+uint_v::IndexesFromZero()<nIndexes));
   }
   {
     int iElement=0;

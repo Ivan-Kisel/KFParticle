@@ -12,10 +12,7 @@
 #ifndef KFPTrackVector_H
 #define KFPTrackVector_H
 
-#include <vector>
-
 #include "KFPTrack.h"
-#include <iostream>
 #include "KFParticleDef.h"
 
 class KFPTrackVector

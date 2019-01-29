@@ -28,15 +28,11 @@
 #include "TDatabasePDG.h"
 
 #include "TMath.h"
-#include "TROOT.h"
-#include "Riostream.h"
-#include "TFile.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
 #include "TProfile.h"
 #include "TProfile2D.h"
-#include "TStyle.h"
 
 #include <map>
 #include <algorithm>

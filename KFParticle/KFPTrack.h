@@ -27,24 +27,23 @@ public:
   int    GetID() const { return fId; }
   
   bool   GetXYZPxPyPz(float *p) const
-         {
-           for(int i=0; i<6; i++)
-             p[i] = fP[i];
-           return 1;
-         }
+  {
+    for(int i=0; i<6; i++)
+      p[i] = fP[i];
+    return 1;
+  }
   bool   GetCovarianceXYZPxPyPz(float cv[21]) const
-         {
-           for (int i=0; i<21; i++)
-             cv[i] = fC[i];
-           return 1;
-         }
-
+  {
+    for (int i=0; i<21; i++)
+      cv[i] = fC[i];
+    return 1;
+  }
   bool   GetCovarianceXYZPxPyPz(double cv[21]) const
-         {
-           for (int i=0; i<21; i++)
-             cv[i] = fC[i];
-           return 1;
-         }
+  {
+    for (int i=0; i<21; i++)
+      cv[i] = fC[i];
+    return 1;
+  }
 
 //  void   GetXYZ(float *position) {position[0] = fP[0]; position[1] = fP[1]; position[1] = fP[1];}
   void   GetXYZ(float *position)    const {position[0] = fP[0]; position[1] = fP[1]; position[2] = fP[2];}
@@ -65,11 +64,11 @@ public:
   float GetPt() const { return sqrt(fP[3]*fP[3]+fP[4]*fP[4]); }
   float GetP()  const { return sqrt(fP[3]*fP[3]+fP[4]*fP[4]+fP[5]*fP[5]); }
 
-  void   GetCovarianceMatrix(float *covmatrix)
-         {
-           for (int i=0; i<21; i++)
-             covmatrix[i] = fC[i];
-         }
+  void GetCovarianceMatrix(float *covmatrix)
+  {
+    for (int i=0; i<21; i++)
+      covmatrix[i] = fC[i];
+  }
   float GetParameter(int i) const { return fP[i]; }
   float GetCovariance(int i) const { return fC[i]; }
 
@@ -82,28 +81,28 @@ public:
   const float * GetCovMatrix() const { return fC; }
 
   void SetParameters(const float *position) 
-       { 
-         for(int i=0; i<6; i++)
-           fP[i] = position[i];
-       }
+  { 
+    for(int i=0; i<6; i++)
+      fP[i] = position[i];
+  }
   void SetParameters(double *position) 
-       { 
-         for(int i=0; i<6; i++)
-           fP[i] = position[i];
-       }
+  { 
+    for(int i=0; i<6; i++)
+      fP[i] = position[i];
+  }
   void SetParameters(float x, float y, float z, float px, float py, float pz) 
-       { 
-         fP[0] = x;  fP[1] = y;  fP[2] = z;
-         fP[3] = px; fP[4] = py; fP[5] = pz;
-       }
+  { 
+    fP[0] = x;  fP[1] = y;  fP[2] = z;
+    fP[3] = px; fP[4] = py; fP[5] = pz;
+  }
   void SetXYZ(float x, float y, float z) 
-       { 
-         fP[0] = x;  fP[1] = y;  fP[2] = z;
-       }
+  { 
+    fP[0] = x;  fP[1] = y;  fP[2] = z;
+  }
   void SetPxPyPz(float px, float py, float pz) 
-       { 
-         fP[3] = px; fP[4] = py; fP[5] = pz;
-       }
+  { 
+    fP[3] = px; fP[4] = py; fP[5] = pz;
+  }
   void SetID(int id)       {fId = id;}
 
   void SetX(float x)      { fP[0] = x; }

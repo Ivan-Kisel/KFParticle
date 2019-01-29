@@ -12,7 +12,6 @@
 #ifndef KFParticleField_h
 #define KFParticleField_h 1
 
-#include "KFParticleDef.h"
 #include <iostream>
 
 class KFParticleFieldValue{
@@ -45,9 +44,11 @@ class KFParticleFieldRegion{
         fField[i] = field[i];
     }
     
-    float_v fField[10]; //cx0, cx1, cx2 ; // Bx(z) = cx0 + cx1*(z-z0) + cx2*(z-z0)^2
- //   float_v cy0, cy1, cy2 ; // By(z) = cy0 + cy1*(z-z0) + cy2*(z-z0)^2
- //   float_v cz0, cz1, cz2 ; // Bz(z) = cz0 + cz1*(z-z0) + cz2*(z-z0)^2
+    float_v fField[10]; 
+    //cx0, cx1, cx2: Bx(z) = cx0 + cx1*(z-z0) + cx2*(z-z0)^2
+    //cy0, cy1, cy2: By(z) = cy0 + cy1*(z-z0) + cy2*(z-z0)^2
+    //cz0, cz1, cz2: Bz(z) = cz0 + cz1*(z-z0) + cz2*(z-z0)^2
+    //z0
 
     KFParticleFieldValue Get(const float_v z){
       float_v dz = (z-fField[9]);

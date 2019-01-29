@@ -13,7 +13,6 @@
 #include "KFPTrackVector.h"
 #include "KFParticle.h"
 
-#include <iostream>
 using std::vector;
 
 void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
@@ -25,19 +24,8 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
   
   KFPTrack track;
   for ( int iTr = 0; iTr < fNParticles; iTr++ ) {
-    // {   // check cov matrix TODO
-    //   bool ok = true;  
-    //   int k = 0;
-    //   for (int i = 0; i < 6; i++) {
-    //     for (int j = 0; j <= i; j++, k++) {
-    //       ok &= finite( KFPCov[k] );
-    //     }
-    //     ok &= ( KFPCov[k-1] > 0 );
-    //   }
-    //   if (!ok) continue;
-    // }
     tracks->GetTrack(track,iTr);
-    fParticles[iTr] = KFParticle( track, 211 ); // pi+ // TODO include PDG in KFPTrack?
+    fParticles[iTr] = KFParticle( track, 211 );
     fParticles[iTr].AddDaughterId(track.Id());
   }
   
@@ -303,7 +291,6 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
       if( primVtx.GetNDF() >= cutNDF)
 #endif
       {
-//         std::cout << primVtx.X() << " " << primVtx.Y() << " " << primVtx.Z() << " " << cluster.fTracks.size() << std::endl;
         fPrimVertices.push_back(primVtx);
         fClusters.push_back(cluster);
       }
@@ -312,48 +299,6 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
     }
     if(pParticles) delete [] pParticles;
   }
-//   if(fClusters.size()>1)
-//   {
-//     for(int i=1; i<fClusters.size(); i++)
-//     {
-//       float dx = fClusters[0].fP[0] - fClusters[i].fP[0];
-//       float dy = fClusters[0].fP[1] - fClusters[i].fP[1];
-//       float dz = fClusters[0].fP[2] - fClusters[i].fP[2];
-// 
-//       float dr[3] = {dx, dy, dz};
-//       float cov[6] = {fClusters[0].fC[0] + fClusters[i].fC[0],
-//                       fClusters[0].fC[1] + fClusters[i].fC[1],
-//                       fClusters[0].fC[2] + fClusters[i].fC[2],
-//                       fClusters[0].fC[3] + fClusters[i].fC[3],
-//                       fClusters[0].fC[4] + fClusters[i].fC[4],
-//                       fClusters[0].fC[5] + fClusters[i].fC[5] };
-//       float dr2 = dr[0]*dr[0] + dr[1]*dr[1] + dr[2]*dr[2];
-//       float drError2 = dr[0]* (cov[0]* dr[0] + cov[1]* dr[1] + cov[3]* dr[2]) +
-//                        dr[1]* (cov[1]* dr[0] + cov[2]* dr[1] + cov[4]* dr[2]) + 
-//                        dr[2]* (cov[3]* dr[0] + cov[4]* dr[1] + cov[5]* dr[2]);
-//       drError2 /= dr2;
-//     
-//       std::cout << "Ntr 1 " << fClusters[0].fTracks.size() << " ntr2  " << fClusters[i].fTracks.size() << std::endl;
-//       std::cout << "dr2 " << dr2 << " err " << drError2 << " chi " << sqrt(dr2/drError2) << std::endl;
-//     }
-//     int ui;
-//     std::cin >> ui;
-//   }
-//   static int nVert[10]={0.};
-//   if(fClusters.size()<10)
-//     nVert[fClusters.size()]++;
-//   std::cout << "N Vert     ";
-//   for(int i=0; i<10; i++)
-//     std::cout << i << ": " << nVert[i] << "     ";
-//   std::cout << std::endl;
-// 
-//   static int nPart[10]={0.};
-//   if(fNParticles<10)
-//     nPart[fNParticles]++;
-//   std::cout << "N Part     ";
-//   for(int i=0; i<10; i++)
-//     std::cout << i << ": " << nPart[i] << "     ";
-//   std::cout << std::endl;
 }
 
 void KFParticlePVReconstructor::ReconstructPrimVertex()
@@ -376,7 +321,7 @@ void KFParticlePVReconstructor::ReconstructPrimVertex()
     KFParticleCluster cluster;
     fClusters.push_back(cluster);
   }
-} // void KFParticlePVReconstructor::Run()
+}
 
 void KFParticlePVReconstructor::AddPV(const KFVertex &pv, const vector<int> &tracks)
 {

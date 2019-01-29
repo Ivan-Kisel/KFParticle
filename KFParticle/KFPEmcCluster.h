@@ -12,9 +12,6 @@
 #ifndef KFPEmcCluster_H
 #define KFPEmcCluster_H
 
-#include <vector>
-
-#include <iostream>
 #include "KFParticleDef.h"
 
 class KFPEmcCluster

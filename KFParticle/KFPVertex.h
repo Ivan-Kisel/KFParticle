@@ -15,7 +15,7 @@
 class KFPVertex
 {
  public:
-  KFPVertex():fChi2(-1.f), fNContributors(0), fNDF(-1)  { }
+  KFPVertex();
   ~KFPVertex() { }
 
 /*  KFPVertex(const KFPVertex& vVert); 
@@ -25,23 +25,23 @@ class KFPVertex
   float GetY() const { return fP[1]; }
   float GetZ() const { return fP[2]; }
   
-  void   GetXYZ(float *position) const {position[0] = fP[0]; position[1] = fP[1]; position[2] = fP[2];}
-  void   GetXYZ(double *position) const {position[0] = fP[0]; position[1] = fP[1]; position[2] = fP[2];}
-  void   GetCovarianceMatrix(float *covmatrix) const
-         {
-           for (int i=0; i<6; i++)
-             covmatrix[i] = fC[i];
-         }
-  void   GetCovarianceMatrix(double *covmatrix) const
-         {
-           for (int i=0; i<6; i++)
-             covmatrix[i] = fC[i];
-         }
+  void GetXYZ(float *position) const {position[0] = fP[0]; position[1] = fP[1]; position[2] = fP[2];}
+  void GetXYZ(double *position) const {position[0] = fP[0]; position[1] = fP[1]; position[2] = fP[2];}
+  void GetCovarianceMatrix(float *covmatrix) const
+  {
+    for (int i=0; i<6; i++)
+      covmatrix[i] = fC[i];
+  }
+  void GetCovarianceMatrix(double *covmatrix) const
+  {
+    for (int i=0; i<6; i++)
+      covmatrix[i] = fC[i];
+  }
 
   float GetChi2perNDF() const { return fChi2/fNDF; }
   float GetChi2()       const { return fChi2;      }
-  int    GetNDF()        const { return fNDF; }
-  int    GetNContributors() const { return fNContributors; }
+  int   GetNDF()        const { return fNDF; }
+  int   GetNContributors() const { return fNContributors; }
   
   float GetParameter(int i) const { return fP[i]; }
   float GetCovariance(int i) const { return fC[i]; }
@@ -53,14 +53,14 @@ class KFPVertex
   void SetY(float y)      { fP[1] = y; }
   void SetZ(float z)      { fP[2] = z; }
   void SetChi2(float chi) { fChi2 = chi; }
-  void SetNDF(int ndf)     { fNDF = ndf; }
-  void SetNContributors(int nc)  { fNContributors = nc; }
+  void SetNDF(int ndf)    { fNDF = ndf; }
+  void SetNContributors(int nc) { fNContributors = nc; }
 
   void SetCovarianceMatrix(float *C)
-       {
-         for (int i=0; i<6; i++)
-           fC[i] = C[i];
-       }
+  {
+    for (int i=0; i<6; i++)
+      fC[i] = C[i];
+  }
 
   void SetCovarianceMatrix(float C00,float C10,float C11,float C20,float C21,float C22)
   {

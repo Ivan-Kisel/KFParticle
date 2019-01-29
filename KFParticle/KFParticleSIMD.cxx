@@ -428,7 +428,6 @@ KFParticleSIMD::KFParticleSIMD(KFParticle* parts[], const int nPart): KFParticle
       const KFParticle &part = *(parts[ie]);
       ok &= part.NDaughters() == nD;
     }
-//    assert(ok);
     if (!ok) {
       std::cout << " void CbmKFParticle_simd::Create(CbmKFParticle *parts[], int N) " << std::endl;
       exit(1);

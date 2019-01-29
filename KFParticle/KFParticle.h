@@ -22,7 +22,6 @@
 #define KFPARTICLE_H
 
 #include "KFParticleBase.h"
-// #include "TMath.h"
 #include <cmath>
 
 class KFPTrack;

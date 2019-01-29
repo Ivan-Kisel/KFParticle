@@ -31,14 +31,10 @@
 #include <map>
 #include <string>
 
-class TObject;
-class TParticle;
 class TDirectory;
-class TH1;
 class TH1F;
 class TH2F;
 class TH3F;
-class TDirectory;
 
 class KFParticle;
 class TProfile;

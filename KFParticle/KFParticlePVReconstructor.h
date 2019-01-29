@@ -20,8 +20,6 @@
 #include "KFVertex.h"
 #include "assert.h"
 
-#include "KFPTrack.h"
-
 #include <vector>
 
 class KFParticle;

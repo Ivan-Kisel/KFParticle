@@ -15,12 +15,12 @@
 
 #include "KFParticle.h"
 #include "KFParticleSIMD.h"
-
 #include "KFPTrackVector.h"
-#include "KFPEmcCluster.h"
 
 #include <vector>
 #include <map>
+
+class KFPEmcCluster;
 
 class KFParticleFinder
 {

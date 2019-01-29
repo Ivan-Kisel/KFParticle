@@ -27,18 +27,8 @@
 
 class AliHLTTPCCAGBTracker;
 
-
-class TObject;
-class TParticle;
 class KFParticleTopoReconstructor;
 class KFPHistogram;
-class TDirectory;
-class TH1D;
-class TH2D;
-class TH3D;
-class TProfile;
-
-class TFile;
 
 /**
  * @class KFTopoPerformance. Don't use w\o GlobalPerformance

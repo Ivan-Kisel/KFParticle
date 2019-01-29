@@ -11,17 +11,10 @@
 
 #include "KFPVertex.h"
 
-/*
-KFPVertex::KFPVertex(const KFPVertex& vVert) :  TNamed(vVert) 
-{
-} // Copy constructor
-
-KFPVertex& KFPVertex::operator=(const KFPVertex& vVert)
-{
-  if (this!=&vVert) { 
-    TNamed::operator=(vVert); 
-  }
-  
-  return *this; 
+KFPVertex::KFPVertex():fChi2(-1.f), fNContributors(0), fNDF(-1)  
+{ 
+  for(int iP=0; iP<3; iP++)
+    fP[iP] = 0;
+  for(int iC=0; iC<6; iC++)
+    fC[iC] = 0;
 }
-*/

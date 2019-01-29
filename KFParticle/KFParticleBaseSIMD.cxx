@@ -17,9 +17,7 @@
 
 
 #include "KFParticleBaseSIMD.h"
-
 #include <iostream>
-#include <iomanip>
 
 static const float_v small = 1.e-20f;
 
@@ -846,9 +844,7 @@ void KFParticleBaseSIMD::SubtractDaughter( const KFParticleBaseSIMD &Daughter )
 
   float_v D[3][3];
   GetMeasurement(Daughter, m, mV, D);
-  
-//     std::cout << "X: " << fC[0] << " " << mV[0] << " Y: " << fC[2] << " "<< mV[2] << " Z: "<< fC[5] << " "<< mV[5] << std::endl;
-  
+    
   float_v mS[6]= { fC[0]+mV[0], 
                      fC[1]+mV[1], fC[2]+mV[2], 
                      fC[3]+mV[3], fC[4]+mV[4], fC[5]+mV[5] };    
@@ -3907,36 +3903,6 @@ void KFParticleBaseSIMD::InvertCholetsky3(float_v a[6])
   for(int i=0; i<2; i++)
     a[i+1] = u[i][1]*u[1][1]*d[1] + u[i][2]*u[1][2]*d[2];
   a[0] = u[0][0]*u[0][0]*d[0] + u[0][1]*u[0][1]*d[1] + u[0][2]*u[0][2]*d[2];
-
-// float_v mI[9];
-// mI[0] = a[0]*ai[0] + a[1]*ai[1] + a[3]*ai[3];
-// mI[1] = a[0]*ai[1] + a[1]*ai[2] + a[3]*ai[4];
-// mI[2] = a[0]*ai[3] + a[1]*ai[4] + a[3]*ai[5];
-// 
-// mI[3] = a[1]*ai[0] + a[2]*ai[1] + a[4]*ai[3];
-// mI[4] = a[1]*ai[1] + a[2]*ai[2] + a[4]*ai[4];
-// mI[5] = a[1]*ai[3] + a[2]*ai[4] + a[4]*ai[5];
-// 
-// mI[6] = a[3]*ai[0] + a[4]*ai[1] + a[5]*ai[3];
-// mI[7] = a[3]*ai[1] + a[4]*ai[2] + a[5]*ai[4];
-// mI[8] = a[3]*ai[3] + a[4]*ai[4] + a[5]*ai[5];
-// 
-// 
-// std::cout << "In Matrix"<<std::endl;
-// std::cout << ai[0][0] << " " << ai[1][0] << " " << ai[3][0] << std::endl;
-// std::cout << ai[1][0] << " " << ai[2][0] << " " << ai[4][0] << std::endl;
-// std::cout << ai[3][0] << " " << ai[4][0] << " " << ai[5][0] << std::endl;
-// std::cout << "I"<<std::endl;
-// std::cout << mI[0][0] << " " << mI[1][0] << " " << mI[2][0] << std::endl;
-// std::cout << mI[3][0] << " " << mI[4][0] << " " << mI[5][0] << std::endl;
-// std::cout << mI[6][0] << " " << mI[7][0] << " " << mI[8][0] << std::endl;
-// std::cout << " " <<std::endl;
-// std::cout << (ai[0][0]/ai[1][0]) << " "<< (ai[1][0]/ai[2][0]) << " " << (ai[3][0]/ai[4][0]) <<std::endl;
-// std::cout << (ai[0][0]/ai[3][0]) << " "<< (ai[1][0]/ai[4][0]) << " " << (ai[3][0]/ai[5][0]) <<std::endl;
-// 
-// int ui;
-// std::cin >>ui;
-
 }
 
 void KFParticleBaseSIMD::MultQSQt( const float_v Q[], const float_v S[], float_v SOut[], const int kN )

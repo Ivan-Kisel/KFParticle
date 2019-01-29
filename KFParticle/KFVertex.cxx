@@ -11,7 +11,6 @@
 
 
 #include "KFVertex.h"
-#include "iostream"
 
 #ifndef KFParticleStandalone
 ClassImp(KFVertex);
@@ -30,16 +29,6 @@ KFVertex::KFVertex( const KFPVertex &vertex ): fIsConstrained(0)
   fIsLinearized = 0;
   fSFromDecay = 0;
 }
-
-/*
-void     KFVertex::Print(Option_t* ) const
-{  
-  cout<<"KFVertex position:    "<<GetX()<<" "<<GetY()<<" "<<GetZ()<<endl;
-  cout<<"KFVertex cov. matrix: "<<GetCovariance(0)<<endl;
-  cout<<"                         "<<GetCovariance(1)<<" "<<GetCovariance(2)<<endl;
-  cout<<"                         "<<GetCovariance(3)<<" "<<GetCovariance(4)<<" "<<GetCovariance(5)<<endl;
-}
-  */
 
 void KFVertex::SetBeamConstraint( float x, float y, float z, 
 				     float errX, float errY, float errZ )

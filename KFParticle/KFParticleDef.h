@@ -66,10 +66,6 @@ typedef std::vector<float_v, KFPSimdAllocator<float_v> > kfvector_floatv;
 typedef std::vector<float, KFPSimdAllocator<float> > kfvector_float;
 typedef std::vector<int, KFPSimdAllocator<int> > kfvector_int;
 typedef std::vector<unsigned int, KFPSimdAllocator<unsigned int> > kfvector_uint;
-// #include "KFPVector.h"
-// typedef KFPVector<float> kfvector_float;
-// typedef KFPVector<int> kfvector_int;
-// typedef KFPVector<unsigned int> kfvector_uint;
 
 namespace KFPMath
 {
@@ -90,14 +86,11 @@ namespace KFPMath
     const float_v& P = 0.218f;
     y = P * (y * abs(y) - y) + y;
     
-    return y;
-    
-//     return sin(phi);
+    return y;    
   }
   static inline __attribute__((always_inline)) float_v Cos  ( const float_v &phi )
   {     
     return Sin( phi + 1.570796326795f ); //x + pi/2
-//     return cos(phi);
   }
   static inline __attribute__((always_inline)) float_v ATan2( const float_v &y, const float_v &x )
   { 

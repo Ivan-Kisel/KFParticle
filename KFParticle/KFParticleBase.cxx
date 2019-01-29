@@ -19,8 +19,6 @@
 #include "KFParticleBase.h"
 #include <cmath>
 
-#include <iostream>
-
 #ifndef KFParticleStandalone
 ClassImp(KFParticleBase)
 #endif
@@ -29,6 +27,8 @@ ClassImp(KFParticleBase)
 #include "TClass.h"
 #include "TRSymMatrix.h"
 #include "TRVector.h"
+#include <iostream>
+
 KFParticleBase::KFParticleBase() :fChi2(0), fSFromDecay(0), SumDaughterMass(0), fMassHypo(-1), fNDF(-3), 
                                   fId(-1), fParentID(0), fIdTruth(0), fQuality(0), fIdParentMcVx(0), fAtProductionVertex(0),  
                                   fIsLinearized(0), fQ(0), fConstructMethod(0), fPDG(0), fDaughtersIds()
@@ -730,8 +730,6 @@ void KFParticleBase::SubtractDaughter( const KFParticleBase &Daughter )
   float D[3][3];
   if(! GetMeasurement(Daughter, m, mV, D) )
     return;
-
-//     std::cout << "X: " << fC[0] << " " << mV[0] << " Y: " << fC[2] << " "<< mV[2] << " Z: "<< fC[5] << " "<< mV[5] << std::endl;
   
   float mS[6]= { fC[0]+mV[0], 
 		  fC[1]+mV[1], fC[2]+mV[2], 
@@ -1470,17 +1468,10 @@ void KFParticleBase::Construct( const KFParticleBase* vDaughters[], Int_t nDaugh
     fNDF  = -3;
     fChi2 =  0.;
     fQ = 0;
-// std::cout << " nDaughters " << nDaughters << std::endl;
-// int ui;
-// std::cin >>ui;
-//     nDaughters = nDaughters < 200 ? nDaughters : 200;
     
     for( Int_t itr =0; itr<nDaughters; itr++ ){
       AddDaughter( *vDaughters[itr] );    
     }
-// std::cout << "Vse! "<<std::endl;
-// std::cin>>ui;
-    
   }
 
   if( Mass>=0 ) SetMassConstraint( Mass );

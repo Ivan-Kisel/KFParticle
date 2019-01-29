@@ -11,13 +11,11 @@
 
 #include "KFParticleFinder.h"
 
-//for particle finding
-#include <map>
 using std::map;
 using std::vector;
 
 #include "KFParticleDatabase.h"
-#include <iomanip>
+#include "KFPEmcCluster.h"
 
 KFParticleFinder::KFParticleFinder():
   fNPV(-1),fNThreads(1),fDistanceCut(1.f),fLCut(-5.f),fCutCharmPt(0.2f),fCutCharmChiPrim(85.f),fCutLVMPt(0.0f),fCutLVMP(0.0f),fCutJPsiPt(1.0f),
@@ -65,8 +63,6 @@ KFParticleFinder::KFParticleFinder():
 void KFParticleFinder::Init(int nPV) {
   fNPV = nPV;
   
-  
-//std::cout << "NPart estim " << nPart << std::endl;
 //   Particles.reserve(vRTracks.size() + nPart);
 
   fD0.clear();
@@ -1079,39 +1075,6 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
             
               float_m closeDaughters = simd_cast<float_m>(activeNeg && (int_v::IndexesFromZero() < int_v(NTracks)));
               
-//               float_v ds(Vc::Zero), dsPos(Vc::Zero);
-//               if(!( (iTrTypePos == 1) && (iTrTypeNeg == 1) ) )
-//               { 
-//                 float_v par1[8], cov1[36], par2[8], cov2[36];
-//                 daughterNeg.GetDStoParticle(daughterPos, ds, dsPos);
-//                 float_v dsdr[6] = {0.f,0.f,0.f,0.f,0.f,0.f};
-//                 daughterNeg.Transport(ds,dsdr,par1,cov1);
-//                 daughterPos.Transport(dsPos,dsdr,par2,cov2);
-//           
-//                 const float_v& dx = par1[0] - par2[0];
-//                 const float_v& dy = par1[1] - par2[1];
-//                 const float_v& dz = par1[2] - par2[2];
-//                 const float_v& r2 = dx*dx + dy*dy + dz*dz;
-//                 
-//                 const float_v vtx[3] = {(par1[0] + par2[0])/2.f,
-//                                         (par1[1] + par2[1])/2.f,
-//                                         (par1[2] + par2[2])/2.f, };
-//         
-//                 
-//                 const float_v cov[6] = {cov1[0]+cov2[0],
-//                                         cov1[1]+cov2[1],
-//                                         cov1[2]+cov2[2],
-//                                         cov1[3]+cov2[3],
-//                                         cov1[4]+cov2[4],
-//                                         cov1[5]+cov2[5] };
-//                 const float_v& err2 = cov[0]*dx*dx + cov[2]*dy*dy + cov[5]*dz*dz + 2.f*( cov[1]*dx*dy + cov[3]*dx*dz + cov[4]*dy*dz );
-  
-//                 closeDaughters &= daughterNeg.GetDeviationFromParticle(daughterPos) < float_v(1.f);
-//                 closeDaughters &= (r2 < float_v(1.f));
-//                 
-//               std::cout << "distance " << daughterNeg.GetDistanceFromParticle(daughterPos) << " mask " << closeDaughters << std::endl;
-//                 closeDaughters &= (daughterNeg.GetDistanceFromParticle(daughterPos) < float_v(1.f));
-//               }
               if(closeDaughters.isEmpty() && (iTC != 0)) continue;
               
               
@@ -1254,18 +1217,6 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
                                       int_m(negNPixelHits >= int_v(3)) && int_m(posNPixelHits >= int_v(3)) )
                                     || (!(abs(motherPDG) == 421 || abs(motherPDG) == 426));
                 }
-//                 if( !((abs(motherPDG) == 200113).isEmpty()) )
-//                 {
-//                   const float_v& pNeg2 = ptNeg2 + daughterNeg.Pz()*daughterNeg.Pz();
-//                   const float_v& pPos2 = ptPos2 + daughterPos.Pz()*daughterPos.Pz();
-                  
-//                   active[iPDGPos] &= ( (abs(motherPDG) == int_v(200113)) && 
-//                                       int_m(ptNeg2 >= fCutLVMPt*fCutLVMPt) && 
-//                                       int_m(ptPos2 >= fCutLVMPt*fCutLVMPt) && 
-//                                       int_m(pNeg2 >= fCutLVMP*fCutLVMP) && 
-//                                       int_m(pPos2 >= fCutLVMP*fCutLVMP)) 
-//                                     || (!(abs(motherPDG) == int_v(200113)));
-//                 }
                 
                 if(active[iPDGPos].isEmpty()) continue;
 
@@ -2890,38 +2841,23 @@ void KFParticleFinder::NeutralDaughterDecay(KFPTrackVector* vTracks,
                 neutralDaughterUnconstr.GetKFParticle(mother_temp, iV);
                 int neutralId = Particles.size();
                 mother_temp.SetId(neutralId);
-                // if(iTC==0 && iHypothesis==0 && iTrTypeDaughter==1)
                 if (iTrTypeDaughter==0)
                   mother_temp.SetPDG(-outNeutralDaughterPDG[iTC][iHypothesis]);
                 else
                   mother_temp.SetPDG(outNeutralDaughterPDG[iTC][iHypothesis]);
                 Particles.push_back(mother_temp);
 
-//                   for (int i=0; i<mother_temp.NDaughters(); i++){
-//                     std::cout << "Daughter ID="<< mother_temp.DaughterIds()[i] <<std::endl;
-//                     std::cout << "Daughter PDG  "<< Particles[mother_temp.DaughterIds()[i]].GetPDG() <<std::endl;
-//                   }
-// 
-//                    std::cin.get();
                 mother.GetKFParticle(mother_temp, iV);
                 mother_temp.SetId(Particles.size());
                 mother_temp.CleanDaughtersId();
                 mother_temp.AddDaughterId(ChargedDaughter.Id()[iV]);
                 mother_temp.AddDaughterId(neutralId);
-                // if(iTC==0 && iHypothesis==0 && iTrTypeDaughter==1)
                 
                 if (iTrTypeDaughter==0)  
                   mother_temp.SetPDG(-outMotherPDG[iTC][iHypothesis]);
                 else
                   mother_temp.SetPDG(outMotherPDG[iTC][iHypothesis]);
                 Particles.push_back(mother_temp);
-                
-//                   for (int i=0; i<mother_temp.NDaughters(); i++){
-//                     std::cout << "Daughter ID="<< mother_temp.DaughterIds()[i] <<std::endl;
-//                     std::cout << "Daughter PDG  "<< Particles[mother_temp.DaughterIds()[i]].GetPDG() <<std::endl;
-//                   }
-// 
-//                    std::cin.get();
               }
             }
           }//iRot

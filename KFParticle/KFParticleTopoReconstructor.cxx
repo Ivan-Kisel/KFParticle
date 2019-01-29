@@ -21,7 +21,6 @@
 
 #include <fstream>
 #include <iostream>
-#include <stdio.h>
 #include "string"
 using std::string;
 using std::ofstream;
