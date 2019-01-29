@@ -697,17 +697,18 @@ inline void KFParticleFinder::ConstructV0(KFPTrackVector* vTracks,
 //   saveParticle &= (float_m(!isPrimary) && ldlMin > ldlCut) || isPrimary;
 
   saveParticle &= (lMin < 200.f);
-  
-//   KFParticleSIMD motherTopo;
-//     ldlMin = 1.e8f;
-//   for(int iP=0; iP<fNPV; iP++)
-//   {
-//     motherTopo = mother;
-//     motherTopo.SetProductionVertex(PrimVtx[iP]);
-//     motherTopo.GetDecayLength(l[iP], dl[iP]);
-//     float_v ldl = (l[iP]/dl[iP]);
-//     ldlMin( (ldl < ldlMin) && saveParticle) = ldl;
-//   }
+#ifdef NonhomogeneousField  
+  KFParticleSIMD motherTopo;
+    ldlMin = 1.e8f;
+  for(int iP=0; iP<fNPV; iP++)
+  {
+    motherTopo = mother;
+    motherTopo.SetProductionVertex(PrimVtx[iP]);
+    motherTopo.GetDecayLength(l[iP], dl[iP]);
+    float_v ldl = (l[iP]/dl[iP]);
+    ldlMin( (ldl < ldlMin) && saveParticle) = ldl;
+  }
+#endif
   saveParticle &= ( (float_m(!isPrimary) && ldlMin > ldlCut) || float_m(isPrimary) );
   
   
@@ -1214,12 +1215,12 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
                     motherPDG( isSecondary && (abs(trackPdgPos[iPDGPos])==  211) && int_m(abs(trackPdgNeg) ==  321) ) =   421; //D0 -> pi+ K-
                 }
                 
-//                 if( (iTrTypeNeg == 0) && (iTrTypePos == 0) )
-//                 {
-//                   float_v chiprimCut = fCuts2D[0];
-//                   chiprimCut( float_m(abs(motherPDG) == 421 || abs(motherPDG) == 426) ) = fCutCharmChiPrim;
-//                   active[iPDGPos] &= int_m(chiPrimNeg > chiprimCut) && int_m(chiPrimPos > chiprimCut);
-//                 }
+                if( (iTrTypeNeg == 0) && (iTrTypePos == 0) )
+                {
+                  float_v chiprimCut = fCuts2D[0];
+                  chiprimCut( simd_cast<float_m>(abs(motherPDG) == 421 || abs(motherPDG) == 426) ) = fCutCharmChiPrim;
+                  active[iPDGPos] &= simd_cast<int_m>(chiPrimNeg > chiprimCut && chiPrimPos > chiprimCut);
+                }
                 
                 active[iPDGPos] &= (motherPDG != -1);
                 if(!(fDecayReconstructionList.empty()))
