@@ -59,6 +59,7 @@ set (SOURCES
   KFParticle/KFParticle.cxx
   KFParticle/KFParticleSIMD.cxx
   KFParticle/KFParticleFinder.cxx
+  KFParticle/KFPEmcCluster.cxx
   KFParticlePerformance/KFMCVertex.cxx
   KFParticlePerformance/KFParticlePerformanceBase.cxx
   KFParticlePerformance/KFTopoPerformance.cxx
