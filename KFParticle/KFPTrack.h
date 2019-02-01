@@ -140,11 +140,11 @@ public:
 #endif
  private:
 
-  float fP[6];  //coordinates of the vertex
-  float fC[21];  //Covariance matrix of the vertex parameters
-  float fChi2;  //chi-square of the vertex fitting
-  char fQ;     //charge
-  short fNDF;  //degree of freedom number
+  float fP[6];  //!< coordinates of the vertex
+  float fC[21]; //!< Covariance matrix of the vertex parameters
+  float fChi2;  //!< chi-square of the vertex fitting
+  char fQ;      //!< charge
+  short fNDF;   //!< degree of freedom number
 
   int fId;
   

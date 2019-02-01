@@ -17,7 +17,7 @@
 class KFPEmcCluster
 {
  public:
-  KFPEmcCluster():fId() { }
+  KFPEmcCluster():fP(), fC(), fId() { }
   ~KFPEmcCluster() { }
 
   int Size() const { return fP[0].size(); }
@@ -47,6 +47,29 @@ class KFPEmcCluster
   void PrintTrack(int n);
   void PrintTracks();
   
+  KFPEmcCluster(const KFPEmcCluster& clusters)
+  {
+    const int localSize = clusters.Size();
+    
+    for(int i=0; i<4; i++)
+    {
+      fP[i].resize(localSize);
+      for(int n=0; n<localSize; n++)
+        fP[i][n] = clusters.fP[i][n];
+    }
+
+    for(int i=0; i<10; i++)
+    {
+      fC[i].resize(localSize);
+      for(int n=0; n<localSize; n++)
+        fC[i][n] = clusters.fC[i][n];
+    }
+    
+    fId.resize(localSize);
+    for(int n=0; n<localSize; n++)
+      fId[n] = clusters.fId[n];    
+  }
+  
   const KFPEmcCluster& operator = (const KFPEmcCluster& clusters)
   {
     const int localSize = clusters.Size();
@@ -73,8 +96,8 @@ class KFPEmcCluster
   }
   
  private:  
-  kfvector_float fP[4];  //coordinates of the cluster : x, y, z, E
-  kfvector_float fC[10];  //Covariance matrix of the track parameters
+  kfvector_float fP[4];  //!< Coordinates of the cluster and energy: x, y, z, E
+  kfvector_float fC[10]; //!< Covariance matrix of the track parameters
 
   kfvector_int fId;
 };

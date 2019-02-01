@@ -23,6 +23,7 @@ KFParticleFinder::KFParticleFinder():
   fDPlus3Pi(0), fDMinus3Pi(0), fDsPlusK2Pi(0), fDsMinusK2Pi(0), fLcPlusP2Pi(0), fLcMinusP2Pi(0),
   fLPi(0), fLPiPIndex(0), fHe3Pi(0), fHe3PiBar(0), fHe4Pi(0), fHe4PiBar(0), 
   fHe4L(0), fHe5L(0),  fLLn(0), fH5LL(0),
+  fSecCandidates(), fPrimCandidates(), fPrimCandidatesTopo(),fPrimCandidatesTopoMass(),
   fEmcClusters(0), fMixedEventAnalysis(0), fDecayReconstructionList()
 {
   //Cuts
