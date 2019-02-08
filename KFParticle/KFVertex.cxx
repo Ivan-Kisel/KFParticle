@@ -26,7 +26,6 @@ KFVertex::KFVertex( const KFPVertex &vertex ): fIsConstrained(0)
   fNDF = 2*vertex.GetNContributors() - 3;
   fQ = 0;
   fAtProductionVertex = 0;
-  fIsLinearized = 0;
   fSFromDecay = 0;
 }
 

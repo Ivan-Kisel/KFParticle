@@ -931,7 +931,7 @@ inline void KFParticleSIMD::TransportToParticle( const KFParticleSIMD &p )
   float_v dsdr[4][6];
   float_v dS[2];
   GetDStoParticle( p, dS, dsdr );
-  TransportToDS( dS[0], dsdr[3] );
+  TransportToDS( dS[0], dsdr[0] );
 }
 
 inline void KFParticleSIMD::TransportToDS( float_v dS, const float_v* dsdr )
