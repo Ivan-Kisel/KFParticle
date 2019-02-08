@@ -81,7 +81,7 @@ class KFParticleBase :public TObject {
   void SetConstructMethod(Int_t m) {fConstructMethod = m;} ///< Defines the construction method for the current particle (see description of fConstructMethod).
   void SetMassHypo(float m) { fMassHypo = m;} ///< Sets the mass hypothesis to the particle, is used when fConstructMethod = 2.
   const float& GetMassHypo() const { return fMassHypo; } ///< Returns the mass hypothesis.
-  const float& GetSumDaughterMass() const {return SumDaughterMass;} ///< Returns the sum of masses of the daughters
+  const float& GetSumDaughterMass() const {return SumDaughterMass;} ///< Returns the sum of masses of the daughters.
 
   //*
   //*  ACCESSORS

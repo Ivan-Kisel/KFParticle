@@ -203,11 +203,11 @@ class KFParticle :public KFParticleBase
   float & Chi2 () ; ///< Modifier of Chi2 of the fit.
   Int_t & NDF  () ; ///< Modifier of number of decrease of freedom.
 
-  float & Parameter ( int i ) ;         ///< Modifier of P[i] parameter.
-  float & Covariance( int i ) ;         ///< Modifier of C[i] element of the covariance matrix in the lower triangular form.
-  float & Covariance( int i, int j ) ;  ///< Modifier of C[i,j] element of the covariance matrix.
-  float * Parameters () ;               ///< Returns pointer to the parameters fP
-  float * CovarianceMatrix() ;          ///< Returns pointer to the covariance matrix fC
+  float & Parameter ( int i ) ;        ///< Modifier of P[i] parameter.
+  float & Covariance( int i ) ;        ///< Modifier of C[i] element of the covariance matrix in the lower triangular form.
+  float & Covariance( int i, int j ) ; ///< Modifier of C[i,j] element of the covariance matrix.
+  float * Parameters () ;              ///< Returns pointer to the parameters fP
+  float * CovarianceMatrix() ;         ///< Returns pointer to the covariance matrix fC
 
   //* 
   //* CONSTRUCTION OF THE PARTICLE BY ITS DAUGHTERS AND MOTHER
@@ -893,6 +893,17 @@ inline void KFParticle::TransportToParticle( const KFParticle &p )
 
 inline float KFParticle::GetDStoPoint( const float xyz[], float* dsdr ) const 
 {
+  /** Returns dS = l/p parameter, where \n
+   ** 1) l - signed distance to the DCA point with the input xyz point;\n
+   ** 2) p - momentum of the particle; \n
+   ** Also calculates partial derivatives dsdr of the parameter dS over the state vector of the current particle.
+   ** If "HomogeneousField" is defined KFParticleBase::GetDStoPointBz() is called,
+   ** if "NonhomogeneousField" is defined - KFParticleBase::GetDStoPointCBM()
+   ** \param[in] xyz[3] - point, to which particle should be transported
+   ** \param[out] dsdr[6] = ds/dr partial derivatives of the parameter dS over the state vector of the current particle
+   ** \param[in] param - optional parameter, is used in case if the parameters of the particle are rotated
+   ** to other coordinate system (see GetDStoPointBy() function), otherwise fP are used
+   **/
 #ifdef HomogeneousField
   return KFParticleBase::GetDStoPointBz( GetFieldAlice(), xyz, dsdr );
 #endif
@@ -911,6 +922,12 @@ inline float KFParticle::GetFieldAlice()
 #ifdef HomogeneousField
 inline void KFParticle::GetFieldValue( const float * /*xyz*/, float B[] ) const 
 {    
+  /** Calculates the Bx, By, Bz components at the point xyz using approximation of the
+   ** magnetic field along the particle trajectory.
+   ** \param[in] xyz[3] - X, Y, Z coordiantes of the point where the magnetic field should be calculated
+   ** \param[out] B[3] - value of X, Y, Z components of the calculated magnetic field at the given point
+   **/
+  
   B[0] = B[1] = 0;
   B[2] = GetFieldAlice();
 }
@@ -919,6 +936,12 @@ inline void KFParticle::GetFieldValue( const float * /*xyz*/, float B[] ) const
 #ifdef NonhomogeneousField
 inline void KFParticle::GetFieldValue( const float xyz[], float B[] ) const 
 {
+  /** Calculates the Bx, By, Bz components at the point xyz using approximation of the
+   ** magnetic field along the particle trajectory.
+   ** \param[in] xyz[3] - X, Y, Z coordiantes of the point where the magnetic field should be calculated
+   ** \param[out] B[3] - value of X, Y, Z components of the calculated magnetic field at the given point
+   **/
+  
   const float dz = (xyz[2]-fieldRegion[9]);
   const float dz2 = dz*dz;
 
@@ -930,6 +953,22 @@ inline void KFParticle::GetFieldValue( const float xyz[], float B[] ) const
 
 inline void KFParticle::GetDStoParticle( const KFParticleBase &p, float dS[2], float dsdr[4][6] ) const
 { 
+  /** Calculates dS = l/p parameters for two particles, where \n
+   ** 1) l - signed distance to the DCA point with the other particle;\n
+   ** 2) p - momentum of the particle \n
+   ** dS[0] is the transport parameter for the current particle, dS[1] - for the particle "p".
+   ** Also calculates partial derivatives dsdr of the parameters dS[0] and dS[1] over the state vectors of the particles:\n
+   ** 1) dsdr[0][6] = d(dS[0])/d(param1);\n
+   ** 2) dsdr[1][6] = d(dS[0])/d(param2);\n
+   ** 3) dsdr[2][6] = d(dS[1])/d(param1);\n
+   ** 4) dsdr[3][6] = d(dS[1])/d(param2);\n
+   ** where param1 are parameters of the current particle fP and
+   ** param2 are parameters of the second particle p.fP. If "HomogeneousField" is defined KFParticleBase::GetDStoParticleBz() is called,
+   ** if "NonhomogeneousField" is defined - KFParticleBase::GetDStoParticleCBM()
+   ** \param[in] p - second particle
+   ** \param[out] dS[2] - transport parameters dS for the current particle (dS[0]) and the second particle "p" (dS[1])
+   ** \param[out] dsdr[4][6] - partial derivatives of the parameters dS[0] and dS[1] over the state vectors of the both particles
+   **/
 #ifdef HomogeneousField
   KFParticleBase::GetDStoParticleBz( GetFieldAlice(), p, dS, dsdr ) ;
 #endif
@@ -952,7 +991,6 @@ inline void KFParticle::Transport( float dS, const float* dsdr, float P[], float
    ** Since dS can depend on the state vector r1 of other particle or vertex, the corelation matrix 
    ** F1 = d(fP new)/d(r1) can be optionally calculated if a pointer F1 is provided.
    *  Parameters F and F1 should be either both initialised or both set to null pointer.
-   ** \param[in] Bz - z-component of the constant homogeneous magnetic field Bz
    ** \param[in] dS - transport parameter which defines the distance to which particle should be transported
    ** \param[in] dsdr[6] = ds/dr - partial derivatives of the parameter dS over the state vector of the current particle
    ** \param[out] P[8] - array, where transported parameters should be stored

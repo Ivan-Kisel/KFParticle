@@ -46,7 +46,6 @@ KFParticle::KFParticle( const KFParticle &d1, const KFParticle &d2 ): KFParticle
 void KFParticle::Create( const float Param[], const float Cov[], Int_t Charge, float mass )
 {
   /** Constructor from a "cartesian" track, mass hypothesis should be provided
-   **
    ** \param[in] Param[6] = { X, Y, Z, Px, Py, Pz } - position and momentum
    ** \param[in] Cov[21]  - lower-triangular part of the covariance matrix:@n
    ** \verbatim
@@ -69,7 +68,6 @@ void KFParticle::Create( const float Param[], const float Cov[], Int_t Charge, f
 void KFParticle::Create( const Double_t Param[], const Double_t Cov[], Int_t Charge, float mass )
 {
   /** Constructor from a "cartesian" track, mass hypothesis should be provided
-   **
    ** \param[in] Param[6] = { X, Y, Z, Px, Py, Pz } - position and momentum
    ** \param[in] Cov[21]  - lower-triangular part of the covariance matrix:@n
    ** \verbatim
@@ -94,7 +92,6 @@ void KFParticle::Create( const Double_t Param[], const Double_t Cov[], Int_t Cha
 KFParticle::KFParticle( const KFPTrack &track, const int PID ): KFParticleBase()
 {
   /** Constructor from a track in the KF Particle format, PID hypothesis should be provided
-   **
    ** \param[in] track - KFPTrack containing 6 parameters: { X, Y, Z, Px, Py, Pz } and their errors
    ** \param[in] PID - PID hypothesis, needed to assign mass to a particle and calculate the energy
    **/
@@ -119,7 +116,6 @@ KFParticle::KFParticle( const KFPTrack &track, const int PID ): KFParticleBase()
 KFParticle::KFParticle( const KFPVertex &vertex ): KFParticleBase()
 {
   /** Constructor from a vertex in the KF Particle format
-   **
    ** \param[in] vertex - KFPVertex containing 3 parameters: { X, Y, Z } and their errors
    **/
 
@@ -136,7 +132,6 @@ Bool_t KFParticle::GetDistanceFromVertexXY( const float vtx[], const float Cv[],
 {
   /** Calculates the DCA distance from a vertex together with the error in the XY plane.
    ** Returns "true" if calculation is failed, "false" if both value and the error are well defined.
-   **
    ** \param[in] vtx[2] - { X, Y } coordinates of the vertex
    ** \param[in] Cv[3] - lower-triangular part of the covariance matrix of the vertex
    ** \param[out] val - the distance in the XY plane to the vertex
@@ -191,7 +186,6 @@ Bool_t KFParticle::GetDistanceFromVertexXY( const float vtx[], float &val, float
 {
   /** Calculates the DCA distance from a vertex together with the error in the XY plane.
    ** Returns "true" if calculation is failed, "false" if both value and the error are well defined.
-   **
    ** \param[in] vtx[2] - { X, Y } coordinates of the vertex
    ** \param[out] val - the distance in the XY plane to the vertex
    ** \param[out] err - the error of the calculated distance, takes into account errors of the particle only
@@ -204,7 +198,6 @@ Bool_t KFParticle::GetDistanceFromVertexXY( const KFParticle &Vtx, float &val, f
 {
   /** Calculates the DCA distance from a vertex in the KFParticle format together with the error in the XY plane.
    ** Returns "true" if calculation is failed, "false" if both value and the error are well defined.
-   **
    ** \param[in] Vtx - the vertex in the KFParticle format
    ** \param[out] val - the distance in the XY plane to the vertex
    ** \param[out] err - the error of the calculated distance, takes into account errors of the particle and vertex
@@ -218,7 +211,6 @@ Bool_t KFParticle::GetDistanceFromVertexXY( const KFPVertex &Vtx, float &val, fl
 {
   /** Calculates the DCA distance from a vertex in the KFPVertex format together with the error in the XY plane.
    ** Returns "true" if calculation is failed, "false" if both value and the error are well defined.
-   **
    ** \param[in] Vtx - the vertex in the KFPVertex format
    ** \param[out] val - the distance in the XY plane to the vertex
    ** \param[out] err - the error of the calculated distance, takes into account errors of the particle and vertex
@@ -231,7 +223,6 @@ Bool_t KFParticle::GetDistanceFromVertexXY( const KFPVertex &Vtx, float &val, fl
 float KFParticle::GetDistanceFromVertexXY( const float vtx[] ) const
 {
   /** Returns the DCA distance from a vertex in the XY plane.
-   **
    ** \param[in] vtx[2] - { X, Y } coordinates of the vertex
    **/
 
@@ -243,7 +234,6 @@ float KFParticle::GetDistanceFromVertexXY( const float vtx[] ) const
 float KFParticle::GetDistanceFromVertexXY( const KFParticle &Vtx ) const 
 {
   /** Returns the DCA distance from a vertex in the KFParticle format in the XY plane.
-   **
    ** \param[in] Vtx - the vertex in the KFParticle format
    **/
 
@@ -254,7 +244,6 @@ float KFParticle::GetDistanceFromVertexXY( const KFParticle &Vtx ) const
 float KFParticle::GetDistanceFromVertexXY( const KFPVertex &Vtx ) const 
 {
   /** Returns the DCA distance from a vertex in the KFParticle format in the XY plane.
-   **
    ** \param[in] Vtx - the vertex in the KFPVertex format
    **/
 
@@ -265,7 +254,6 @@ float KFParticle::GetDistanceFromVertexXY( const KFPVertex &Vtx ) const
 float KFParticle::GetDistanceFromParticleXY( const KFParticle &p ) const 
 {
   /** Returns the DCA distance between the current and the second particles in the XY plane.
-   **
    ** \param[in] p - the second particle
    **/
   
@@ -283,7 +271,6 @@ float KFParticle::GetDistanceFromParticleXY( const KFParticle &p ) const
 float KFParticle::GetDeviationFromParticleXY( const KFParticle &p ) const 
 {
   /** Returns sqrt(Chi2/ndf) deviation from other particle in the XY plane.
-   **
    ** \param[in] p - the second particle
    **/
   
@@ -312,7 +299,6 @@ float KFParticle::GetDeviationFromParticleXY( const KFParticle &p ) const
 float KFParticle::GetDeviationFromVertexXY( const float vtx[], const float Cv[] ) const 
 {
   /** Returns sqrt(Chi2/ndf) deviation from the vertex in the XY plane.
-   **
    ** \param[in] vtx[2] - { X, Y } coordinates of the vertex
    ** \param[in] Cv[3] - lower-triangular part of the covariance matrix of the vertex
    **/
@@ -327,7 +313,6 @@ float KFParticle::GetDeviationFromVertexXY( const float vtx[], const float Cv[] 
 float KFParticle::GetDeviationFromVertexXY( const KFParticle &Vtx ) const  
 {
   /** Returns sqrt(Chi2/ndf) deviation from the vertex in the KFParticle format in the XY plane.
-   **
    ** \param[in] Vtx - the vertex in the KFParticle format
    **/
 
@@ -338,7 +323,6 @@ float KFParticle::GetDeviationFromVertexXY( const KFParticle &Vtx ) const
 float KFParticle::GetDeviationFromVertexXY( const KFPVertex &Vtx ) const 
 {
   /** Returns sqrt(Chi2/ndf) deviation from the vertex in the KFPVertex format in the XY plane.
-   **
    ** \param[in] Vtx - the vertex in the KFPVertex format
    **/
 
@@ -350,7 +334,6 @@ float KFParticle::GetDeviationFromVertexXY( const KFPVertex &Vtx ) const
 void KFParticle::GetParametersAtPoint(const float* point, const float* pointCov, float* m, float* mV)
 {
   /** Transports particle to the DCA of the given point and stores obtained parameters and covariance matrix
-   **
    ** \param[in] point[3] - the point to which particle is transported
    ** \param[in] pointCov[6] - the covariance matrix of the point
    ** \param[out] m[8] - the parameters of the particle at the DCA point
@@ -381,7 +364,6 @@ void KFParticle::GetParametersAtPoint(const float* point, const float* pointCov,
 float KFParticle::GetAngle  ( const KFParticle &p ) const 
 {
   /** Returns the opening angle between the current and the second particle in 3D.
-   **
    ** \param[in] p - the second particle
    **/
   
@@ -404,7 +386,6 @@ float KFParticle::GetAngle  ( const KFParticle &p ) const
 float KFParticle::GetAngleXY( const KFParticle &p ) const 
 {
   /** Returns the opening angle between the current and the second particle in the XY plane.
-   **
    ** \param[in] p - the second particle
    **/
   
@@ -427,7 +408,6 @@ float KFParticle::GetAngleXY( const KFParticle &p ) const
 float KFParticle::GetAngleRZ( const KFParticle &p ) const 
 {
   /** Returns the opening angle between the current and the second particle in the RZ plane, R = sqrt(X*X+Y*Y).
-   **
    ** \param[in] p - the second particle
    **/
 
@@ -452,7 +432,6 @@ float KFParticle::GetAngleRZ( const KFParticle &p ) const
 float KFParticle::GetPseudoProperDecayTime( const KFParticle &pV, const float& mass, float* timeErr2 ) const
 { 
   /** Returns the Pseudo Proper Time of the decay = (r*pt) / |pt| * M/|pt|
-   **
    ** \param[in] pV - the creation point of the particle
    ** \param[in] mass - the mass of the particle
    ** \param[out] timeErr2 - error of the returned value, if null pointer is provided - is not calculated

@@ -1775,7 +1775,7 @@ float KFParticleBase::GetDStoPointBy( float By, const float xyz[3], float dsdr[6
    ** The particle parameters are transformed to the coordinate system, where the main component of the magnetic field
    ** By is directed along the Z axis: x->x, y->-z, z->y, and the function GetDStoPointBz() is called. Derivatives dsdr are transformed back
    ** to the coordinate system of the particle.
-   ** \param[in] B - magnetic field By
+   ** \param[in] By - magnetic field By
    ** \param[in] xyz[3] - point, to which particle should be transported
    ** \param[out] dsdr[6] = ds/dr - partial derivatives of the parameter dS over the state vector of the current particle
    **/
@@ -1803,7 +1803,7 @@ float KFParticleBase::GetDStoPointB( const float* B, const float xyz[3], float d
    ** 2) p - momentum of the particle; \n
    ** under the assumption of the constant homogeneous field B.
    ** Also calculates partial derivatives dsdr of the parameter dS over the state vector of the current particle.
-   ** The particle parameters are transformed to the coordinate system, where the magnetic field at the current point
+   ** The particle parameters are transformed to the coordinate system, where the magnetic field B
    ** is directed along the Z axis and the function GetDStoPointBz() is called. Derivatives dsdr are transformed back
    ** to the coordinate system of the particle.
    ** \param[in] B[3] - three components of the magnetic field at the current position of the particle
@@ -3034,7 +3034,6 @@ void KFParticleBase::SubtractFromVertex(  KFParticleBase &Vtx ) const
    ** \param[in] Vtx - vertex from which particle should be subtracted
    **/
   
-  //TODO this solution is an approximation, find exact solution
   float m[8];
   float mCm[36];
   float D[3][3];
