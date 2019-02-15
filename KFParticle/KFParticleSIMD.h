@@ -341,10 +341,13 @@ class KFParticleSIMD :public KFParticleBaseSIMD
   
  private:
 #ifdef HomogeneousField
-  static float_v fgBz;  ///< Bz compoment of the magnetic field
+  static float_v fgBz;  ///< Bz compoment of the magnetic field (is defined in case of #ifdef HomogeneousField)
 #endif
 #ifdef NonhomogeneousField
-  KFParticleFieldRegion fField; ///< Approximation of the magnetic field along the particle trajectory, each component is approximated with a parabola
+  /** \brief Approximation of the magnetic field along the track trajectory.
+   ** Each component (Bx, By, Bz) is approximated with the parabola depending on Z coordinate. Is defined in case of #ifdef NonhomogeneousField.
+   **/
+  KFParticleFieldRegion fField;
 #endif
 };
 
@@ -359,6 +362,9 @@ class KFParticleSIMD :public KFParticleBaseSIMD
 #ifdef HomogeneousField
 inline void KFParticleSIMD::SetField( float_v Bz )
 { 
+  /** Sets the constant homogemeous one-component magnetic field Bz (is defined in case of #ifdef HomogeneousField).
+   ** \param[in] Bz - Z-component of the magnetic field
+   **/
   fgBz = Bz;
 }
 #endif
@@ -961,6 +967,7 @@ inline float_v KFParticleSIMD::GetDStoPoint( const float_v xyz[3], float_v dsdr[
 #ifdef HomogeneousField
 inline float_v KFParticleSIMD::GetFieldAlice()
 { 
+  /** Returns value of the constant homogemeous one-component magnetic field Bz, (is defined in case of #ifdef HomogeneousField). */
   return fgBz; 
 }
 #endif

@@ -32,7 +32,7 @@
 #include <vector>
 
 /** @class KFParticleBase
- ** @brief The base of KF Particle class, describes particle objects.
+ ** @brief The base of KFParticle class, describes particle objects.
  ** @author  S.Gorbunov, I.Kisel, M.Zyzak
  ** @date 05.02.2019
  ** @version 1.0

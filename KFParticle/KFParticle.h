@@ -28,7 +28,7 @@ class KFPTrack;
 class KFPVertex;
 
 /** @class KFParticle
- ** @brief The main scalar class of KF Particle pacakge, describes particle objects.
+ ** @brief The main scalar class of KF Particle package, describes particle objects.
  ** @author  S.Gorbunov, I.Kisel, M.Zyzak
  ** @date 05.02.2019
  ** @version 1.0
@@ -40,7 +40,7 @@ class KFPVertex;
  ** short-lived particles from other tracks or particles. The mathematics is 
  ** based on the Kalman filter method. It also allows to subtract particles from 
  ** the already constructed object,
- ** to transport partices, get parameters together with their erros, get distance 
+ ** to transport particles, get parameters together with their errors, get distance 
  ** to other particles and vertices, get deviations from them in terms of errors, etc.
  **/
 
@@ -311,9 +311,12 @@ class KFParticle :public KFParticleBase
   
  private:
 #ifdef HomogeneousField
-  static float fgBz;  //* Bz compoment of the magnetic field
+  static float fgBz;  ///< Bz compoment of the magnetic field (is defined in case of #ifdef HomogeneousField)
 #endif
 #ifdef NonhomogeneousField
+  /** \brief Approximation of the magnetic field along the track trajectory.
+   ** Each component (Bx, By, Bz) is approximated with the parabola depending on Z coordinate. Is defined in case of #ifdef NonhomogeneousField.
+   **/
   float fieldRegion[10];
 #endif
   
@@ -333,6 +336,9 @@ class KFParticle :public KFParticleBase
 #ifdef HomogeneousField
 inline void KFParticle::SetField( float Bz )
 { 
+  /** Sets the constant homogemeous one-component magnetic field Bz (is defined in case of #ifdef HomogeneousField).
+   ** \param[in] Bz - Z-component of the magnetic field
+   **/
   fgBz = Bz;
 }
 #endif
@@ -915,6 +921,7 @@ inline float KFParticle::GetDStoPoint( const float xyz[], float* dsdr ) const
 #ifdef HomogeneousField
 inline float KFParticle::GetFieldAlice()
 { 
+  /** Returns value of the constant homogemeous one-component magnetic field Bz, (is defined in case of #ifdef HomogeneousField). */
   return fgBz; 
 }
 #endif
