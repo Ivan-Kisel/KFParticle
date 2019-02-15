@@ -97,7 +97,7 @@ public:
     for (int i=0; i<21; i++)
       covmatrix[i] = fC[i];
   }
-  float GetParameter(int i) const { return fP[i]; }  ///< Returns parameter "i" of the track. \param[in] i - index of the track to be returned
+  float GetParameter(int i) const { return fP[i]; }  ///< Returns parameter "i" of the track. \param[in] i - index of the parameter to be returned
   float GetCovariance(int i) const { return fC[i]; } ///< Returns element of the covariance matrix "i" of the track. \param[in] i - index of the element to be returned
 
   int    Charge()        const { return fQ; }        ///< Returns charge of the track.
@@ -105,13 +105,13 @@ public:
   float GetChi2()       const { return fChi2;      } ///< Returns Chi2 of the track.
   int    GetNDF()        const { return fNDF; }      ///< Returns number of degrees of freedom of the track.
 
-  const float * GetTrack() const { return fP; }     ///< Retrns a pointer to the array of track parameters.
-  const float * GetCovMatrix() const { return fC; } ///< Retrns a pointer to the array of the covariance matrix elemets stored in a lower triangular form.
+  const float * GetTrack() const { return fP; }     ///< Returns a pointer to the array of track parameters.
+  const float * GetCovMatrix() const { return fC; } ///< Returns a pointer to the array of the covariance matrix elements stored in a lower triangular form.
 
   void SetParameters(const float *position) 
   {
     /** Sets parameters { X, Y, Z, Px, Py, Pz } of the track from the input array of floats.
-     ** \param[in] position - array with the input track parameter
+     ** \param[in] position - input array with the track parameters
      **/
     for(int i=0; i<6; i++)
       fP[i] = position[i];
@@ -119,7 +119,7 @@ public:
   void SetParameters(double *position) 
   { 
     /** Sets parameters { X, Y, Z, Px, Py, Pz } of the track from the input array of doubles.
-     ** \param[in] position - array with the input track parameter
+     ** \param[in] position - input array with the track parameters
      **/
     for(int i=0; i<6; i++)
       fP[i] = position[i];
@@ -170,7 +170,7 @@ public:
   void SetCovarianceMatrix(const float *C)
   {
     /** Sets the covariance matrix from the input array of floats.
-     ** \param[in] C[21] - array with the input elements of the covariance matrix stroed in the lower trinagular form
+     ** \param[in] C[21] - array with the input elements of the covariance matrix stored in the lower triangular form
      **/
     for (int i=0; i<21; i++)
       fC[i] = C[i];
@@ -178,7 +178,7 @@ public:
   void SetCovarianceMatrix(const double *C)
   {
     /** Sets the covariance matrix from the input array of doubles.
-     ** \param[in] C[21] - array with the input elements of the covariance matrix stroed in the lower trinagular form
+     ** \param[in] C[21] - array with the input elements of the covariance matrix stored in the lower triangular form
      **/
     for (int i=0; i<21; i++)
       fC[i] = C[i];
@@ -187,7 +187,7 @@ public:
   /** Sets an element of the covariance matrix with index "i". \param[in] c - value to be set \param[in] i - index of the element */
   void SetCovariance(const int i, const float c) { fC[i]=c; } 
   
-  void RotateXY( float alpha ); // rotate on alpha in XY plane. Should be usefull for CS change
+  void RotateXY( float alpha ); // rotate on alpha in XY plane. Should be useful for CS change
 
   int Id() const { return fId; }    ///< Returns Id of the track.
   void SetId( int id ){ fId = id; } ///< Sets Id of the track.
@@ -200,7 +200,7 @@ public:
  private:
 
   float fP[6];  ///< Parameters of the track: { X, Y, Z, Px, Py, Pz }.
-  float fC[21]; ///< Covariance matrix of the track parameters. Stroed in the lower triangular form.
+  float fC[21]; ///< Covariance matrix of the track parameters. Stored in the lower triangular form.
   float fChi2;  ///< Chi-square of the track fit.
   char fQ;      ///< Charge of the track.
   short fNDF;   ///< Number of degree of freedom of the fit.
