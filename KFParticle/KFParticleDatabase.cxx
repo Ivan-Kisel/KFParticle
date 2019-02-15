@@ -39,6 +39,9 @@ KFParticleDatabase::KFParticleDatabase():
   fMassDPlusPDGSigma(0.0115)
 #endif
 {
+  /** The default constructor. Initialises masses and widths of the peaks. 
+   ** Be aware, that widths of the peaks are experiment specific.
+   **/
   fMass[0] = 0.000510999;
   fMass[1] = 0.105658;
   fMass[2] = 0.13957;
