@@ -14,9 +14,22 @@
 #ifdef __ROOT__
 ClassImp(KFPTrack);
 #endif
-  // rotate on alpha in XY plane
+
 void KFPTrack::RotateXY( float alpha )
 {
+  /** Rotates the parameters of the track on an angle alpha in the XY plane.
+   ** Can be used in case of the transforamtion of the coordinate system.
+   ** The rotation matrix is:
+   ** \verbatim
+   {  cos(A), -sin(A),  0,        0,        0,   0 }
+   {  sin(A),  cos(A),  0,        0,        0,   0 }
+   {       0,       0,  1,        0,        0,   0 }
+   {       0,       0,  0,   cos(A),  -sin(A),   0 }
+   {       0,       0,  0,   sin(A),   cos(A),   0 }
+   {       0,       0,  0,        0,        0,   1 } 
+   \endverbatim
+   ** \param[in] alpha - rotation angle
+   **/
   const float cA = cos( alpha );
   const float sA = sin( alpha );
 
@@ -68,4 +81,4 @@ void KFPTrack::RotateXY( float alpha )
   fC[19] = cA* cov[18] - cov[19]* sA;
   fC[20] = cov[20];
 
-} // RotateXY
+}
