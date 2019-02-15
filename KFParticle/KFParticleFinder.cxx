@@ -1193,11 +1193,9 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
                   {
                     if(!(active[iPDGPos][iV])) continue;
                     if(fDecayReconstructionList.find(motherPDG[iV]) == fDecayReconstructionList.end())
-                    {
-                      active[iPDGPos][iV] = false;
                       motherPDG[iV] = -1;
-                    }
                   }
+                  active[iPDGPos] &= (motherPDG != -1);
                 }
                 if(active[iPDGPos].isEmpty()) continue;
 
@@ -1413,11 +1411,9 @@ void KFParticleFinder::ConstructPrimaryBG(KFPTrackVector* vTracks,
           {
             if(!(active[iV])) continue;
             if(fDecayReconstructionList.find(motherPDG[iV]) == fDecayReconstructionList.end())
-            {
-              active[iV] = false;
               motherPDG[iV] = -1;
-            }
           }
+          active &= (motherPDG != -1);
         }
         if(active.isEmpty()) continue;
 
@@ -2150,11 +2146,9 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
           {
             if(!(active[iPDGPos][iV])) continue;
             if(fDecayReconstructionList.find(motherPDG[iV]) == fDecayReconstructionList.end())
-            {
-              active[iPDGPos][iV] = false;
               motherPDG[iV] = -1;
-            }
           }
+          active[iPDGPos] &= (motherPDG != -1);
         }
         if(ChiToPrimVtx)
           active[iPDGPos] &= ( !( (abs(motherPDG) == 3334 || abs(motherPDG) == 3312 ) ) ||

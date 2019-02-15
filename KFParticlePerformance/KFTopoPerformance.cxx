@@ -1262,27 +1262,27 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
   KFParticleSIMD pv(fTopoReconstructor->GetPrimVertex(iPV));
   tempSIMDPart.GetDistanceToVertexLine(pv, l, dl);
 #ifdef __ROOT__
-  if( (l[0] > 0.2 || Pt < 0.) && (abs( TempPart.GetPDG() ) ==   4122 ||
-                                  abs( TempPart.GetPDG() ) == 104122 ||
-                                  abs( TempPart.GetPDG() ) == 204122 ||
-                                  abs( TempPart.GetPDG() ) == 304122 ||
-                                  abs( TempPart.GetPDG() ) == 404122 || 
-                                  abs( TempPart.GetPDG() ) == 504122 )  ) return;
-  if( (l[0] > 0.2 || Pt < 0.) && (abs( TempPart.GetPDG() ) == 421 ||
-                                  abs( TempPart.GetPDG() ) == 420 ||
-                                  abs( TempPart.GetPDG() ) == 425 ||
-                                  abs( TempPart.GetPDG() ) == 426 ||
-                                  abs( TempPart.GetPDG() ) == 427 ||
-                                  abs( TempPart.GetPDG() ) == 429)  ) return;
-  if( (l[0] > 0.4 || Pt < 0.) && (abs( TempPart.GetPDG() ) ==    411 ||
-                                  abs( TempPart.GetPDG() ) == 100411 ||
-                                  abs( TempPart.GetPDG() ) == 200411 ||
-                                  abs( TempPart.GetPDG() ) == 300411)  ) return;
-  if( (l[0] > 0.2 || Pt < 0.) && (abs( TempPart.GetPDG() ) ==    431 ||
-                                  abs( TempPart.GetPDG() ) == 100431 ||
-                                  abs( TempPart.GetPDG() ) == 200431 ||
-                                  abs( TempPart.GetPDG() ) == 300431 ||
-                                  abs( TempPart.GetPDG() ) == 400431)  ) return;
+  if( (l[0] > 0.2f || Pt < 0.f) && (abs( TempPart.GetPDG() ) ==   4122 ||
+                                    abs( TempPart.GetPDG() ) == 104122 ||
+                                    abs( TempPart.GetPDG() ) == 204122 ||
+                                    abs( TempPart.GetPDG() ) == 304122 ||
+                                    abs( TempPart.GetPDG() ) == 404122 || 
+                                    abs( TempPart.GetPDG() ) == 504122 )  ) return;
+  if( (l[0] > 0.2f || Pt < 0.f) && (abs( TempPart.GetPDG() ) == 421 ||
+                                    abs( TempPart.GetPDG() ) == 420 ||
+                                    abs( TempPart.GetPDG() ) == 425 ||
+                                    abs( TempPart.GetPDG() ) == 426 ||
+                                    abs( TempPart.GetPDG() ) == 427 ||
+                                    abs( TempPart.GetPDG() ) == 429)  ) return;
+  if( (l[0] > 0.4f || Pt < 0.f) && (abs( TempPart.GetPDG() ) ==    411 ||
+                                    abs( TempPart.GetPDG() ) == 100411 ||
+                                    abs( TempPart.GetPDG() ) == 200411 ||
+                                    abs( TempPart.GetPDG() ) == 300411)  ) return;
+  if( (l[0] > 0.2f || Pt < 0.f) && (abs( TempPart.GetPDG() ) ==    431 ||
+                                    abs( TempPart.GetPDG() ) == 100431 ||
+                                    abs( TempPart.GetPDG() ) == 200431 ||
+                                    abs( TempPart.GetPDG() ) == 300431 ||
+                                    abs( TempPart.GetPDG() ) == 400431)  ) return;
   
 //   if(Pt < 2. && (abs( TempPart.GetPDG() ) ==    443 ||
 //                  abs( TempPart.GetPDG() ) == 100443 ||
@@ -1291,8 +1291,8 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
 //                  abs( TempPart.GetPDG() ) == 400443 ||
 //                  abs( TempPart.GetPDG() ) == 500443) ) return;
   
-  if(Pt < 0.5 && (abs( TempPart.GetPDG() ) == 3000 ||
-                  abs( TempPart.GetPDG() ) == 3001) ) return;
+  if(Pt < 0.5f && (abs( TempPart.GetPDG() ) == 3000 ||
+                   abs( TempPart.GetPDG() ) == 3001) ) return;
 #endif
   float parameters[17] = {M, P, Pt, Rapidity, dL, cT, chi2/ndf, prob, Theta, Phi, X, Y, Z, R, l[0], l[0]/dl[0], M_t };
 

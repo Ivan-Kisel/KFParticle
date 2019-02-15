@@ -49,6 +49,16 @@ using ::Vc::asin;
 using ::Vc::round;
 using ::Vc::isfinite;
 
+#ifdef VC_VERSION_NUMBER
+#if VC_VERSION_NUMBER < VC_VERSION_CHECK(1,0,0)
+template <typename To, typename From> To simd_cast(From &&x) { return static_cast<To>(x); }
+#endif
+#elif defined(Vc_VERSION_NUMBER)
+#if Vc_VERSION_NUMBER < Vc_VERSION_CHECK(1,0,0)
+template <typename To, typename From> To simd_cast(From &&x) { return static_cast<To>(x); }
+#endif
+#endif
+
 const int float_vLen = float_v::Size;
 
 #if defined(HLTCA_STANDALONE)
