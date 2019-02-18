@@ -57,11 +57,12 @@ class KFPHistogram1D
     if( fSize != h.fSize )
     {
       std::cout << "Size of 1D histogram " << fName << " is incorrect. Stop the program." << std::endl;
-      exit(1);
     }
-    
-    for(int i=0; i<fSize; i++)
-      fHistogram[i] += h.fHistogram[i];
+    else
+    {
+      for(int i=0; i<fSize; i++)
+        fHistogram[i] += h.fHistogram[i];
+    }
   }
   
   KFPHistogram1D(const KFPHistogram1D& h): fHistogram(h.fHistogram), fSize(h.fSize), fName(h.fName), fMinBin(h.fMinBin), fMaxBin(h.fMaxBin)
