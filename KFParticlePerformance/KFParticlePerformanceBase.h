@@ -58,7 +58,9 @@ class KFParticlePerformanceBase
   TDirectory* GetHistosDirectory() { return fHistoDir; }
 #endif
 
-  void DoNotStoreMCHistograms() { fStoreMCHistograms = 0; }
+  void DoNotStoreMCHistograms()      { fStoreMCHistograms = 0; }
+  void DoNotStorePrimSecHistograms() { fStorePrimSecHistograms = 0; }
+  void DoNotStoreZRHistograms()      { fStoreZRHistograms = 0; }
   
   const TH1F* GetDecayResidual(const int iDecay, const int iParameter) const { return hFitQA[iDecay][iParameter];          }
   const TH1F* GetDecayPull(const int iDecay, const int iParameter)     const { return hFitQA[iDecay][iParameter+nFitQA/2]; }
@@ -84,6 +86,8 @@ class KFParticlePerformanceBase
 
   int fNEvents;
   bool fStoreMCHistograms;
+  bool fStorePrimSecHistograms;
+  bool fStoreZRHistograms;
 
 //histos
   static const int nFitQA = 16;

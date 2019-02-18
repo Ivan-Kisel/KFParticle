@@ -22,7 +22,8 @@
 
 
 KFParticlePerformanceBase::KFParticlePerformanceBase():
-  fParteff(), fPVeff(), fPVeffMCReconstructable(), fParticles(0), fPV(0), outfileName(), histodir(0), fNEvents(0), fStoreMCHistograms(1)
+  fParteff(), fPVeff(), fPVeffMCReconstructable(), fParticles(0), fPV(0), outfileName(), histodir(0), fNEvents(0), fStoreMCHistograms(1), 
+  fStorePrimSecHistograms(1), fStoreZRHistograms(1)
 #ifndef KFPWITHTRACKER
   ,fHistoDir(0), fIsHistoCreated(0)
 #endif
@@ -257,7 +258,7 @@ void KFParticlePerformanceBase::CreateHistos(std::string histoDir, TDirectory* o
                                            abs(fParteff.partPDG[iPart]) == 22 ||
                                            abs(fParteff.partPDG[iPart]) == 111;
                                             
-            if(plotPrimaryHistograms)
+            if(fStorePrimSecHistograms && plotPrimaryHistograms)
             {
               gDirectory->mkdir("Primary");
               gDirectory->cd("Primary");
@@ -270,7 +271,7 @@ void KFParticlePerformanceBase::CreateHistos(std::string histoDir, TDirectory* o
               gDirectory->cd(".."); // particle directory / Parameters
             }
             
-            if(plotSecondaryHistograms)
+            if(fStorePrimSecHistograms && plotSecondaryHistograms)
             {
               gDirectory->mkdir("Secondary");
               gDirectory->cd("Secondary");
@@ -707,7 +708,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
   int nBins[nHistoPartParam] =  {1000, // M
                                   100, // p
                                   100, // pt
-                                  100, // y
+                                   40, // y
                                   100, // DecayL
                                   100, // ctau
                                   100, // chi2/ndf
@@ -717,8 +718,8 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                   200, // X
                                   200, // Y
                                   360, // Z
-                                  200, // R
-                                  200, // L
+                                   60, // R
+                                  140, // L
                                   200, // L/dL
                                   100, // Mt
                                   fParteff.partMaxMult[iPart]+1};
@@ -743,7 +744,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
   float xMax[nHistoPartParam] = { fParteff.partMHistoMax[iPart], // M
                                   20.f, // p
                                    5.f, // pt
-                                   6.f, // y
+                                   4.f, // y
                                   55.f, // DecayL
                                   30.f, // ctau
                                   20.f, // chi2/ndf
@@ -753,8 +754,8 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                   50.f, // X
                                   50.f, // Y
                                   80.f, // Z
-                                  50.f, // R
-                                 100.f, // L
+                                  30.f, // R
+                                  70.f, // L
                                   35.f, // L/dL
                                   4.f, // Mt
                                   float(fParteff.partMaxMult[iPart])+0.5f};
@@ -847,8 +848,8 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
   if(IsCollectArmenteros(iPart))
   {
     histoParameters2D[iPart][2] = new TH2F(parName2D[2].Data(),parTitle2D[2].Data(),
-                                          100, -2.f, 2.f, //100, -1.f, 1.f,
-                                          300,  0.f, 2.f); //300,  0.f, 1.2f);
+                                           50, -1.f, 1.f,
+                                          150,  0.f, 1.f);
     histoParameters2D[iPart][2]->GetXaxis()->SetTitle("#alpha (p_{L}^{+}-p_{L}^{-})/(p_{L}^{+}+p_{L}^{-})");
     histoParameters2D[iPart][2]->GetYaxis()->SetTitle("q_{t} [GeV/c]");
   }
@@ -907,7 +908,7 @@ bool KFParticlePerformanceBase::IsCollectZRHistogram(int iParticle) const
           abs(fParteff.partPDG[iParticle]) == 3122 ||
           abs(fParteff.partPDG[iParticle]) == 3312 ||
           abs(fParteff.partPDG[iParticle]) == 3334 ||
-          abs(fParteff.partPDG[iParticle]) == 22) && fStoreMCHistograms;
+          abs(fParteff.partPDG[iParticle]) == 22) && fStoreMCHistograms && fStoreZRHistograms;
 }
 
 bool KFParticlePerformanceBase::IsCollect3DHistogram(int iParticle) const
