@@ -26,7 +26,7 @@ class KFPTrackVector
   int DataSize() const { 
     const int& size = fP[0].size();
     
-    const int dataSize = size * 31 
+    const int dataSize = size * 32 
 #ifdef NonhomogeneousField
                        + size * 10
 #endif
