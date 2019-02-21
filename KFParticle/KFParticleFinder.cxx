@@ -691,7 +691,6 @@ inline void KFParticleFinder::ConstructV0(KFPTrackVector* vTracks,
     lMin( (l[iP] < lMin) && saveParticle) = l[iP];
     ldlMin( (ldl < ldlMin) && saveParticle) = ldl;
   }
-//   saveParticle &= (float_m(!isPrimary) && ldlMin > ldlCut) || isPrimary;
 
   saveParticle &= (lMin < 200.f);
 #ifdef NonhomogeneousField  
@@ -708,8 +707,6 @@ inline void KFParticleFinder::ConstructV0(KFPTrackVector* vTracks,
 #endif
   saveParticle &= ( (float_m(!isPrimary) && ldlMin > ldlCut) || float_m(isPrimary) );
   
-  
-//         if(isPrimary && (float(ldlMin > 3) )) continue;
   saveParticle &= (float_m(!isPrimary) && isParticleFromVertex) || isPrimary;
   if( saveParticle.isEmpty() ) return;
   

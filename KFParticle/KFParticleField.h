@@ -15,7 +15,7 @@
 #include <iostream>
 
 /** @class KFParticleFieldValue
- ** @brief A class to store a vector with the magneticfield values {Bx, By, Bz} at the certain point.
+ ** @brief A class to store a vector with the magnetic field values {Bx, By, Bz} at the certain point.
  ** @author  M.Zyzak, I.Kisel
  ** @date 05.02.2019
  ** @version 1.0
