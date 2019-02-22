@@ -19,13 +19,33 @@
 #include <string>
 #include <fstream>
 
+/** @class KFPTrackIndex
+ ** @brief Helper structure to sort tracks in the KFPTrackVector object.
+ ** @author  M.Zyzak, I.Kisel
+ ** @date 05.02.2019
+ ** @version 1.0
+ **
+ ** The structure is used in the KFParticleTopoReconstructor::SortTracks() function.
+ ** Tracks are sorted according to their pdg hypothesis: electrons, muons, pions,
+ ** tracks without pdg (-1), kaons, protons, deuterons, tritons, He3, He4.
+ ** Teh structure contains pdg hypothesis of the track and its index in the 
+ ** KFPTrackVector object.
+ **/
+
 struct KFPTrackIndex
 {
-  int fIndex;
-  short fPdg;
+  int fIndex; ///< index of the track in the KFPTrackVector object.
+  int fPdg;   ///< PDG hypothesis of the track
   
   static bool Compare(const KFPTrackIndex& a, const KFPTrackIndex& b)
   {
+    /** Static sorting function for comparison of the two input objects of class KFPTrackIndex.
+     ** Objects are sorted according to the PDG hypothesis: electrons, muons, pions,
+     ** tracks without pdg (-1), kaons, protons, deuterons, tritons, He3, He4.
+     ** Return "true" if a.fPdg < b.fPdg, otherwise returns "false". 
+     ** \param[in] a - first object
+     ** \param[in] b - second object
+     **/
     int pdg1 = a.fPdg == -1 ? 250 : a.fPdg;
     int pdg2 = b.fPdg == -1 ? 250 : b.fPdg;
 
