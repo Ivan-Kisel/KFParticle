@@ -53,22 +53,36 @@ struct KFPTrackIndex
   }
 };
 
+
+/** @class KFPInputData
+ ** @brief Class with the input data for KF Particle Finder: tracks, primary vertex and magnetic field.
+ ** @author  M.Zyzak, I.Kisel
+ ** @date 05.02.2019
+ ** @version 1.0
+ **
+ ** The class is used to transfer the data between devices: CPU and Intel Xeon Phi. The memory is aligned
+ ** with the size of the SIMD vectors.
+ **/
+
 class KFPInputData
 {
  public:
    
-  void *operator new(size_t size) { return _mm_malloc(size, sizeof(float_v)); }
-  void *operator new[](size_t size) { return _mm_malloc(size, sizeof(float_v)); }
-  void *operator new(size_t size, void *ptr) { return ::operator new(size, ptr);}
-  void *operator new[](size_t size, void *ptr) { return ::operator new(size, ptr);}
-  void operator delete(void *ptr, size_t) { _mm_free(ptr); }
-  void operator delete[](void *ptr, size_t) { _mm_free(ptr); }
+  void *operator new(size_t size) { return _mm_malloc(size, sizeof(float_v)); }      ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
+  void *operator new[](size_t size) { return _mm_malloc(size, sizeof(float_v)); }    ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
+  void *operator new(size_t size, void *ptr) { return ::operator new(size, ptr);}    ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
+  void *operator new[](size_t size, void *ptr) { return ::operator new(size, ptr);}  ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
+  void operator delete(void *ptr, size_t) { _mm_free(ptr); }                         ///< delete operator for the SIMD-alligned dynamic memory release
+  void operator delete[](void *ptr, size_t) { _mm_free(ptr); }                       ///< delete operator for the SIMD-alligned dynamic memory release
   
   KFPInputData():fPV(0),fBz(0.f) {};
   ~KFPInputData() {};
 
   bool ReadDataFromFile( std::string prefix )
   {
+    /** Reads the input data from the input file with the name defined by "prefix".
+     ** \param[in] prefix - string with the name of the input file
+     **/ 
     std::ifstream ifile(prefix.data());
     if ( !ifile.is_open() ) return 0;
     int nSets;
@@ -155,6 +169,10 @@ class KFPInputData
   
   void SetDataToVector(int* data, int& dataSize)
   {
+    /** Stores information to the memory under pointer "data".
+     ** \param[out] data - memory, where input information will be stored
+     ** \param[out] dataSize - size of the stored memory in "int" (or bloks of 4 bytes, or 32 bits)
+     **/
     dataSize = NInputSets + 1 + 1; //sizes of the track vectors and pv vector, and field
     for(int iSet=0; iSet<NInputSets; iSet++)
       dataSize += fTracks[iSet].DataSize();
@@ -194,7 +212,10 @@ class KFPInputData
   }
 
   void ReadDataFromVector(int* data)
-  { 
+  {
+    /** Reads input data from the given memory.
+     ** \param[in] data - pointer to the memory with the input data
+     **/
     int offset = NInputSets+2;
     for(int iSet=0; iSet<NInputSets; iSet++)
     {
@@ -230,6 +251,7 @@ class KFPInputData
   
   void Print()
   {
+    /**Prints all fields of the current object.*/
     for(int iSet=0; iSet<NInputSets; iSet++)
       fTracks[iSet].Print();
     std::cout << "N PV: " << fPV.size() << std::endl;
@@ -259,12 +281,13 @@ class KFPInputData
     std::cout << "Field: " << fBz << std::endl;
   }
   
-  KFPTrackVector* GetTracks()  { return fTracks; }
-  float GetBz() const { return fBz; }
-  const std::vector<KFParticle>& GetPV() const { return fPV; }
+  KFPTrackVector* GetTracks()  { return fTracks; } ///< Returns pointer to the array with track vectors.
+  float GetBz() const { return fBz; } ///< Returns value of the constant field Bz.
+  const std::vector<KFParticle>& GetPV() const { return fPV; } ///< Returns vector with primary vertices.
 
   const KFPInputData& operator = (const KFPInputData& data)
   {
+    /** Copies input data from object "data" to the current object. Returns the current object. \param[in] data - input data*/
     for(int i=0; i<NInputSets; i++)
       fTracks[i] = data.fTracks[i];
     fPV = data.fPV;
@@ -274,6 +297,7 @@ class KFPInputData
   }
   KFPInputData(const KFPInputData& data):fPV(0),fBz(0.f)
   {
+    /** Copies input data from object "data" to the current object. \param[in] data - input data */
     for(int i=0; i<NInputSets; i++)
       fTracks[i] = data.fTracks[i];
     fPV = data.fPV;
@@ -281,16 +305,26 @@ class KFPInputData
   }
   
  protected:
-  KFPTrackVector fTracks[NInputSets]__attribute__((aligned(sizeof(float_v)))); //0 - pos sec, 1 - neg sec, 2 - pos prim, 3 - neg prim
-  std::vector<KFParticle> fPV;
-  float fBz;
+  KFPTrackVector fTracks[NInputSets]__attribute__((aligned(sizeof(float_v)))); ///<
+  std::vector<KFParticle> fPV; ///< Vector with primary vertices.
+  float fBz; ///< Constant homogenious one-component magnetic field Bz.
 } __attribute__((aligned(sizeof(float_v))));
+
+/** @class KFPInputDataArray
+ ** @brief Structure with the set of the input data for KF Particle Finder.
+ ** @author  M.Zyzak, I.Kisel
+ ** @date 05.02.2019
+ ** @version 1.0
+ **
+ ** The structure contains pointer to array of KFPInputData objects. Copying of the 
+ ** objects of this structure is disabled.
+ **/
 
 struct KFPInputDataArray{
   KFPInputDataArray():fInput(0){};
   ~KFPInputDataArray() { if(fInput) delete [] fInput; }
 
-  KFPInputData *fInput;
+  KFPInputData *fInput; ///< Pointer to the array of the input data objects.
   
  private:
    const KFPInputDataArray& operator = (const KFPInputDataArray&);
@@ -298,17 +332,28 @@ struct KFPInputDataArray{
 };
 
 
+/** @class KFPLinkedList
+ ** @brief Structure to creat a linked list of the input data.
+ ** @author  M.Zyzak, I.Kisel
+ ** @date 05.02.2019
+ ** @version 1.0
+ **
+ ** The structure contains pointer to array of KFPInputData objects. Copying of the 
+ ** objects of this structure is disabled. The list is used to create a queue for processing
+ ** at the device side (Intel Xeon Phi).
+ **/
+
 struct KFPLinkedList
 {
-  void *operator new(size_t size) { return _mm_malloc(size, sizeof(float_v)); }
-  void *operator new[](size_t size) { return _mm_malloc(size, sizeof(float_v)); }
-  void *operator new(size_t size, void *ptr) { return ::operator new(size, ptr);}
-  void *operator new[](size_t size, void *ptr) { return ::operator new(size, ptr);}
-  void operator delete(void *ptr, size_t) { _mm_free(ptr); }
-  void operator delete[](void *ptr, size_t) { _mm_free(ptr); }
+  void *operator new(size_t size) { return _mm_malloc(size, sizeof(float_v)); }      ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
+  void *operator new[](size_t size) { return _mm_malloc(size, sizeof(float_v)); }    ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
+  void *operator new(size_t size, void *ptr) { return ::operator new(size, ptr);}    ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
+  void *operator new[](size_t size, void *ptr) { return ::operator new(size, ptr);}  ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
+  void operator delete(void *ptr, size_t) { _mm_free(ptr); }                         ///< delete operator for the SIMD-alligned dynamic memory release
+  void operator delete[](void *ptr, size_t) { _mm_free(ptr); }                       ///< delete operator for the SIMD-alligned dynamic memory release
   
-  KFPInputData data __attribute__((aligned(sizeof(float_v))));
-  KFPLinkedList* next;
+  KFPInputData data __attribute__((aligned(sizeof(float_v)))); ///< Input data for KF Particle Finder \see KFPInputData.
+  KFPLinkedList* next; ///< Link to the nex object in the linked list.
 } __attribute__((aligned(sizeof(float_v))));
 
 #endif
