@@ -14,6 +14,12 @@
 
 void KFPEmcCluster::SetParameter(const float_v& value, int iP, int iTr)
 { 
+  /** Copies the SIMD vector "value" to the parameter vector KFPEmcCluster::fP[iP]
+   ** starting at the position "iTr".
+   ** \param[in] value - SIMD vector with the values to be stored
+   ** \param[in] iP - number of the parameter vector
+   ** \param[in] iTr - starting position in the parameter vector where the values should be stored
+   **/
   if( (iTr+float_vLen) < Size())
     reinterpret_cast<float_v&>(fP[iP][iTr]) = value;
   else
@@ -24,6 +30,12 @@ void KFPEmcCluster::SetParameter(const float_v& value, int iP, int iTr)
 }
 void KFPEmcCluster::SetCovariance(const float_v& value, int iC, int iTr) 
 { 
+  /** Copies the SIMD vector "value" to the element of the covariance matrix vector KFPEmcCluster::fC[iC]
+   ** starting at the position "iTr".
+   ** \param[in] value - SIMD vector with the values to be stored
+   ** \param[in] iC - number of the element of the covariance matrix
+   ** \param[in] iTr - starting position in the parameter vector where the values should be stored
+   **/
   if( (iTr+float_vLen) < Size())
     reinterpret_cast<float_v&>(fC[iC][iTr]) = value;
   else
@@ -35,6 +47,9 @@ void KFPEmcCluster::SetCovariance(const float_v& value, int iC, int iTr)
 
 void KFPEmcCluster::Resize(const int n)
 {
+  /** Resizes all vectors in the class to a given value.
+   ** \param[in] n - new size of the vector
+   **/
   for(int i=0; i<4; i++)
     fP[i].resize(n);
   for(int i=0; i<10; i++)
@@ -44,6 +59,12 @@ void KFPEmcCluster::Resize(const int n)
 
 void KFPEmcCluster::Set(KFPEmcCluster& v, int vSize, int offset)
 {
+  /** Copies "vSize" clusters from the KFPEmcCluster "v" to the current object.
+   ** Tracks are put starting from the "offset" position.
+   ** \param[in] v - external KFPEmcCluster with input clusters to be copied
+   ** \param[in] vSize - number of clusters to be copied from "v"
+   ** \param[in] offset - offset position in the current object, starting from which input clusters will be stored
+   **/
   for(int iV=0; iV<vSize; iV++)
   {
     for(int i=0; i<4; i++)
@@ -56,9 +77,11 @@ void KFPEmcCluster::Set(KFPEmcCluster& v, int vSize, int offset)
 
 void KFPEmcCluster::SetTracks(const KFPEmcCluster& track, const kfvector_uint& trackIndex, const int nIndexes)
 {
-  //track - input vector of tracks
-  //trackIndex - indexes of tracks in a vector "track", which should be stored 
-  //to the current vector
+  /** The current object is resised to "nIndexes", clusters with indices "trackIndex" are copied to the current object.
+   ** \param[in] track - input vector of clusters
+   ** \param[in] trackIndex - indices of clusters in a vector "track", which should be stored to the current object
+   ** \param[in] nIndexes - number of clusters to be copied, defines the new size of the current object
+   **/
 
   if(nIndexes == 0) return;
   
@@ -107,6 +130,9 @@ void KFPEmcCluster::SetTracks(const KFPEmcCluster& track, const kfvector_uint& t
 
 void KFPEmcCluster::PrintTrack(int n)
 {
+  /** Prints parameters of the cluster with index "n".
+   ** \param[in] n - index of cluster to be printed
+   **/
   for(int i=0; i<4; i++)
     std::cout << fP[i][n] << " ";
   std::cout << std::endl;
@@ -119,6 +145,8 @@ void KFPEmcCluster::PrintTrack(int n)
 
 void KFPEmcCluster::PrintTracks()
 {
+  /** Prints all field of the current object. **/
+    
   std::cout << "NTracks " << Size() << std::endl;
   if( Size()==0 ) return;
   

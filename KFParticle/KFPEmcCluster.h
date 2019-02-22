@@ -14,41 +14,58 @@
 
 #include "KFParticleDef.h"
 
+/** @class KFPEmcCluster
+ ** @brief A class to store vectors of input cluster from the electro-magnetic calorimeter.
+ ** @author  M.Zyzak, I.Kisel
+ ** @date 05.02.2019
+ ** @version 1.0
+ **
+ ** A cluster is described with the state vector { X, Y, Z, E }
+ ** and the corresponding covariance matrix. Also contains a unique id.
+ ** The data model implemented in the class is "Structure Of Arrays":
+ ** each parameter is stroed in a separate vector. Such data structure
+ ** allows fast vectorised access to the aligned data providing the
+ ** maximum possible speed for data reading, and at the same time easy
+ ** random access to the data members.
+ **/
+
 class KFPEmcCluster
 {
  public:
   KFPEmcCluster():fP(), fC(), fId() { }
   ~KFPEmcCluster() { }
 
+  /**Returns size of the vectors. All data vectors have the same size. */
   int Size() const { return fP[0].size(); }
   
   void Resize(const int n);
   void Set(KFPEmcCluster& v, int vSize, int offset);
   void SetTracks(const KFPEmcCluster& track, const kfvector_uint& trackIndex, const int nIndexes);
   
-  const kfvector_float& X()  const { return fP[0]; }
-  const kfvector_float& Y()  const { return fP[1]; }
-  const kfvector_float& Z()  const { return fP[2]; }
-  const kfvector_float& E() const { return fP[3]; }
+  const kfvector_float& X()  const { return fP[0]; } ///< Returns constant reference to the vector with X coordinates.
+  const kfvector_float& Y()  const { return fP[1]; } ///< Returns constant reference to the vector with Y coordinates.
+  const kfvector_float& Z()  const { return fP[2]; } ///< Returns constant reference to the vector with Z coordinates.
+  const kfvector_float& E() const { return fP[3]; }  ///< Returns constant reference to the vector with energy of the cluster.
 
-  const kfvector_float& Parameter(const int i)  const { return fP[i]; }
-  const kfvector_float& Covariance(const int i)  const { return fC[i]; }
-  const kfvector_int& Id()    const { return fId; }
+  const kfvector_float& Parameter(const int i)  const { return fP[i]; }  ///< Returns constant reference to the parameter vector with index "i".
+  const kfvector_float& Covariance(const int i)  const { return fC[i]; } ///< Returns constant reference to the vector of the covariance matrix elements with index "i".
+  const kfvector_int& Id()    const { return fId; }                      ///< Returns constant reference to the vector with unique id of the clusters.
 
   //modifiers 
-  void SetParameter (float value, int iP, int iTr) { fP[iP][iTr] = value; }
-  void SetCovariance(float value, int iC, int iTr) { fC[iC][iTr] = value; }
+  void SetParameter (float value, int iP, int iTr) { fP[iP][iTr] = value; } ///< Sets the "value" of the parameter "iP" of the cluster with index "iTr".
+  void SetCovariance(float value, int iC, int iTr) { fC[iC][iTr] = value; } ///< Sets the "value" of the element of covariance matrix "iC" of the cluster with index "iTr".
 
   void SetParameter (const float_v& value, int iP, int iTr);  
   void SetCovariance(const float_v& value, int iC, int iTr);
 
-  void SetId        (int value, int iTr)           { fId[iTr] = value; }
+  void SetId        (int value, int iTr)           { fId[iTr] = value; } ///< Sets the "value" of the id of the cluster with index "iTr".
   
   void PrintTrack(int n);
   void PrintTracks();
   
   KFPEmcCluster(const KFPEmcCluster& clusters)
   {
+    /** Copy-constructor. Makes one-to-one copy.*/
     const int localSize = clusters.Size();
     
     for(int i=0; i<4; i++)
@@ -72,6 +89,7 @@ class KFPEmcCluster
   
   const KFPEmcCluster& operator = (const KFPEmcCluster& clusters)
   {
+    /** Operator to copy one KFPEmcCluster object to another. Makes one-to-one copy.*/
     const int localSize = clusters.Size();
     
     for(int i=0; i<4; i++)
@@ -96,10 +114,10 @@ class KFPEmcCluster
   }
   
  private:  
-  kfvector_float fP[4];  //!< Coordinates of the cluster and energy: x, y, z, E
-  kfvector_float fC[10]; //!< Covariance matrix of the track parameters
+  kfvector_float fP[4];  ///< Coordinates of the cluster and energy: X, Y, Z, E.
+  kfvector_float fC[10]; ///< Covariance matrix of the parameters of the cluster.
 
-  kfvector_int fId;
+  kfvector_int fId; ///< Vector with unique ids of the clusters.
 };
 
 #endif
