@@ -305,7 +305,18 @@ class KFPInputData
   }
   
  protected:
-  KFPTrackVector fTracks[NInputSets]__attribute__((aligned(sizeof(float_v)))); ///<
+  /** Array of track vectors: \n
+   ** 0 - positive secondary tracks stored at the first point; \n
+   ** 1 - negative secondary tracks stored at the first point; \n
+   ** 2 - positive primary tracks stored at the first point; \n
+   ** 3 - positive primary tracks stored at the first point; \n
+   ** 4 - positive secondary tracks stored at the last point; \n
+   ** 5 - negative secondary tracks stored at the last point; \n
+   ** 6 - positive primary tracks stored at the last point; \n
+   ** 7 - positive primary tracks stored at the last point.
+   ** \see KFPTrackVector for documentation.
+   **/
+  KFPTrackVector fTracks[NInputSets]__attribute__((aligned(sizeof(float_v)))); 
   std::vector<KFParticle> fPV; ///< Vector with primary vertices.
   float fBz; ///< Constant homogenious one-component magnetic field Bz.
 } __attribute__((aligned(sizeof(float_v))));
