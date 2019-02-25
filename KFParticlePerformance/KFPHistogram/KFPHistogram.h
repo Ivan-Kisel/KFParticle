@@ -20,6 +20,20 @@
 #include <iostream>
 #include <fstream>
 
+/** @class KFPHistogram
+ ** @brief A common object containing histograms for all particle species.
+ ** @author  M.Zyzak, I.Kisel
+ ** @date 05.02.2019
+ ** @version 1.0
+ **
+ ** The class is used to collect histograms in the environment,
+ ** where ROOT is not available, for example at Intel Xeon Phi cards.
+ ** Contains a set of histograms for each decay reconstructed by the
+ ** KF Particle Finder package, allocates the memory for all histograms:
+ ** This allows faster allocation, faster transfer of the memory,
+ ** easier access from the Intel Xeon Phi, better performance.
+ **/
+
 class KFPHistogram
 {  
  public:
@@ -44,10 +58,10 @@ class KFPHistogram
       fKFPHistogramSet[iParticle].SetHistogramMemory(pointer);
       pointer += fKFPHistogramSet[iParticle].DataSize();
     }
-  }
+  } ///< Default Constructor. Creates histograms, allocates memory for them.
   ~KFPHistogram() { if(fMemory) delete [] fMemory; }
   
-  void SetOutFileName(std::string name) { fOutFileName = name; }
+  void SetOutFileName(std::string name) { fOutFileName = name; } ///< Set the name of the output file.
   
   inline void Fill(const KFParticle& particle)
   {
@@ -55,15 +69,16 @@ class KFPHistogram
     it=fPdgToIndex.find(particle.GetPDG());
     if(it != fPdgToIndex.end())
       fKFPHistogramSet[it->second].Fill(particle);
-  }
+  } ///< Fills histograms using parameters of the given particle.
   
   inline void Fill(const KFParticleTopoReconstructor& topoReconstructor)
   {
     for(unsigned int iParticle=0; iParticle<topoReconstructor.GetParticles().size(); iParticle++)
       Fill(topoReconstructor.GetParticles()[iParticle]);
-  }
+  } ///< Fills histograms for each particle reconstructed by the KFParticleFinder object from the given KFParticleTopoReconstructor.
     
-  KFPHistogramSet GetHistogramSet(int iSet)   const { return fKFPHistogramSet[iSet]; }
+  KFPHistogramSet GetHistogramSet(int iSet)   const { return fKFPHistogramSet[iSet]; } ///< Returns set of histograms for the decay with index iSet.
+  /** \brief Returns "iHistogram" histogram from the set of histograms for the decay with index "iSet". */
   KFPHistogram1D  GetHistogram(int iSet, int iHistogram) const { return fKFPHistogramSet[iSet].GetHistogram1D(iHistogram); }
   
   friend std::fstream & operator<<(std::fstream &strm, KFPHistogram &histograms)
@@ -83,14 +98,14 @@ class KFPHistogram
     }
 
     return strm;
-  }
+  } ///< Stores all histograms to the output file.
   
   void Save() 
   {
     std::fstream file(fOutFileName.data(),std::fstream::out);
     file << (*this);
     file.close();
-  }
+  } ///< Stores all histograms to the file with the name defined in KFPHistogram::fOutFileName.
   
   bool FillFromFile( std::string prefix )
   {
@@ -128,22 +143,22 @@ class KFPHistogram
     
     ifile.close();
     return 1;
-  }
+  } ///< Reads object from the file with the name defined by "prefix".
   
   inline void operator += ( const KFPHistogram &h )
   {
     for(int i=0; i<KFPartEfficiencies::nParticles; i++)
       fKFPHistogramSet[i] += h.fKFPHistogramSet[i];
-  }
+  }///< Adds all histograms from object "h" to the current object.
   
  private:
-  std::map<int, int> fPdgToIndex;
-  std::string fOutFileName;
-  KFPHistogramSet fKFPHistogramSet[KFPartEfficiencies::nParticles];
-  int* fMemory;
+  std::map<int, int> fPdgToIndex; ///< A map between PDG code and index of the decay in the KF Particle Finder scheme. A copy of an object from KFPartEfficiencies.
+  std::string fOutFileName; ///< The name of the output file, where histograms will be stored.
+  KFPHistogramSet fKFPHistogramSet[KFPartEfficiencies::nParticles]; ///< A set of histograms for all decays reconstructed by KF Particle Finder.
+  int* fMemory; ///< A pointer to the memory for all histograms.
   
-  KFPHistogram(const KFPHistogram&);
-  KFPHistogram& operator=(const KFPHistogram&);
+  KFPHistogram(const KFPHistogram&); ///< Does not allow copying of the objects of this class.
+  KFPHistogram& operator=(const KFPHistogram&); ///< Does not allow copying of the objects of this class.
 };
 
 #endif

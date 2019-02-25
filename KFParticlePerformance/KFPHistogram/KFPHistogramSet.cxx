@@ -14,6 +14,10 @@
 
 KFPHistogramSet::KFPHistogramSet(int iPart)
 {
+  /** Creates a set of histograms for the given particle specie. 
+   ** \param[in] iPart - number of the particle specie in the KF Particle Finder scheme
+   ** \see KFPartEfficiencies for the definition of "iPart". 
+   **/
   KFPartEfficiencies fParteff;
   std::string parName[NHisto1D] = {"M","p","p_{t}","y","DecayL","c#tau","chi2ndf","prob","#theta","phi","X","Y","Z","R", "L", "l/dl","Multiplicity"};
 #ifdef CBM
@@ -127,6 +131,9 @@ KFPHistogramSet::KFPHistogramSet(int iPart)
 
 void KFPHistogramSet::SetHistogramMemory(int* pointer)
 {
+  /** Sets a pointer to the memory allocated externally for the current set of histograms.
+   ** \param[in] pointer - pointer to the memory
+   **/
   for(int i=0; i<NHisto1D; i++)
   {
     fKFPHistogram1D[i].SetHistogramMemory(pointer);
@@ -135,7 +142,10 @@ void KFPHistogramSet::SetHistogramMemory(int* pointer)
 }
 
 void KFPHistogramSet::Fill(const KFParticle& particle)
-{  
+{
+  /** Fill all possible histograms using parameters of the provided KFParticle object.
+   ** \param[in] particle - KFParticle object
+   **/  
   float mass = 0, p=0, pt=0, err = 0;
   particle.GetMass(mass, err);
   particle.GetMomentum(p, err);
