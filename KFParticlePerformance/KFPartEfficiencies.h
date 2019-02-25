@@ -22,41 +22,69 @@
 #include "TObject.h"
 #endif
 
+/** @class KFEfficiencyParticleInfo
+ ** @brief A helper class to define parameters of the decay list in KFPartEfficiencies.
+ ** @author  M.Zyzak, I.Kisel
+ ** @date 05.02.2019
+ ** @version 1.0
+ **/
+
 class KFEfficiencyParticleInfo
 {
  public:
   KFEfficiencyParticleInfo():fName("null"),fTitle("null"),fPDG(0),fHistoMin(0.f),fHistoMax(0.f),fMass(0.f),fLifeTime(0.f),fCharge(0), fMassSigma(0.001) {};
+  /** \brief Constructor with all parameters set in. There is no other way to define the parameters other then use this constructor.*/
   KFEfficiencyParticleInfo(std::string name, std::string title, int pdg, float histoMin, float histoMax, float mass, float lifeTime, int charge, float massSigma ):
     fName(name), fTitle(title), fPDG(pdg), fHistoMin(histoMin), fHistoMax(histoMax), fMass(mass), fLifeTime(lifeTime), fCharge(charge), fMassSigma(massSigma) {};
   ~KFEfficiencyParticleInfo() {};
   
   //accessors
-  std::string Name()      const { return fName; }
-  std::string Title()     const { return fTitle; }
-  int         PDG()       const { return fPDG; }
-  float       HistoMin()  const { return fHistoMin; }
-  float       HistoMax()  const { return fHistoMax; }
-  float       Mass()      const { return fMass; }
-  float       LifeTime()  const { return fLifeTime; }
-  int         Charge()    const { return fCharge; } 
-  float       MassSigma() const { return fMassSigma; }
+  std::string Name()      const { return fName; }      ///< Returns name of the decay in the file with histograms.
+  std::string Title()     const { return fTitle; }     ///< Returns name of the decay in the output table with efficiency.
+  int         PDG()       const { return fPDG; }       ///< Returns the assigned PDG code.
+  float       HistoMin()  const { return fHistoMin; }  ///< Returns lower boundary in the mass histogram for the current decay.
+  float       HistoMax()  const { return fHistoMax; }  ///< Returns upper boundary in the mass histogram for the current decay.
+  float       Mass()      const { return fMass; }      ///< Returns table mass of the particle.
+  float       LifeTime()  const { return fLifeTime; }  ///< Returns lifetime of the particle.
+  int         Charge()    const { return fCharge; }    ///< Returns charge of the particle in units of the elementary charge.
+  float       MassSigma() const { return fMassSigma; } ///< Returns expected width of the mass peak, used in the side bands method.
   
  private:
-  std::string fName;
-  std::string fTitle;
-  int fPDG;
-  float fHistoMin;
-  float fHistoMax;
-  float fMass;
-  float fLifeTime;
-  int fCharge; 
-  float fMassSigma;
+  std::string fName;  ///< Name of the decay in the file with histograms.
+  std::string fTitle; ///< Name of the decay in the output table with efficiency.
+  int fPDG;           ///< PDG code assigned to the current decay in the scheme of KF Particle Finder.
+  float fHistoMin;    ///< Lower boundary in the mass histogram for the current decay.
+  float fHistoMax;    ///< Upper boundary in the mass histogram for the current decay.
+  float fMass;        ///< Table mass of the particle.
+  float fLifeTime;    ///< Lifetime of the particle in seconds.
+  int fCharge;        ///< Charge in units of the elementary charge.
+  float fMassSigma;   ///< Expected width of the decay, determines peak sigma for the side bands method.
 };
+
+/** @class KFPartEfficiencies
+ ** @brief Class to calculate efficiency of KF Particle Finder.
+ ** @author  M.Zyzak, I.Kisel
+ ** @date 05.02.2019
+ ** @version 1.0
+ **
+ ** The class has two main purposes:\n
+ ** 1) Defines the list of decays to be analysed: a unique code of the decay, its mass, lifetime,
+ ** a list of daughter particles, etc. See KFPartEfficiencies::KFPartEfficiencies() for more details.\n
+ ** 2) It calculates reconstruction efficiency of the decays from the KF Particle Finder scheme.\n
+ ** Definitions:\n
+ ** background - physics background, when daughter particle come from the real particle, but the pdg
+ ** hypothesis is incorrect, for example, Lambda->p pi will create a physics background for
+ ** K0s if the proton is misidentified;\n
+ ** ghost - combinatorial background, tracks do not form a real vertex;\n
+ ** clone - a particle is reconstructed several times, for example, particle track is split into 
+ ** to parts due to the multiple scattering.
+ **/
 
 class KFPartEfficiencies :public TObject
 {
  public:
 
+  /** \brief The default constructor. Defines the list of decays to be analysed and their properties. Please, see the code for indexing scheme. */
   KFPartEfficiencies():
     partDaughterPdg(0),
     names(),
@@ -1053,6 +1081,7 @@ class KFPartEfficiencies :public TObject
 
   virtual ~KFPartEfficiencies(){};
 
+  /** \brief Returns index of the decay with a given PDG code in the scheme of the KF Particle Finder. If it is not present there - returns "-1". */
   int GetParticleIndex(int pdg)
   {
     std::map<int, int>::iterator it;
@@ -1061,9 +1090,17 @@ class KFPartEfficiencies :public TObject
     else return -1;
   }
 
-  std::map<int,int> GetPdgToIndexMap() const { return fPdgToIndex; }
+  /** \brief Returns the map between PDG codes and index of the decay in the scheme of the KF Particle Finder. */
+  std::map<int,int> GetPdgToIndexMap() const { return fPdgToIndex; } 
   
-  virtual void AddCounter(std::string shortname, std::string name){
+  virtual void AddCounter(std::string shortname, std::string name)
+  {
+    /** Adds a counter with the name defined by "name" to all counter
+     ** objects. For easiness of operation with counters, a shortname is assigned
+     ** to each of them and the corresponding entry in the map indices is done.
+     ** \param[in] shortname - a short name of the counter for fast and easy access to its index
+     ** \param[in] name - name of the counter which is added to each counter object.
+     **/
     indices[shortname] = names.size();
     names.push_back(name);
 
@@ -1085,12 +1122,14 @@ class KFPartEfficiencies :public TObject
     clone.AddCounter();
   };
 
+  /** \brief Operator to add efficiency table from object "a" to the current object. Returns the current object after addition. */
   KFPartEfficiencies& operator+=(KFPartEfficiencies& a){
     mc1 += a.mc1; mc2 += a.mc2; mc3 += a.mc3; reco += a.reco;
     ghost += a.ghost; bg += a.bg; clone += a.clone;
     return *this;
   };
   
+  /** \brief Function to calculate efficiency after all counters are set. If the counters are modified the function should be called again. */
   void CalcEff(){
     ratio_reco1 = reco/mc1;
     ratio_reco2 = reco/mc2;
@@ -1102,9 +1141,17 @@ class KFPartEfficiencies :public TObject
     ratio_clone  = clone/allReco;
   };
   
-
   void Inc(bool isReco, int nClones, bool isMC1, bool isMC2, bool isMC3, std::string name)
   {
+    /** Increases counters by one, if the corresponding boolean variable is "true".
+     ** \param[in] isReco - "true" if particle is reconstructed
+     ** \param[in] nClones - number of double reconstructed particles for the given MC particle,
+     ** will be added to the "clone" counters
+     ** \param[in] isMC1 - "true" if particle is reconstructable in 4pi, mc1 is increased
+     ** \param[in] isMC2 - "true" if all daughters are reconstructable, mc2 is increased
+     ** \param[in] isMC3 - "true" if all daughters are reconstructed, mc3 is increased
+     ** \param[in] name  - "shortname" of the set of counters, which should be increased
+     **/
     const int index = indices[name];
     
     if(isMC1) mc1.counters[index]++;
@@ -1116,13 +1163,20 @@ class KFPartEfficiencies :public TObject
       clone.counters[index] += nClones;
   };
 
-  void IncReco(bool isGhost, bool isBg, std::string name){
+  void IncReco(bool isGhost, bool isBg, std::string name)
+  {
+    /** Increases counters by one, if the corresponding boolean variable is "true".
+     ** \param[in] isGhost - "true" if ghost is added
+     ** \param[in] isBg - "true" if physics background is added added
+     ** \param[in] name  - "shortname" of the set of counters, which should be increased
+     **/
     const int index = indices[name];
 
     if (isGhost) ghost.     counters[index]++;
     if (isBg)    bg.counters[index]++;
   };
 
+  /** \brief Prints the efficiency table on the screen. */
   void PrintEff(){
     std::ios_base::fmtflags original_flags = std::cout.flags();
     std::cout.setf(std::ios::fixed);
@@ -1161,16 +1215,16 @@ class KFPartEfficiencies :public TObject
     std::cout.flags(original_flags); 
   };
   
-  float GetTotal4piEfficiency(int iDecay) { return ratio_reco1.counters[3*iDecay]; }
-  float GetTotalKFPEfficiency(int iDecay) { return ratio_reco3.counters[3*iDecay]; }
-  float GetPrimary4piEfficiency(int iDecay) { return ratio_reco1.counters[3*iDecay+1]; }
-  float GetPrimaryKFPEfficiency(int iDecay) { return ratio_reco3.counters[3*iDecay+1]; }
-  float GetSecondary4piEfficiency(int iDecay) { return ratio_reco1.counters[3*iDecay+2]; }
-  float GetSecondaryKFPEfficiency(int iDecay) { return ratio_reco3.counters[3*iDecay+2]; }
-
+  float GetTotal4piEfficiency(int iDecay) { return ratio_reco1.counters[3*iDecay]; }  ///< Returns efficiency in 4pi for decay "iDecay".
+  float GetTotalKFPEfficiency(int iDecay) { return ratio_reco3.counters[3*iDecay]; }  ///< Returns efficiency of KF Particle Finder method (cuts) for decay "iDecay".
+  float GetPrimary4piEfficiency(int iDecay) { return ratio_reco1.counters[3*iDecay+1]; } ///< Returns efficiency in 4pi for decay "iDecay" for primary particles.
+  float GetPrimaryKFPEfficiency(int iDecay) { return ratio_reco3.counters[3*iDecay+1]; } ///< Returns efficiency of KF Particle Finder method (cuts) for decay "iDecay" for primary particles.
+  float GetSecondary4piEfficiency(int iDecay) { return ratio_reco1.counters[3*iDecay+2]; } ///< Returns efficiency in 4pi for decay "iDecay" for secondary particles.
+  float GetSecondaryKFPEfficiency(int iDecay) { return ratio_reco3.counters[3*iDecay+2]; } ///< Returns efficiency of KF Particle Finder method (cuts) for decay "iDecay" for secondary particles.
+  
+  /** \brief Operator to write efficiencies to file. */
   friend std::fstream & operator<<(std::fstream &strm, KFPartEfficiencies &a) 
   {
-
     strm << a.ratio_reco1;
     strm << a.ratio_reco2;
     strm << a.ratio_reco3;
@@ -1187,10 +1241,9 @@ class KFPartEfficiencies :public TObject
 
     return strm;
   }
-
+  /** \brief Operator to read efficiencies from file. */
   friend std::fstream & operator>>(std::fstream &strm, KFPartEfficiencies &a)
   {
-
     strm >> a.ratio_reco1;
     strm >> a.ratio_reco2;
     strm >> a.ratio_reco3;
@@ -1207,63 +1260,64 @@ class KFPartEfficiencies :public TObject
 
     return strm;
   }
-
+  /** \brief Adds efficiency from the file with the name defined by "fileName" to the current objects. */
   void AddFromFile(std::string fileName)
   {
     std::fstream file(fileName.data(),std::fstream::in);
     file >> *this;
   }
   
-  int GetNDaughters(int iParticle) const { return partDaughterPdg[iParticle].size(); }
+  int GetNDaughters(int iParticle) const { return partDaughterPdg[iParticle].size(); } ///< Returns number of daughter particles for the decay with index "iParticle".
+  /** \brief Returns the PDG code of the daughter "iDaughter" from the decay with index "iParticle". */
   int GetDaughterPDG(int iParticle, int iDaughter) const { return partDaughterPdg[iParticle][iDaughter]; }
   
-  float GetMass(int iParticle) const { return partMass[iParticle]; }
-  float GetMassSigma(int iParticle) const { return partMassSigma[iParticle]; }
+  float GetMass(int iParticle) const { return partMass[iParticle]; } ///< Returns the table mass of the decay with index "iParticle".
+  float GetMassSigma(int iParticle) const { return partMassSigma[iParticle]; } ///< Returns expected width of the mass peak of the decay with index "iParticle".
   
-  static const int nParticles = 194;
-  static const int fFirstHypernucleusIndex = 114;
-  static const int fLastHypernucleusIndex = 130;  
-  static const int fFirstMissingMassParticleIndex = 131;
-  static const int fLastMissingMassParticleIndex = 166;  
-  static const int fFirstStableParticleIndex = 167;
-  static const int fLastStableParticleIndex = 184;
+  static const int nParticles = 194;                     ///< Number of particles.
+  static const int fFirstHypernucleusIndex = 114;        ///< Index of the first hypernuclei in the list.
+  static const int fLastHypernucleusIndex = 130;         ///< Index of the last hypernuclei in the list.
+  static const int fFirstMissingMassParticleIndex = 131; ///< Index of the first decay reconstructed by the missing mass method.
+  static const int fLastMissingMassParticleIndex = 166;  ///< Index of the last decay reconstructed by the missing mass method.
+  static const int fFirstStableParticleIndex = 167;      ///< Index of the first stable particle in the list.
+  static const int fLastStableParticleIndex = 184;       ///< Index of the last stable particle in the list.
   
-  int partPDG[nParticles];
-  std::string partName[nParticles];
-  std::string partTitle[nParticles];
-  std::vector<std::vector<int> > partDaughterPdg;
-  float partMHistoMin[nParticles];
-  float partMHistoMax[nParticles];
-  int partMaxMult[nParticles];
-  float partMass[nParticles];
-  float partLifeTime[nParticles];
-  int partCharge[nParticles];
-  float partMassSigma[nParticles];
+  int partPDG[nParticles];                        ///< Array of PDG codes assigned to the decays.
+  std::string partName[nParticles];               ///< Array of names of the decay in the file with histograms.
+  std::string partTitle[nParticles];              ///< Array of names of the decay in the output table with efficiency.
+  std::vector<std::vector<int> > partDaughterPdg; ///< Array with vectors of daughter particles for each decay.
+  float partMHistoMin[nParticles];                ///< Array with lower boundary in the mass histograms for each decay.
+  float partMHistoMax[nParticles];                ///< Array with upper boundary in the mass histograms for each decay.
+  int partMaxMult[nParticles];                    ///< Array with upper boundary in the multiplicity histograms of each decay.
+  float partMass[nParticles];                     ///< Array with table masses of each decay.
+  float partLifeTime[nParticles];                 ///< Array with lifetimes in seconds of each decay.
+  int partCharge[nParticles];                     ///< Array with charge of each particle specie in units of the elementary charge.
+  float partMassSigma[nParticles];                ///< Array with expected width of mass peaks used for the side band method.
 
   
  private:
-  std::vector<std::string> names; // names counters indexed by index of counter
-  std::map<std::string, int> indices; // indices of counters indexed by a counter shortname
+  std::vector<std::string> names;     ///< Names of the counters. The same for all counters objects.
+  std::map<std::string, int> indices; ///< Map between the counter index and its short name.
 
-  std::map<int, int> fPdgToIndex;
+  std::map<int, int> fPdgToIndex;     ///< The map between PDG code assigned to the decay and index in the decay list.
 
-  KFMCCounter<double> ratio_reco1;
-  KFMCCounter<double> ratio_reco2;
-  KFMCCounter<double> ratio_reco3;
+  KFMCCounter<double> ratio_reco1;    ///< Efficiency in 4 pi for all decays.
+  KFMCCounter<double> ratio_reco2;    ///< Efficiency normalised on the particles with all daughters reconstructable for all decays.
+  KFMCCounter<double> ratio_reco3;    ///< Efficiency normalised on the particles with all daughters reconstructed for all decays.
 
-  KFMCCounter<int> mc1;
-  KFMCCounter<int> mc2;
-  KFMCCounter<int> mc3;
+  KFMCCounter<int> mc1;               ///< Counters of the Monte Carlo particles of all species.
+  KFMCCounter<int> mc2;               ///< Counters of the Monte Carlo particles with all daughters reconstructable for all species.
+  KFMCCounter<int> mc3;               ///< Counters of the Monte Carlo particles with all daughters found for all species.
 
-  KFMCCounter<int> reco;
+  KFMCCounter<int> reco;              ///< Counters of the reconstructed particles for all species.
 
-  KFMCCounter<double> ratio_ghost;
-  KFMCCounter<double> ratio_bg;
-  KFMCCounter<double> ratio_clone;
+  KFMCCounter<double> ratio_ghost;    ///< Ratio of the ghost candidates to the total number of candidates for all species.
+  KFMCCounter<double> ratio_bg;       ///< Ratio of the physics background candidates to the total number of candidates for all species.
+  KFMCCounter<double> ratio_clone;    ///< Ratio of double reconstructed particles to the total number of signal candidates for all species.
 
-  KFMCCounter<int> ghost;
-  KFMCCounter<int> bg; // background
-  KFMCCounter<int> clone; // background
+  KFMCCounter<int> ghost;             ///< Counters of the ghost candidates for all species.
+  KFMCCounter<int> bg;                ///< Counters of the physics background candidates for all species.
+  KFMCCounter<int> clone;             ///< Counters of the double reconstructed particles for all species.
   
 #ifndef KFParticleStandalone
   ClassDef( KFPartEfficiencies, 1 )
