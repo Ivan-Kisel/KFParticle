@@ -1167,7 +1167,7 @@ class KFPartEfficiencies :public TObject
   {
     /** Increases counters by one, if the corresponding boolean variable is "true".
      ** \param[in] isGhost - "true" if ghost is added
-     ** \param[in] isBg - "true" if physics background is added added
+     ** \param[in] isBg - "true" if physics background is added
      ** \param[in] name  - "shortname" of the set of counters, which should be increased
      **/
     const int index = indices[name];
