@@ -18,7 +18,7 @@ ClassImp(KFVertex);
 
 KFVertex::KFVertex( const KFPVertex &vertex ): fIsConstrained(0)
 {
-  // Constructor from ALICE VVertex
+  /** Constructor from KFPVertex. **/
 
   vertex.GetXYZ( fP );
   vertex.GetCovarianceMatrix( fC );  
@@ -30,9 +30,12 @@ KFVertex::KFVertex( const KFPVertex &vertex ): fIsConstrained(0)
 }
 
 void KFVertex::SetBeamConstraint( float x, float y, float z, 
-				     float errX, float errY, float errZ )
+                                  float errX, float errY, float errZ )
 {
-  // Set beam constraint to the vertex
+  /** Sets a soft beam constraint on the vertex position.
+   ** \param[in] x, y, z - coordinates of the constraint
+   ** \param[in] errX, errY, errZ - corresponding errors
+   **/
   fP[0] = x;
   fP[1] = y;
   fP[2] = z;
@@ -47,6 +50,7 @@ void KFVertex::SetBeamConstraint( float x, float y, float z,
 
 void KFVertex::SetBeamConstraintOff()
 {
+  /** Switches off the constraint. Should be called before KFVertex::ConstructPrimaryVertex() **/
   fIsConstrained = 0;
 }
 
@@ -54,7 +58,19 @@ void KFVertex::ConstructPrimaryVertex( const KFParticle *vDaughters[],
                                        int nDaughters, Bool_t vtxFlag[],
                                        float ChiCut  )
 {
-  //* Primary vertex finder with simple rejection of outliers
+  /** Reconstructs the primary vertex from a set of particles. Reconstruction is 
+   ** parformed in three steps:\n
+   ** 1) vertex seed is constructed from all particles; \n
+   ** 2) if particle deviates more then on the "ChiCut" it is rejected; \n
+   ** 3) the final vertex is constructed from the set of remaining particles.\n
+   ** Rejected particles are marked with "false" in the output array of flags.
+   ** \param[in] vDaughters - input array of pointers to the particles
+   ** \param[in] nDaughters - number of particles in the input array
+   ** \param[out] vtxFlag - array of flags showing if particle was used in the 
+   ** vertex fit, if yes - set to "true"
+   ** \param[in] ChiCut - cut on the chi2-deviation of the particle from the created
+   ** seed, by default the cut is set to 3.5
+   **/
 
   if( nDaughters<2 ) return;
   float constrP[3]={fP[0], fP[1], fP[2]};
@@ -72,7 +88,7 @@ void KFVertex::ConstructPrimaryVertex( const KFParticle *vDaughters[],
 //     float worstChi = 0.;
 //     Int_t worstDaughter = 0;
 //     for( Int_t it=0; it<nDaughters; it++ ){
-//       if( !vtxFlag[it] ) continue;	
+//       if( !vtxFlag[it] ) continue;        
 //       const KFParticle &p = *(vDaughters[it]);
 //       //KFVertex tmp = *this - p;
 //       //float chi = p.GetDeviationFromVertex( tmp );      
