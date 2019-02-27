@@ -33,7 +33,12 @@ class KFPSimdAllocator {
   typedef std::size_t    size_type;
   typedef std::ptrdiff_t difference_type;
 
-  /** Rebind allocator to type U. */
+  /** @class rebind
+   ** @brief Rebind allocator to type U of the SIMD allocator.
+   ** @author  M.Zyzak, I.Kisel
+   ** @date 05.02.2019
+   ** @version 1.0
+   **/
   template <class U>
   struct rebind {
     typedef KFPSimdAllocator<U> other;
