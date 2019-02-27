@@ -30,6 +30,7 @@ using std::vector;
 
 KFParticleTopoReconstructor::~KFParticleTopoReconstructor()
 {
+  /** The default destructor. Deallocates memory for all pointers if objects exist. **/
   if (fKFParticlePVReconstructor) delete fKFParticlePVReconstructor;
   if (fKFParticleFinder) delete fKFParticleFinder;
   if(fTracks) delete [] fTracks;
@@ -38,6 +39,7 @@ KFParticleTopoReconstructor::~KFParticleTopoReconstructor()
 #ifdef HomogeneousField
 void KFParticleTopoReconstructor::SetField(double b)
 {
+  /** Sets constant homogeneous one component magnetic field Bz to "b". */
   KFParticle::SetField(b);
   KFParticleSIMD::SetField(float(b));
 }
@@ -62,8 +64,8 @@ void KFParticleTopoReconstructor::Init(AliHLTTPCCAGBTracker* tracker, vector<int
   timer.Start();
 #endif // USE_TIMERS
 
-  KFParticle::SetField( tracker->Slice(0).Param().Bz() ); // to understand -1 see SetField
-  KFParticleSIMD::SetField( tracker->Slice(0).Param().Bz() ); // to understand -1 see SetField
+  KFParticle::SetField( tracker->Slice(0).Param().Bz() );
+  KFParticleSIMD::SetField( tracker->Slice(0).Param().Bz() );
 
     // create and fill array of tracks to init KFParticleTopoReconstructor
   const int nTracks = tracker->NTracks();
@@ -233,7 +235,7 @@ void KFParticleTopoReconstructor::Init(AliHLTTPCCAGBTracker* tracker, vector<int
 #ifdef USE_TIMERS
   timer.Stop();
   fStatTime[0] = timer.RealTime();
-#endif /// USE_TIMERS
+#endif // USE_TIMERS
 } // void KFParticleTopoReconstructor::Init(AliHLTTPCCAGBTracker* tracker)
 #endif
 
@@ -286,7 +288,7 @@ void KFParticleTopoReconstructor::Init(vector<KFParticle> &particles, vector<int
 #ifdef USE_TIMERS
   timer.Stop();
   fStatTime[0] = timer.RealTime();
-#endif /// USE_TIMERS
+#endif // USE_TIMERS
 }
 
 void KFParticleTopoReconstructor::Init(KFPTrackVector &tracks, KFPTrackVector &tracksAtLastPoint)
@@ -317,12 +319,11 @@ void KFParticleTopoReconstructor::Init(KFPTrackVector &tracks, KFPTrackVector &t
 #ifdef USE_TIMERS
   timer.Stop();
   fStatTime[0] = timer.RealTime();
-#endif /// USE_TIMERS
+#endif // USE_TIMERS
 }
 
-
 void KFParticleTopoReconstructor::Init(const KFPTrackVector *particles, const vector<KFParticle>& pv)
-{
+{ 
 #ifdef USE_TIMERS
   timer.Start();
 #endif // USE_TIMERS
@@ -340,11 +341,14 @@ void KFParticleTopoReconstructor::Init(const KFPTrackVector *particles, const ve
 #ifdef USE_TIMERS
   timer.Stop();
   fStatTime[0] = timer.RealTime();
-#endif /// USE_TIMERS
+#endif // USE_TIMERS
 }
 
 void KFParticleTopoReconstructor::ReconstructPrimVertex(bool isHeavySystem)
 {
+  /** Runs reconstruction of primary vertices. If "isHeavySystem" is defined - only the
+   ** best vertex with the maximum number of tracks-contributors is stored.
+   **/
 #ifdef USE_TIMERS
   timer.Start();
 #endif // USE_TIMERS
@@ -404,11 +408,25 @@ void KFParticleTopoReconstructor::ReconstructPrimVertex(bool isHeavySystem)
 #ifdef USE_TIMERS
   timer.Stop();
   fStatTime[1] = timer.RealTime();
-#endif /// USE_TIMERS
+#endif // USE_TIMERS
 } // void KFParticleTopoReconstructor::ReconstructPrimVertex
 
 void KFParticleTopoReconstructor::SortTracks()
 {
+  /** Sorts input tracks according to they charge, relation to the primary 
+   ** vertex candidates, PDG hypothesis. The tracks after sorting are divided 
+   ** into several groups: \n
+   ** 0) secondary positive at the first hit position; \n
+   ** 1) secondary negative at the first hit position; \n
+   ** 2) primary positive at the first hit position; \n
+   ** 3) primary negative at the first hit position; \n
+   ** 4) secondary positive at the last hit position; \n
+   ** 5) secondary negative at the last hit position; \n
+   ** 6) primary positive at the last hit position; \n
+   ** 7) primary negative at the last hit position. \n
+   ** In each group they are sorted according to PDG: electrons, muons, pions, 
+   ** tracks without PID, kaons, protons, deuterons, tritons, He3, He4.
+   **/
 #ifdef USE_TIMERS
   timer.Start();
 #endif // USE_TIMERS
@@ -514,6 +532,10 @@ void KFParticleTopoReconstructor::SortTracks()
 
 void KFParticleTopoReconstructor::TransportPVTracksToPrimVertex()
 {
+  /** Tracks which are considered as primary, i.e. were used in fit of candidates
+   ** for the primary vertex, are transported to the DCA point to the corresponding
+   ** primary vertex.
+   **/
   float_v point[3];
   KFParticleSIMD tmpPart;
   
@@ -549,7 +571,12 @@ void KFParticleTopoReconstructor::TransportPVTracksToPrimVertex()
 
 void KFParticleTopoReconstructor::GetChiToPrimVertex(KFParticleSIMD* pv, const int nPV)
 { 
-  KFParticleSIMD tmpPart; // for chi_prim calculation 
+  /** Calculates the chi2-deviation from the primary vertex. If several primary vertices
+   ** are found the minimum value is stored.
+   ** \param[in] pv - pointer to the array with primary vertices
+   ** \param[in] nPV - number of the primary vertices in the array
+   **/
+  KFParticleSIMD tmpPart;
   
   for(int iTV=0; iTV<2; iTV++)
   {
@@ -600,6 +627,9 @@ struct ParticleInfo
 
 bool UseParticleInCompetition(int PDG)
 {
+  /** Defines if a particle with a given PDG code should be used in the
+   ** competition between reconstructed particle candidates.
+   **/
   bool use = (PDG == 310) ||         //K0
              (PDG == 22) ||          //gamma
              (PDG == 111) ||         //pi0
@@ -622,6 +652,15 @@ bool UseParticleInCompetition(int PDG)
 
 void KFParticleTopoReconstructor::SelectParticleCandidates()
 {
+  /** Cleans reconstructed short-lived particles: \n
+   ** 1) primary K0, Lambda, anti-Lambda, gamma, hypernuclei are selected; \n
+   ** 2) competition between candidates defined by the 
+   ** KFParticleTopoReconstructor::UseParticleInCompetition is run; \n
+   ** 3) dielectron spectrum is cleaned from gamma-electrons; \n
+   ** 4) in the dielectron spectrum for low mass vector mesons only those
+   ** candidates are left, which have both daughters identified as electrons.
+   **/
+  
   std::vector<ParticleInfo> particleInfo;
   std::vector<bool> isUsed(fParticles.size());
   std::vector<bool> deleteCandidate(fParticles.size());
@@ -929,6 +968,10 @@ void KFParticleTopoReconstructor::SelectParticleCandidates()
 
 bool KFParticleTopoReconstructor::ParticleHasRepeatingDaughters(const KFParticle& particle)
 {
+  /** Checks if the provided particle candidate has two or more daughter tracks 
+   ** with the same index including tracks from the daughter particles in the decay
+   ** chains. Such candidates should be rejected.
+   **/
   if(particle.NDaughters() < 2) return 0;
   
   vector<int> daughters;
@@ -948,6 +991,11 @@ bool KFParticleTopoReconstructor::ParticleHasRepeatingDaughters(const KFParticle
 
 void KFParticleTopoReconstructor::GetListOfDaughterTracks(const KFParticle& particle, vector<int>& daughters)
 {
+  /** Returns the list of indices of all tracks used for construction of the given particle
+   ** including tracks from the short-lived daughter particles in the decay chain.
+   ** \param[in] particle - the particle to be processed
+   ** \param[out] daughters - a vector with indices of all daughter tracks
+   **/
   if(particle.NDaughters() == 1)
     daughters.push_back( particle.DaughterIds()[0] );
   else
@@ -957,7 +1005,13 @@ void KFParticleTopoReconstructor::GetListOfDaughterTracks(const KFParticle& part
 
 void KFParticleTopoReconstructor::ReconstructParticles()
 {
-  // find short-lived particles
+  /** Runs reconstruction of the short-lived particles by KFParticleFinder.
+   ** At first, primary tracks are transported to the DCA point with the
+   ** corresponding primary vertices for better precision,
+   ** chi2-deviation of the secondary tracks to the primary vertex is 
+   ** calculated, and than KFParticleFinder is run. Optionally cleanup of
+   ** the output array of particle candidates can be run.
+   **/
 #ifdef USE_TIMERS
   timer.Start();
 #endif // USE_TIMERS
@@ -1047,6 +1101,14 @@ void KFParticleTopoReconstructor::SendDataToXeonPhi( int iHLT, scif_epd_t& endpo
 
 void KFParticleTopoReconstructor::SaveInputParticles(const string prefix, bool onlySecondary)
 {
+  /** Stores input tracks to the output file. If the "onlySecondary" flag is set,
+   ** only secondary particles are stored. As an input function takes the full path
+   ** to the folder, where output files should be stored. For each event a corresponding
+   ** file will be created in the provided folder. The name of the file is 
+   ** "event#_KFPTracks.data", where "#" is the number of the event.
+   ** \param[in] prefix - path to the output folder
+   ** \param[in] onlySecondary - flag shows if only secondary tracks should be stored
+   **/ 
   static int nEvents = 0;
   string outFileName = "/event";
   char Result[16]; // string which will contain the number
