@@ -17,7 +17,25 @@ using std::vector;
 
 void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
 {
-    // copy tracks in particles.
+  /** The function initialises an input for the search of primary vertices:\n
+   ** 1) it receives as an input an array with tracks;\n
+   ** 2) tracks are converted to KFParticle objects assuming pion mass;\n
+   ** 3) the position of the primary vertex is estimated with simplified
+   ** Kalman filter equations using all tracks; \n
+   ** 4) tracks are checked to deviate from the obtained estimation within
+   ** KFParticlePVReconstructor::fChi2CutPreparation; \n
+   ** 5) from the selected tracks a more precise estimation is obtained
+   ** using KFVertex::ConstructPrimaryVertex() with soft cut 
+   ** KFParticlePVReconstructor::fChi2CutPreparation; \n
+   ** 6) input particles are transported to the DCA point with the obtained
+   ** estimation;\n
+   ** 7) the weight for each particle is calculated according to its errors,
+   ** if errors are not defined after extrapolation or if particle 10 cm
+   ** away from the {0,0,0} point the weight of -100 is assigned.
+   ** \param[in] tracks - a pointer to the KFPTrackVector with input tracks
+   ** \param[in] nParticles - number of the input tracks
+   **/
+  
   fNParticles = nParticles;
   fParticles.resize(fNParticles);
   fWeight.resize(fNParticles);
@@ -130,9 +148,24 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
 
 void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
 {
-  // The function finds a set of clusters of tracks.
-  // Tracks are assumed to be transported to the beam line.
-  // If a beam line is set - it will be used for a reconstruction but will not be added to a daughter cluster
+  /** The functions searches for a set of clusters of particles - candidates for the primary
+   ** vertex:\n
+   ** 1) input particles are assumed to be transported to the beam line or target position;\n
+   ** 2) at first, the best particle with the highest weight is selected;\n
+   ** 3) then a cluster is formed around this particle;\n
+   ** 4) if a beam line is set it is used for the reconstruction as an additional track,
+   ** but will not be added to the resulting cluster of daughter particles;\n
+   ** 5) the primary vertex candidate is fitted with KFVertex::ConstructPrimaryVertex()
+   ** using KFParticlePVReconstructor::fChi2Cut;\n
+   ** 6) cluster is cleaned from particles deviating more then the fChi2Cut from the fitted
+   ** candidate;\n
+   ** 7) the cluster and the vertex candidate are stored if they satisfy the provided cutNDF;\n
+   ** 8) the procedure is repeated until not used tracks with well-defined weight are left.
+   ** 
+   ** \param[in] cutNDF - cut on the number of degrees of freedom (effectively - number of
+   ** particles used for the reconstruction), if resulting NDF is smaller then this cut - 
+   ** the PV-candidate is rejected
+   **/
 
   if( IsBeamLine() )
     cutNDF += 2;
@@ -303,11 +336,15 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
 
 void KFParticlePVReconstructor::ReconstructPrimVertex()
 {
-
+  /** Reconstructs primary vertices and corresponding clusters of tracks.
+   ** For this it calls KFParticlePVReconstructor::FindPrimaryClusters(),
+   ** if no vertex is found empty primary vertex is used.
+   **/
+  
   FindPrimaryClusters();
 
-  if ( fPrimVertices.size() == 0 ) { // fill prim vertex by dummy values
-
+  if ( fPrimVertices.size() == 0 )
+  {
     float X=0,Y=0,Z=0;
 
     KFPVertex primVtx_tmp;
@@ -324,7 +361,7 @@ void KFParticlePVReconstructor::ReconstructPrimVertex()
 }
 
 void KFParticlePVReconstructor::AddPV(const KFVertex &pv, const vector<int> &tracks)
-{
+{ 
   fPrimVertices.push_back(pv);
   KFParticleCluster cluster;
   cluster.fTracks = tracks;
