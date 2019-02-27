@@ -574,15 +574,28 @@ void KFParticleTopoReconstructor::GetChiToPrimVertex(KFParticleSIMD* pv, const i
   }
 }
 
+/** @class ParticleInfo
+ ** @brief Helper structure to clean particle spectra by competition of PDG hypothesis.
+ ** @author  I.Kisel, M.Zyzak
+ ** @date 05.02.2019
+ ** @version 1.0
+ **
+ ** The structure contains index of the particle and difference in sigmas between the mass of
+ ** the particle candidate and the table mass of the corresponding PDG hypothesis. Is used to
+ ** sort the array with particle candidates according to the smallest difference. Then only
+ ** the best candidate is stored.
+ **/
 struct ParticleInfo
 {
   ParticleInfo():fParticleIndex(-1),fMassDistance(1.e9f) {};
+  /** \brief Constructor with all parameters initialised by user. */
   ParticleInfo(int index, float massDistance):fParticleIndex(index),fMassDistance(massDistance) {};
   
+  /** \brief Sorting function, returns true if the mass difference of "a" is smaller then of "b". The array is sorted according to the smallest difference.*/
   static bool compare(const ParticleInfo& a, const ParticleInfo& b) { return (a.fMassDistance < b.fMassDistance); }
   
-  int   fParticleIndex;
-  float fMassDistance;
+  int   fParticleIndex; ///< Index in the array of the particle candidates.
+  float fMassDistance;  ///< difference between the mass of the candidate and the table mass normalised to the width of the peak.
 };
 
 bool UseParticleInCompetition(int PDG)
@@ -1031,12 +1044,6 @@ void KFParticleTopoReconstructor::SendDataToXeonPhi( int iHLT, scif_epd_t& endpo
   scif_send(endpoint, &controlSignal, sizeof(int), SCIF_SEND_BLOCK); // synchronization
 }
 #endif
-
-struct PrimVertexVector
-{
-  vector<float> fP[3];
-  vector<float> fC[6];
-};
 
 void KFParticleTopoReconstructor::SaveInputParticles(const string prefix, bool onlySecondary)
 {
