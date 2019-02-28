@@ -26,6 +26,7 @@ KFParticleFinder::KFParticleFinder():
   fSecCandidates(), fPrimCandidates(), fPrimCandidatesTopo(),fPrimCandidatesTopoMass(),
   fEmcClusters(0), fMixedEventAnalysis(0), fDecayReconstructionList()
 {
+  /** The default constructor. Initialises all cuts to the default values. **/
   //Cuts
   //track + track
   //chi2_prim         chi2_geo          ldl
@@ -45,7 +46,7 @@ KFParticleFinder::KFParticleFinder():
   //track + particle
   //                ldl          chi2_topo                        chi2_geo
   fCutsTrackV0[0][0] =  5;     fCutsTrackV0[0][1] = 5;        fCutsTrackV0[0][2] = 6;  //Xi, Omega
-  fCutsTrackV0[1][0] =  5;     fCutsTrackV0[1][1] = 5;        fCutsTrackV0[1][2] = 6;  //Omega, charm, H0, Sigma+
+  fCutsTrackV0[1][0] =  5;     fCutsTrackV0[1][1] = 5;        fCutsTrackV0[1][2] = 6;  //Charm, H0, Sigma+
   fCutsTrackV0[2][0] = -100.;  fCutsTrackV0[2][1] = 10000.;   fCutsTrackV0[2][2] = 3;  //resonances
   
   //charm
@@ -61,9 +62,14 @@ KFParticleFinder::KFParticleFinder():
 }
 
 //________________________________________________________________________________
-void KFParticleFinder::Init(int nPV) {
-  fNPV = nPV;
+void KFParticleFinder::Init(int nPV) 
+{
+  /** Initialises the new event: all vectors with temporary candidates are cleaned, the number of 
+   ** primary vertices is set to "nPV", vectors with primary candidates are resized correspondingly.
+   ** \param[in] nPV - number of primary vertices in the event which will be processed
+   **/
   
+  fNPV = nPV;
 //   Particles.reserve(vRTracks.size() + nPart);
 
   fD0.clear();
@@ -112,9 +118,34 @@ void KFParticleFinder::Init(int nPV) {
 }
 //________________________________________________________________________________
 
-void KFParticleFinder::FindParticles(KFPTrackVector* vRTracks, kfvector_float* ChiToPrimVtx,
-                     std::vector<KFParticle>& Particles, std::vector<KFParticleSIMD, KFPSimdAllocator<KFParticleSIMD> >& PrimVtx, int nPV)
+void KFParticleFinder::FindParticles(KFPTrackVector* vRTracks, kfvector_float* ChiToPrimVtx, std::vector<KFParticle>& Particles,
+                                     std::vector<KFParticleSIMD, KFPSimdAllocator<KFParticleSIMD> >& PrimVtx, int nPV)
 {
+  /** The main interface which runs reconstruction of short-lived particles:\n
+   ** 1) a new event is initialised; \n
+   ** 2) long-lived particles formed from tracks are stored to the output array "Particles"; \n
+   ** 3) 2-daughter channels are reconstructed (KFParticleFinder::Find2DaughterDecay()); \n
+   ** 4) the 2-daughter same-signed background is collected for resonances (KFParticleFinder::ConstructPrimaryBG()); \n
+   ** 5) found primary candidates of \f$K_s^0\f$, \f$\Lambda\f$, \f$\overline{\Lambda}\f$ and \f$\gamma\f$ are transported
+   ** to the point of the closest approach with the corresponding primary vertex (KFParticleFinder::ExtrapolateToPV()); \n
+   ** 6) reconstruction with the missing mass method (KFParticleFinder::NeutralDaughterDecay()); \n
+   ** 7) all other decays are reconstructed one after another. \n
+   ** If analysis is run in the mixed event mode only steps 1) and 2) are performed.
+   ** \param[in] vRTracks - pointer to the array with vectors of tracks:\n
+   ** 0) secondary positive at the first hit position; \n
+   ** 1) secondary negative at the first hit position; \n
+   ** 2) primary positive at the first hit position; \n
+   ** 3) primary negative at the first hit position; \n
+   ** 4) secondary positive at the last hit position; \n
+   ** 5) secondary negative at the last hit position; \n
+   ** 6) primary positive at the last hit position; \n
+   ** 7) primary negative at the last hit position. \n
+   ** \param[in] ChiToPrimVtx - arrays with vectors of the \f$\chi^2_{prim}\f$ deviations for track vectors 1) and 2).
+   ** \param[out] Particles - output vector with particles.
+   ** \param[in] PrimVtx - vector with primary vertices.
+   ** \param[in] nPV - number of the input primary vertices.
+   **/
+  
   Init(nPV);
   const int nPartPrim = vRTracks[2].NPions() * vRTracks[3].NKaons() + 
                         vRTracks[3].NPions() * vRTracks[2].NKaons() + 
@@ -564,6 +595,10 @@ void KFParticleFinder::FindParticles(KFPTrackVector* vRTracks, kfvector_float* C
 
 void KFParticleFinder::ExtrapolateToPV(vector<KFParticle>& vParticles, KFParticleSIMD& PrimVtx)
 {
+  /** Extrapolates all particles from the input vector to the DCA point with the primary vertex.
+   ** \param[in,out] vParticles - array of particles to be transported.
+   ** \param[in] PrimVtx - the primary vertex, where particles should be transported.
+   **/
   KFParticle* parts[float_vLen];
   KFParticle tmpPart[float_vLen];
   
@@ -591,33 +626,6 @@ void KFParticleFinder::ExtrapolateToPV(vector<KFParticle>& vParticles, KFParticl
   }
 }
 
-float_v KFParticleFinder::GetChi2BetweenParticles(KFParticleSIMD &p1, KFParticleSIMD &p2)
-{
-  const float_v& x1 = p1.GetX();
-  const float_v& y1 = p1.GetY();
-  const float_v& z1 = p1.GetZ();
-
-  const float_v& x2 = p2.GetX();
-  const float_v& y2 = p2.GetY();
-  const float_v& z2 = p2.GetZ();
-
-  const float_v dx = x1 - x2;
-  const float_v dy = y1 - y2;
-  const float_v dz = z1 - z2;
-
-  const float_v& c0 = p1.GetCovariance(0) + p2.GetCovariance(0);
-  const float_v& c1 = p1.GetCovariance(1) + p2.GetCovariance(1);
-  const float_v& c2 = p1.GetCovariance(2) + p2.GetCovariance(2);
-  const float_v& c3 = p1.GetCovariance(3) + p2.GetCovariance(3);
-  const float_v& c4 = p1.GetCovariance(4) + p2.GetCovariance(4);
-  const float_v& c5 = p1.GetCovariance(5) + p2.GetCovariance(5);
-
-  const float_v r2 = dx*dx + dy*dy + dz*dz;
-  const float_v err2 = c0*dx*dx + c2*dy*dy + c5*dz*dz + 2.f*( c1*dx*dy + c3*dx*dz + c4*dy*dz );
-
-  return (r2*r2/err2);
-}
-
 inline void KFParticleFinder::ConstructV0(KFPTrackVector* vTracks,
                                           int iTrTypePos,
                                           int iTrTypeNeg,
@@ -643,6 +651,40 @@ inline void KFParticleFinder::ConstructV0(KFPTrackVector* vTracks,
                                           vector<KFParticle>* vMotherSec
                                          )
 {
+  /** Combines two SIMD vectors of particles into 2-daughter candidate.
+   ** \param[in] vRTracks - pointer to the array with vectors of tracks:\n
+   ** 0) secondary positive at the first hit position; \n
+   ** 1) secondary negative at the first hit position; \n
+   ** 2) primary positive at the first hit position; \n
+   ** 3) primary negative at the first hit position; \n
+   ** 4) secondary positive at the last hit position; \n
+   ** 5) secondary negative at the last hit position; \n
+   ** 6) primary positive at the last hit position; \n
+   ** 7) primary negative at the last hit position. \n
+   ** \param[in] iTrTypePos - index of the first vector with tracks in the vTracks array.
+   ** \param[in] iTrTypeNeg - index of the second vector with tracks in the vTracks array.
+   ** \param[in] idPosDaughters - indices of particles from the first vector of tracks.
+   ** \param[in] idNegDaughters - indices of particles from the second vector of tracks.
+   ** \param[in] daughterPosPDG - PDG hypothesis of the first SIMD vector of tracks.
+   ** \param[in] daughterNegPDG - PDG hypothesis of the second SIMD vector of tracks.
+   ** \param[out] mother - constructed 2-daughter SIMD-candidate.
+   ** \param[in] mother_temp - temporary object to extract KFParticle from constructed KFParticleSIMD mother. Preallocated for better performance.
+   ** \param[in] NTracks - number of tracks in each SIMD vector.
+   ** \param[in] l - SIMD-vector with extracted distance to the primary vertex. Is preallocated for better performance.
+   ** \param[in] dl - SIMD-vector with extracted error of distance to the primary vertex. Is preallocated for better performance.
+   ** \param[out] Particles - the output array with the reconstructed particle-candidates.
+   ** \param[in] PrimVtx - array with primary vertices.
+   ** \param[in] cuts - set of cuts: \f$\chi^2_{prim}\f$, \f$\chi^2_{geo}\f$, \f$l/\Delta l\f$.
+   ** \param[in] pvIndex - index of the primary vertex for reconstruction of resonances. Tracks should come from the same vertex.
+   ** in case of other particles the value should be "-1".
+   ** \param[in] secCuts - cuts to select primary and secondary candidates from the reconstructed set: \f$\sigma_{M}\f$, \f$\chi^2_{topo}\f$, \f$l/\Delta l\f$.
+   ** \param[in] massMotherPDG - PDG table mass for the mother particle, is used for selection of primary and secondary candidates.
+   ** \param[in] massMotherPDGSigma - sigma of the peak width, is used for selection of primary and secondary candidates.
+   ** \param[out] motherPrimSecCand - a SIMD-particle with possible primary and secondary candidates.
+   ** \param[out] nPrimSecCand - number of possible primary and secondary candidates. Can be "0" if no of them are found.
+   ** \param[out] vMotherPrim - array with output primary candidates if any.
+   ** \param[out] vMotherSec - array with output secondary candidates if any.
+   **/
   float_m isPrimary(simd_cast<float_m>(pvIndex>-1));
   int_v trackId;
   KFParticleSIMD posDaughter(vTracks[iTrTypePos],idPosDaughters, daughterPosPDG);
@@ -824,6 +866,17 @@ inline void KFParticleFinder::SaveV0PrimSecCand(KFParticleSIMD& mother,
                                                 vector< vector<KFParticle> >* vMotherPrim,
                                                 vector<KFParticle>* vMotherSec)
 {
+  /** The function which decides if primary and secondary candidates found by KFParticleFinder::ConstructV0()
+   ** should be stored and stores them to the provided arrays.
+   ** \param[in] mother - constructed SIMD vector of particle candidates. 
+   ** \param[in] NParticles - number of particles in the SIMD vector.
+   ** \param[in] mother_temp - temporary object to extract KFParticle from constructed KFParticleSIMD mother. Preallocated for better performance.
+   ** \param[in] PrimVtx - array with primary vertices.
+   ** \param[in] secCuts - cuts to select primary and secondary candidates from the reconstructed set: \f$\sigma_{M}\f$, \f$\chi^2_{topo}\f$, \f$l/\Delta l\f$.
+   ** \param[out] vMotherPrim - array with output primary candidates if any.
+   ** \param[out] vMotherSec - array with output secondary candidates if any.
+   **/
+  
   KFParticleSIMD motherTopo;
   float_v massMotherPDG, massMotherPDGSigma;
   
@@ -913,7 +966,25 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
                                           const float* secCuts,
                                           vector< vector<KFParticle> >* vMotherPrim,
                                           vector<KFParticle>* vMotherSec )
-{ 
+{
+  /** Reconstructs all 2-daughter decays.
+   ** \param[in] vRTracks - pointer to the array with vectors of tracks:\n
+   ** 0) secondary positive at the first hit position; \n
+   ** 1) secondary negative at the first hit position; \n
+   ** 2) primary positive at the first hit position; \n
+   ** 3) primary negative at the first hit position; \n
+   ** 4) secondary positive at the last hit position; \n
+   ** 5) secondary negative at the last hit position; \n
+   ** 6) primary positive at the last hit position; \n
+   ** 7) primary negative at the last hit position. \n
+   ** \param[in] ChiToPrimVtx - arrays with vectors of the \f$\chi^2_{prim}\f$ deviations for track vectors 1) and 2).
+   ** \param[out] Particles - output vector with particles.
+   ** \param[in] PrimVtx - vector with primary vertices.
+   ** \param[in] cuts - set of cuts: \f$\chi^2_{prim}\f$, \f$\chi^2_{geo}\f$, \f$l/\Delta l\f$.
+   ** \param[in] secCuts - cuts to select primary and secondary candidates from the reconstructed set: \f$\sigma_{M}\f$, \f$\chi^2_{topo}\f$, \f$l/\Delta l\f$.
+   ** \param[out] vMotherPrim - array with output primary candidates.
+   ** \param[out] vMotherSec - array with output secondary candidates.
+   **/
   KFParticle mother_temp;
   KFParticleSIMD mother;
   kfvector_floatv l(fNPV), dl(fNPV);
@@ -1329,7 +1400,24 @@ void KFParticleFinder::ConstructPrimaryBG(KFPTrackVector* vTracks,
                                           const float* secCuts,
                                           vector< vector<KFParticle> >* vMotherPrim,
                                           vector<KFParticle>* vMotherSec )
-{ 
+{
+  /** Constructs same-sign background candidates for 2-daughter resonances.
+   ** \param[in] vRTracks - pointer to the array with vectors of tracks:\n
+   ** 0) secondary positive at the first hit position; \n
+   ** 1) secondary negative at the first hit position; \n
+   ** 2) primary positive at the first hit position; \n
+   ** 3) primary negative at the first hit position; \n
+   ** 4) secondary positive at the last hit position; \n
+   ** 5) secondary negative at the last hit position; \n
+   ** 6) primary positive at the last hit position; \n
+   ** 7) primary negative at the last hit position. \n
+   ** \param[out] Particles - the output array with the reconstructed particle-candidates.
+   ** \param[in] PrimVtx - vector with primary vertices.
+   ** \param[in] cuts - set of cuts: \f$\chi^2_{prim}\f$, \f$\chi^2_{geo}\f$, \f$l/\Delta l\f$.
+   ** \param[in] secCuts - cuts to select primary and secondary candidates from the reconstructed set: \f$\sigma_{M}\f$, \f$\chi^2_{topo}\f$, \f$l/\Delta l\f$.
+   ** \param[out] vMotherPrim - array with output primary candidates. Is provided for consistency with KFParticleFinder::ConstructV0().
+   ** \param[out] vMotherSec - array with output secondary candidates. Is provided for consistency with KFParticleFinder::ConstructV0().
+   **/
   KFParticle mother_temp;
   KFParticleSIMD mother;
   kfvector_floatv l(fNPV), dl(fNPV);
@@ -1496,6 +1584,28 @@ void KFParticleFinder::ConstructTrackV0Cand(KFPTrackVector& vTracks,
                                             std::vector< std::vector<KFParticle> >* vMotherPrim,
                                             std::vector<KFParticle>* vMotherSec)
 {
+  /** Constructs a candidate from a track and already reconstructed particle candidate.
+   ** \param[in] vTracks - vector with tracks.
+   ** \param[in] idTracks - indices of particles from the vector of tracks.
+   ** \param[in] trackPDG - PDG hypothesis of the SIMD vector of tracks.
+   ** \param[in] vV0 - array with already reconstructed particle candidate with the size of SIMD vector.
+   ** \param[out] mother - constructed 2-daughter SIMD-candidate.
+   ** \param[in] motherTopo - preallocated SIMD vector for topological constraint for better performance.
+   ** \param[in] mother_temp - temporary object to extract KFParticle from constructed KFParticleSIMD mother. Preallocated for better performance.
+   ** \param[in] nElements - number of elements in each SIMD vector.
+   ** \param[in] l - SIMD-vector with extracted distance to the primary vertex. Is preallocated for better performance.
+   ** \param[in] dl - SIMD-vector with extracted error of distance to the primary vertex. Is preallocated for better performance.
+   ** \param[out] Particles - the output array with the reconstructed particle-candidates.
+   ** \param[in] PrimVtx - array with primary vertices.
+   ** \param[in] cuts - set of cuts: \f$l/\Delta l\f$, \f$\chi^2_{topo}\f$, \f$\chi^2_{geo}\f$.
+   ** \param[in] pvIndex - index of the primary vertex for reconstruction of resonances. Tracks should come from the same vertex.
+   ** in case of other particles the value should be "-1".
+   ** \param[in] massMotherPDG - PDG table mass for the mother particle, is used for selection of primary and secondary candidates.
+   ** \param[in] massMotherPDGSigma - sigma of the peak width, is used for selection of primary and secondary candidates.
+   ** \param[out] vMotherPrim - array with output primary candidates if any. If pointer is set to NULL - not filled.
+   ** \param[out] vMotherSec - array with output secondary candidates if any. If pointer is set to NULL - not filled.
+   **/
+  
   float_m isPrimary(simd_cast<float_m>(pvIndex>-1));
   
   int_v trackId( &(vTracks.Id()[0]), idTracks );
@@ -1845,6 +1955,21 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
                                         vector< vector<KFParticle> >* vMotherPrim,
                                         vector<KFParticle>* vMotherSec)
 {
+  /** Combines tracks and already reconstructed particle candidate of certain type in the next candidate.
+   ** \param[in] vV0 - the input vector with already reconstructed particle candidate.
+   ** \param[in] V0PDG - PDG code of the provided particle candidates.
+   ** \param[in] vTracks - vector with input tracks.
+   ** \param[in] q - charge of the provided tracks.
+   ** \param[in] firstTrack - index of the first track to be used.
+   ** \param[in] lastTrack - index of the last track to be used.
+   ** \param[out] Particles - the output array with the reconstructed particle-candidates.
+   ** \param[in] PrimVtx - array with primary vertices.
+   ** \param[in] v0PVIndex - index of the corresponding primary vertex if the tracks are primary. If not "-1" should be set.
+   ** \param[in] ChiToPrimVtx - vector with the \f$\chi^2_{prim}\f$ deviations for provided tracks. If tracks are primary NULL pointer is provided.
+   ** \param[out] vMotherPrim - array with output primary candidates.
+   ** \param[out] vMotherSec - array with output secondary candidates.
+   **/
+  
   if( (vV0.size() < 1) || ((lastTrack-firstTrack) < 1) ) return;
   KFParticle mother_temp;
 
@@ -2283,6 +2408,19 @@ void KFParticleFinder::SelectParticles(vector<KFParticle>& Particles,
                                        const float& massErr,
                                        const float& massCut)
 {
+  /** Selects particles from a set of candidates "vCandidates" according to the provided cuts
+   ** on \f$\chi^2_{topo}\f$ and \f$l/\Delta l\f$
+   ** and stores them to the output array "Particles". Also, "vCandidates" is cleaned, only
+   ** selected particles with additional cut on \f$\sigma_{M}\f$ are left there.
+   ** \param[out] Particles - output vector with particles.
+   ** \param[in,out] vCandidates - vector with the input candidates.
+   ** \param[in] PrimVtx - vector with primary vertices.
+   ** \param[in] cutChi2Topo - \f$\chi^2_{topo}\f$ cut.
+   ** \param[in] cutLdL - \f$l/\Delta l\f$ cut.
+   ** \param[in] mass - table mass for the given PDG hypothesis.
+   ** \param[in] massErr - sigma of the peak width for the given PDG hypothesis.
+   ** \param[in] massCut - \f$\sigma_{M}\f$ cut.
+   **/
   KFParticle* cand[float_vLen];
   int nCand = vCandidates.size();
   
@@ -2373,6 +2511,21 @@ void KFParticleFinder::CombinePartPart(vector<KFParticle>& particles1,
                                        float massMotherPDG,
                                        float massMotherPDGSigma)
 {
+  /** Combines two already constructed candidates into a new particle.
+   ** \param[in] particles1 - vector with the first set of particles.
+   ** \param[in] particles2 - vector with the second set of particles.
+   ** \param[out] Particles - output vector with particles.
+   ** \param[in] PrimVtx - vector with primary vertices.
+   ** \param[in] cuts - set of cuts: \f$l/\Delta l\f$, \f$\chi^2_{topo}\f$, \f$\chi^2_{geo}\f$.
+   ** \param[in] iPV - index of the primary vertex for reconstruction of resonances. Tracks should come from the same vertex.
+   ** \param[in] MotherPDG - PDG hypothesis of the constructed mother particles.
+   ** \param[in] isSameInputPart - shows if vectors of input particles are the same to avoid double reconstruction of the same candidate.
+   ** \param[in] saveOnlyPrimary - defines if only primary particles should be searched and \f$\chi^2_{topo}\f$ should be applied.
+   ** \param[out] vMotherPrim - array with output primary candidates if any. If pointer is set to NULL - not filled.
+   ** \param[out] vMotherSec - array with output secondary candidates if any. If pointer is set to NULL - not filled.
+   ** \param[in] massMotherPDG - PDG table mass for the mother particle, is used for selection of primary and secondary candidates.
+   ** \param[in] massMotherPDGSigma - sigma of the peak width, is used for selection of primary and secondary candidates.
+   **/
   if( (particles1.size() ==  0) || (particles2.size() ==  0) ) return;  
   if(!(fDecayReconstructionList.empty()) && (fDecayReconstructionList.find(MotherPDG) == fDecayReconstructionList.end())) return;
 
@@ -2585,8 +2738,20 @@ void KFParticleFinder::CombinePartPart(vector<KFParticle>& particles1,
 
 
 void KFParticleFinder::NeutralDaughterDecay(KFPTrackVector* vTracks,
-                                          vector<KFParticle>& Particles)
-{ 
+                                            vector<KFParticle>& Particles)
+{
+  /** Reconstructs particles by the missing mass method.
+   ** \param[in] vRTracks - pointer to the array with vectors of tracks:\n
+   ** 0) secondary positive at the first hit position; \n
+   ** 1) secondary negative at the first hit position; \n
+   ** 2) primary positive at the first hit position; \n
+   ** 3) primary negative at the first hit position; \n
+   ** 4) secondary positive at the last hit position; \n
+   ** 5) secondary negative at the last hit position; \n
+   ** 6) primary positive at the last hit position; \n
+   ** 7) primary negative at the last hit position. \n
+   ** \param[out] Particles - the output array with the reconstructed particle-candidates.
+   **/
   KFParticle mother_temp;
   KFParticleSIMD ChargedDaughter, MotherTrack;
 
@@ -2861,6 +3026,20 @@ void KFParticleFinder::NeutralDaughterDecay(KFPTrackVector* vTracks,
 
 void KFParticleFinder::AddCandidate(const KFParticle& candidate, int iPV)
 {
+  /** Adds an externally found particle to either set of secondary or primary candidates:\n
+   ** 1) if iPV is negative the candidate is stored to KFParticleFinder::fSecCandidates;\n
+   ** 2) if iPV is not negative and smaller then the set number of primary vertices and
+   ** NDF=2 the candidate is stored to KFParticleFinder::fPrimCandidates;\n
+   ** 3) if iPV is not negative and smaller then the set number of primary vertices and
+   ** NDF=3 the candidate is stored to KFParticleFinder::fPrimCandidatesTopo;\n
+   ** 4) if iPV is not negative and smaller then the set number of primary vertices and
+   ** NDF=4 the candidate is stored to KFParticleFinder::fPrimCandidatesTopoMass.\n
+   ** Only those particles will be stored which have accepted PDG. Please check the documentation
+   ** of the corresponding vectors for the list of particles.
+   ** \param[in] candidate - candidate to be added
+   ** \param[in] iPV - index of the associated PV
+   **/
+
   //0 Ks, 1 Lambda,2 LambdaBar, 3 gamma, 4 pi0, 5 Xi, 6 XiBar, 7 Omega, 8 OmegaBar, 9 XiStar
   int iSet = -1;
   if(candidate.GetPDG() ==   310) iSet = 0;
@@ -2893,6 +3072,11 @@ void KFParticleFinder::AddCandidate(const KFParticle& candidate, int iPV)
 
 void KFParticleFinder::SetNPV(int nPV)
 {
+  /** Sets the number of primary vertices to "nPV", resizes all vectors
+   ** with primary candidates correspondingly.
+   ** \param[in] nPV - number of the primary vertices in the event to be set.
+   **/
+  
   fNPV = nPV;
   
   for(int iCandidates=0; iCandidates<fNPrimCandidatesSets; iCandidates++)
