@@ -990,11 +990,9 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
   kfvector_floatv l(fNPV), dl(fNPV);
 
   KFParticleSIMD daughterNeg, daughterPos;
-
     
   // for secondary V0
   unsigned int nBufEntry = 0;
-  float_v dS;
   uint_v idNegDaughters;
   uint_v idPosDaughters;
   int_v daughterPosPDG(-1);
@@ -1269,8 +1267,24 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
 
                 if(!( (iTrTypePos == 1) && (iTrTypeNeg == 1) ) )
                 {
-                  active[iPDGPos] &= simd_cast<int_m>(daughterNeg.GetDistanceFromParticle(daughterPos) < float_v(fDistanceCut));
+                  float_v dS[2];
+                  daughterNeg.GetDStoParticleFast( daughterPos, dS );   
+                  float_v negParameters[8], posParameters[8];
+                  daughterNeg.TransportFast( dS[0], negParameters ); 
+                  daughterPos.TransportFast( dS[1], posParameters ); 
+                  float_v dx = negParameters[0]-posParameters[0]; 
+                  float_v dy = negParameters[1]-posParameters[1]; 
+                  float_v dz = negParameters[2]-posParameters[2];
+                  float_v dr = sqrt(dx*dx+dy*dy+dz*dz);
+
+                  active[iPDGPos] &= simd_cast<int_m>(dr < float_v(fDistanceCut));
                   if(active[iPDGPos].isEmpty()) continue;
+                  
+                  float_v p1p2 = posParameters[3]*negParameters[3] + posParameters[4]*negParameters[4] + posParameters[5]*negParameters[5];
+                  float_v p12  = posParameters[3]*posParameters[3] + posParameters[4]*posParameters[4] + posParameters[5]*posParameters[5];
+                  float_v p22  = negParameters[3]*negParameters[3] + negParameters[4]*negParameters[4] + negParameters[5]*negParameters[5];
+                  active[iPDGPos] &= simd_cast<int_m>(p1p2 > -p12);
+                  active[iPDGPos] &= simd_cast<int_m>(p1p2 > -p22);
                 }
                 
                 const float_v& ptNeg2 = daughterNeg.Px()*daughterNeg.Px() + daughterNeg.Py()*daughterNeg.Py();

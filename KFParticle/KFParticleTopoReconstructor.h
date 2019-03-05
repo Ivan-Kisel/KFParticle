@@ -137,7 +137,7 @@ class KFParticleTopoReconstructor{
   const KFPTrackVector* GetTracks() const { return fTracks; } ///< Returns a pointer to the arrays with tracks KFParticleTopoReconstructor::fTracks.
   const kfvector_float* GetChiPrim() const { return fChiToPrimVtx; } ///<Returns a pointer to the arrays with chi2-deviations KFParticleTopoReconstructor::fChiToPrimVtx.
   
-  KFParticleFinder* GetKFParticleFinderPointer() { return fKFParticleFinder; } ///< Returns a pointer to the KFParticleFinder object.
+  KFParticleFinder* GetKFParticleFinder() { return fKFParticleFinder; } ///< Returns a pointer to the KFParticleFinder object.
   const KFParticleFinder* GetKFParticleFinder() const { return fKFParticleFinder; } ///< Returns a constant pointer to the KFParticleFinder object.
   
   void CleanPV() {

@@ -3545,8 +3545,7 @@ float_v KFParticleBaseSIMD::GetDistanceFromVertex( const float_v vtx[] ) const
   return sqrt( d[0]*d[0]+d[1]*d[1]+d[2]*d[2] );
 }
 
-float_v KFParticleBaseSIMD::GetDistanceFromParticle( const KFParticleBaseSIMD &p ) 
-  const
+float_v KFParticleBaseSIMD::GetDistanceFromParticle( const KFParticleBaseSIMD &p ) const
 { 
   /** Returns the DCA distance from another particle p.
    ** \param[in] p - the second particle

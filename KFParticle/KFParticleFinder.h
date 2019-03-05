@@ -366,7 +366,8 @@ class KFParticleFinder
    ** \param[in] pdg - PDG code of the decay which should be reconstructed
    **/
   void AddDecayToReconstructionList(int pdg) { fDecayReconstructionList[pdg] = true; }
-    
+  const std::map<int,bool> GetReconstructionList() const { return fDecayReconstructionList; } ///< Returns list of decays to be reconstructed.
+
  private:
 
   short int fNPV; ///< Number of primary vertex candidates in the event.
