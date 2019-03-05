@@ -125,7 +125,7 @@ KFParticlePerformanceBase::KFParticlePerformanceBase():
       hPVefficiency[iEffSet][iEff] = NULL;
 }
 
-void KFParticlePerformanceBase::CreateHistos(std::string histoDir, TDirectory* outFile)
+void KFParticlePerformanceBase::CreateHistos(std::string histoDir, TDirectory* outFile, std::map<int,bool> decays)
 {
   TDirectory *curdir = gDirectory;
   if (outFile) {
@@ -146,6 +146,9 @@ void KFParticlePerformanceBase::CreateHistos(std::string histoDir, TDirectory* o
     gDirectory->cd("Particles");
     for(int iPart=0; iPart<fParteff.nParticles; ++iPart)
     {
+      if(!(decays.empty()) && (iPart < fParteff.fFirstStableParticleIndex || iPart > fParteff.fLastStableParticleIndex))
+        if(decays.find(fParteff.partPDG[iPart]) == decays.end()) continue;
+        
       gDirectory->mkdir(fParteff.partName[iPart].data());
       gDirectory->cd(fParteff.partName[iPart].data());
       {
@@ -688,7 +691,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
   TString parTitle[nHistoPartParam];
   TString parName2D[nHistoPartParam2D] = {"y-p_{t}", "Z-R", "Armenteros", "y-m_{t}"};
   TString parTitle2D[nHistoPartParam2D];
-  TString parName3D[nHistoPartParam3D] = {"y-p_{t}-M", "y-m_{t}-M", "centrality-pt-M", "centrality-y-M", "centrality-mt-M"};
+  TString parName3D[nHistoPartParam3D] = {"y-p_{t}-M", "y-m_{t}-M", "centrality-pt-M", "centrality-y-M", "centrality-mt-M", "ct-pt-M"};
   TString parTitle3D[nHistoPartParam3D];
   for(int iParam=0; iParam<nHistoPartParam; iParam++)
   {
@@ -709,8 +712,8 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                   100, // p
                                   100, // pt
                                    40, // y
-                                  100, // DecayL
-                                  100, // ctau
+                                   60, // DecayL
+                                   60, // ctau
                                   100, // chi2/ndf
                                   100, // prob
                                   100, // theta
@@ -727,8 +730,8 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                   0.f, // p
                                   0.f, // pt
                                   0.f, // y
-                                 -5.f, // DecayL
-                                  0.f, // ctau
+                                -10.f, // DecayL
+                                -10.f, // ctau
                                   0.f, // chi2/ndf
                                   0.f, // prob
                                  -2.f, // theta
@@ -745,8 +748,8 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                   20.f, // p
                                    5.f, // pt
                                    4.f, // y
-                                  55.f, // DecayL
-                                  30.f, // ctau
+                                  50.f, // DecayL
+                                  50.f, // ctau
                                   20.f, // chi2/ndf
                                    1.f, // prob
                                    2.f, // theta
@@ -764,8 +767,8 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                  100, // p
                                  100, // pt
                                   30, // y
-                                 100, // DecayL
-                                 100, // ctau
+                                  60, // DecayL
+                                  60, // ctau
                                  100, // chi2/ndf
                                  100, // prob
                                  100, // theta
@@ -782,15 +785,15 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                   0.f, // p
                                   0.f, // pt
                                 -1.5f, // y
-                                 -5.f, // DecayL
-                                  0.f, // ctau
+                                -10.f, // DecayL
+                                -10.f, // ctau
                                   0.f, // chi2/ndf
                                   0.f, // prob
                                   0.f, // theta
                              -3.1416f, // phi
-                                 -1.f, // X
-                                 -1.f, // Y
-                                -10.f, // Z
+                                -10.f, // X
+                                -10.f, // Y
+                                -30.f, // Z
                                   0.f, // R
                                   0.f, // L
                                  -1.f, // L/dL
@@ -800,17 +803,17 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                   10.f, // p
                                   10.f, // pt
                                   1.5f, // y
-                                   5.f, // DecayL
-                                  30.f, // ctau
+                                  50.f, // DecayL
+                                  50.f, // ctau
                                   20.f, // chi2/ndf
                                    1.f, // prob
                                3.1416f, // theta
                                3.1416f, // phi
-                                   1.f, // X
-                                   1.f, // Y
-                                  10.f, // Z
-                                   1.f, // R
-                                   1.f, // L
+                                  10.f, // X
+                                  10.f, // Y
+                                  30.f, // Z
+                                  50.f, // R
+                                  50.f, // L
                                   35.f, // L/dL
                                   10.f, // Mt
                                   float(fParteff.partMaxMult[iPart])+0.5f};
@@ -892,6 +895,14 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
       histoParameters3D[iPart][2+iCH]->GetYaxis()->SetTitle(parAxisName[centralityHisto[iCH]]);
       histoParameters3D[iPart][2+iCH]->GetZaxis()->SetTitle("M");
     }
+    
+    histoParameters3D[iPart][5] = new TH3F(parName3D[5].Data(),parTitle3D[5].Data(),
+                                           nBins[5],xMin[5],xMax[5],
+                                           nBins[2],xMin[2],xMax[2],
+                                           nBins[0],xMin[0],xMax[0]);
+    histoParameters3D[iPart][5]->GetXaxis()->SetTitle("c#tau [cm]");
+    histoParameters3D[iPart][5]->GetYaxis()->SetTitle("p_{t} [GeV/c]");
+    histoParameters3D[iPart][5]->GetZaxis()->SetTitle("M");
   }
   else if(histoParameters3D)
   {
@@ -899,6 +910,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
     histoParameters3D[iPart][1] = NULL;
     for(int iCH = 0; iCH<3; iCH++)
       histoParameters3D[iPart][2+iCH] = NULL;
+    histoParameters3D[iPart][5] = NULL;
   }
 }
 
@@ -917,6 +929,10 @@ bool KFParticlePerformanceBase::IsCollect3DHistogram(int iParticle) const
          abs(fParteff.partPDG[iParticle]) == 3122 ||
          abs(fParteff.partPDG[iParticle]) == 3312 ||
          abs(fParteff.partPDG[iParticle]) == 3334 ||
+         abs(fParteff.partPDG[iParticle]) == 3003 ||
+         abs(fParteff.partPDG[iParticle]) == 3103 ||
+         abs(fParteff.partPDG[iParticle]) == 3004 ||
+         abs(fParteff.partPDG[iParticle]) == 3005 ||
 #ifdef CBM
          abs(fParteff.partPDG[iParticle]) == 7003112 ||
          abs(fParteff.partPDG[iParticle]) == 7003222 ||

@@ -12,6 +12,8 @@
 #ifndef KFMCTRACK_H
 #define KFMCTRACK_H
 
+#include <cmath>
+
 /** @class KFMCTrack
  ** @brief A class for storage of the Monte Carlo simulated track in the cartesian parametrisation.
  ** @author  M.Zyzak, I.Kisel
