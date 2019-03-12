@@ -91,10 +91,10 @@ namespace KFPMath
     const float_v& B = 4.f/pi;
     const float_v& C = -B/pi;
 
-    float_v y = (B + C * abs(x)) * x;
+    float_v y = (B + C * Vc::abs(x)) * x;
 
     const float_v& P = 0.218f;
-    y = P * (y * abs(y) - y) + y;
+    y = P * (y * Vc::abs(y) - y) + y;
     
     return y;    
   }
@@ -112,8 +112,8 @@ namespace KFPMath
     const float_m &xNeg  = (x < zero);
     const float_m &yNeg  = (y < zero);
 
-    const float_v &absX = abs(x);
-    const float_v &absY = abs(y);
+    const float_v &absX = Vc::abs(x);
+    const float_v &absY = Vc::abs(y);
 
     float_v a = absY / absX;
     const float_m &gt_tan_3pi_8 = (a > float_v(2.414213562373095f));
