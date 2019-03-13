@@ -22,28 +22,26 @@
 
 
 KFParticlePerformanceBase::KFParticlePerformanceBase():
-  fParteff(), fPVeff(), fPVeffMCReconstructable(), fParticles(0), fPV(0), outfileName(), histodir(0), fNEvents(0), fStoreMCHistograms(1), 
-  fStorePrimSecHistograms(1), fStoreZRHistograms(1)
-#ifndef KFPWITHTRACKER
-  ,fHistoDir(0), fIsHistoCreated(0)
-#endif
+  fParteff(), fPVeff(), fPVeffMCReconstructable(), outfileName(), histodir(0), fNEvents(0), fStoreMCHistograms(1), 
+  fStorePrimSecHistograms(1), fStoreZRHistograms(1),fHistoDir(0)
 {
+  /** The default constructor. Initialises all pointers to nullptr.  **/
   for(int iParticle=0; iParticle<KFPartEfficiencies::nParticles; iParticle++)
   {
     for(int iFitQA=0; iFitQA<nFitQA; iFitQA++)
     {
-      hFitDaughtersQA         [iParticle][iFitQA] = NULL;
-      hFitQA                  [iParticle][iFitQA] = NULL;
-      hFitQANoConstraint      [iParticle][iFitQA] = NULL;
-      hFitQAMassConstraint    [iParticle][iFitQA] = NULL;
-      hFitQATopoConstraint    [iParticle][iFitQA] = NULL;
-      hFitQATopoMassConstraint[iParticle][iFitQA] = NULL;
+      hFitDaughtersQA         [iParticle][iFitQA] = nullptr;
+      hFitQA                  [iParticle][iFitQA] = nullptr;
+      hFitQANoConstraint      [iParticle][iFitQA] = nullptr;
+      hFitQAMassConstraint    [iParticle][iFitQA] = nullptr;
+      hFitQATopoConstraint    [iParticle][iFitQA] = nullptr;
+      hFitQATopoMassConstraint[iParticle][iFitQA] = nullptr;
     }
   }
 
   for(int iParticle=0; iParticle<KFPartEfficiencies::nParticles; iParticle++)
     for(int iQA=0; iQA<nDSToParticleQA; iQA++)
-      hDSToParticleQA[iParticle][iQA] = NULL;
+      hDSToParticleQA[iParticle][iQA] = nullptr;
   
   for(int iParameterSet=0; iParameterSet<nParametersSet; iParameterSet++)
   {
@@ -51,13 +49,13 @@ KFParticlePerformanceBase::KFParticlePerformanceBase():
     {
       for(int iHisto=0; iHisto<nHistoPartParam; iHisto++)
       {
-        hPartParam               [iParameterSet][iParticle][iHisto] = NULL;
-        hPartParamPrimary        [iParameterSet][iParticle][iHisto] = NULL;
-        hPartParamPrimaryMass    [iParameterSet][iParticle][iHisto] = NULL;
-        hPartParamPrimaryTopo    [iParameterSet][iParticle][iHisto] = NULL;
-        hPartParamPrimaryTopoMass[iParameterSet][iParticle][iHisto] = NULL;
-        hPartParamSecondary      [iParameterSet][iParticle][iHisto] = NULL;
-        hPartParamSecondaryMass  [iParameterSet][iParticle][iHisto] = NULL;
+        hPartParam               [iParameterSet][iParticle][iHisto] = nullptr;
+        hPartParamPrimary        [iParameterSet][iParticle][iHisto] = nullptr;
+        hPartParamPrimaryMass    [iParameterSet][iParticle][iHisto] = nullptr;
+        hPartParamPrimaryTopo    [iParameterSet][iParticle][iHisto] = nullptr;
+        hPartParamPrimaryTopoMass[iParameterSet][iParticle][iHisto] = nullptr;
+        hPartParamSecondary      [iParameterSet][iParticle][iHisto] = nullptr;
+        hPartParamSecondaryMass  [iParameterSet][iParticle][iHisto] = nullptr;
       }
     }
   }
@@ -68,65 +66,72 @@ KFParticlePerformanceBase::KFParticlePerformanceBase():
     {
       for(int iHisto=0; iHisto<nHistoPartParam2D; iHisto++)
       {
-        hPartParam2D               [iParameterSet][iParticle][iHisto] = NULL;
-        hPartParam2DPrimary        [iParameterSet][iParticle][iHisto] = NULL;
-        hPartParam2DPrimaryMass    [iParameterSet][iParticle][iHisto] = NULL;
-        hPartParam2DPrimaryTopo    [iParameterSet][iParticle][iHisto] = NULL;
-        hPartParam2DPrimaryTopoMass[iParameterSet][iParticle][iHisto] = NULL;
-        hPartParam2DSecondary      [iParameterSet][iParticle][iHisto] = NULL;
-        hPartParam2DSecondaryMass  [iParameterSet][iParticle][iHisto] = NULL;
+        hPartParam2D               [iParameterSet][iParticle][iHisto] = nullptr;
+        hPartParam2DPrimary        [iParameterSet][iParticle][iHisto] = nullptr;
+        hPartParam2DPrimaryMass    [iParameterSet][iParticle][iHisto] = nullptr;
+        hPartParam2DPrimaryTopo    [iParameterSet][iParticle][iHisto] = nullptr;
+        hPartParam2DPrimaryTopoMass[iParameterSet][iParticle][iHisto] = nullptr;
+        hPartParam2DSecondary      [iParameterSet][iParticle][iHisto] = nullptr;
+        hPartParam2DSecondaryMass  [iParameterSet][iParticle][iHisto] = nullptr;
       }
     }
   }
 
   for(int iParticle=0; iParticle<KFPartEfficiencies::nParticles; iParticle++)
     for(int iHisto=0; iHisto<nHistoPartParam3D; iHisto++)
-      hPartParam3D[0][iParticle][iHisto] = NULL;
+      hPartParam3D[0][iParticle][iHisto] = nullptr;
 
   for(int iParticle=0; iParticle<KFPartEfficiencies::nParticles; iParticle++)
     for(int iEffSet=0; iEffSet<3; iEffSet++)
       for(int iEff=0; iEff<nPartEfficiency; iEff++)
-        hPartEfficiency[iParticle][iEffSet][iEff] = NULL;
+        hPartEfficiency[iParticle][iEffSet][iEff] = nullptr;
         
   for(int iParticle=0; iParticle<KFPartEfficiencies::nParticles; iParticle++)
     for(int iEffSet=0; iEffSet<3; iEffSet++)
       for(int iEff=0; iEff<nPartEfficiency2D; iEff++)
-        hPartEfficiency2D[iParticle][iEffSet][iEff] = NULL;
+        hPartEfficiency2D[iParticle][iEffSet][iEff] = nullptr;
   
   for(int iEffSet=0; iEffSet<2; iEffSet++)
     for(int iHistoPV=0; iHistoPV<nHistosPV; iHistoPV++)
-      hPVFitQa[iEffSet][iHistoPV] = NULL;
+      hPVFitQa[iEffSet][iHistoPV] = nullptr;
 
   for(int iEffSet1=0; iEffSet1<2; iEffSet1++)
     for(int iEffSet2=0; iEffSet2<2; iEffSet2++)
       for(int iHistoPV=0; iHistoPV<nHistosPV-1; iHistoPV++)
-        hPVFitQa2D[iEffSet1][iEffSet2][iHistoPV] = NULL;
+        hPVFitQa2D[iEffSet1][iEffSet2][iHistoPV] = nullptr;
 
   for(int iParam=0; iParam<nHistosPVParam; iParam++)
   {
-    hPVParam      [iParam] = NULL;
-    hPVParamGhost [iParam] = NULL;
-    hPVParamSignal[iParam] = NULL;
-    hPVParamPileup[iParam] = NULL;
-    hPVParamBG    [iParam] = NULL;
+    hPVParam      [iParam] = nullptr;
+    hPVParamGhost [iParam] = nullptr;
+    hPVParamSignal[iParam] = nullptr;
+    hPVParamPileup[iParam] = nullptr;
+    hPVParamBG    [iParam] = nullptr;
   }
   
   for(int iParam=0; iParam<nHistosPVParam2D; iParam++)
-    hPVParam2D[iParam] = NULL;
+    hPVParam2D[iParam] = nullptr;
   
   for(int iFitQA=0; iFitQA<nFitPVTracksQA; iFitQA++)
-    hFitPVTracksQA[iFitQA] = NULL;
+    hFitPVTracksQA[iFitQA] = nullptr;
   
   for(int iTP=0; iTP<nHistosTP; iTP++)
-    hTrackParameters[iTP] = NULL;
+    hTrackParameters[iTP] = nullptr;
 
   for(int iEffSet=0; iEffSet<4; iEffSet++)
     for(int iEff=0; iEff<nPVefficiency; iEff++)
-      hPVefficiency[iEffSet][iEff] = NULL;
+      hPVefficiency[iEffSet][iEff] = nullptr;
 }
 
 void KFParticlePerformanceBase::CreateHistos(std::string histoDir, TDirectory* outFile, std::map<int,bool> decays)
 {
+  /** Creates all histograms. If "outFile" is provided - creates a new ROOT directory and stores all 
+   ** histograms there. Otherwise histograms are stored in TDirectory::CurrentDirectory().
+   ** \param[in] histoDir - name of the ROOT directory with histograms
+   ** \param[in] outFile - pointer to the external ROOT directory or file, where histograms should be stored
+   ** \param[in] decays - a list of decays, for which histograms are created, if empty - histograms are
+   ** created for all decay channels from the KF Particle Finder reconstruction scheme
+   **/
   TDirectory *curdir = gDirectory;
   if (outFile) {
     outFile->cd();
@@ -546,17 +551,16 @@ void KFParticlePerformanceBase::CreateHistos(std::string histoDir, TDirectory* o
       hTrackParameters[KFPartEfficiencies::nParticles+7] = new TH1F("ProbPrim_ghost", (GetDirectoryPath()+TString("ProbPrim_ghost")), 10000, 0, 1);
     }
     gDirectory->cd(".."); //particle directory
-
-
     curdir->cd();    
-
-    }
-
-    SetHistoCreated();
+  }
 }
 
 void KFParticlePerformanceBase::CreateFitHistograms(TH1F* histo[nFitQA], int iPart)
 {
+  /** Creates 1D histograms with fit QA for decay with "iPart" number.
+   ** \param[in,out] histo - array with pointers, for which the memory is allocated
+   ** \param[in] iPart - number of the decay in the KF Particle Finder reconstruction scheme
+   **/
   TString res = "res";
   TString pull = "pull";
   
@@ -632,6 +636,10 @@ void KFParticlePerformanceBase::CreateFitHistograms(TH1F* histo[nFitQA], int iPa
 
 void KFParticlePerformanceBase::CreateEfficiencyHistograms(TProfile* histo[3][nPartEfficiency], TProfile2D* histo2[3][nPartEfficiency2D])
 {
+  /** Creates efficiency plots in the current ROOT folder.
+   ** \param[in,out] histo - 1D efficiency plots
+   ** \param[in,out] histo2 - 2D efficiency plots
+   **/
   gDirectory->mkdir("Efficiency");
   gDirectory->cd("Efficiency");
   {//vs p, pt, y, z, c*tau, decay length, l, r
@@ -687,6 +695,13 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                                           TH3F *histoParameters3D[KFPartEfficiencies::nParticles][nHistoPartParam3D],
                                                           int iPart, bool drawZR)
 {
+  /** Creates histograms with parameter distributions for decay with "iPart" number.
+   ** \param[in,out] histoParameters - 1D histograms
+   ** \param[in,out] histoParameters2D - 2D histograms
+   ** \param[in,out] histoParameters3D - 3D histograms
+   ** \param[in] iPart - number of the decay in the KF Particle Finder reconstruction scheme
+   ** \param[in] drawZR - flag showing if Z-R histogram should be created
+   **/
   TString parName[nHistoPartParam] = {"M","p","p_{t}","y","DecayL","c#tau","chi2ndf","prob","#theta","phi","X","Y","Z","R", "L", "l/dl","m_{t}","Multiplicity"};
   TString parTitle[nHistoPartParam];
   TString parName2D[nHistoPartParam2D] = {"y-p_{t}", "Z-R", "Armenteros", "y-m_{t}"};
@@ -916,6 +931,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
 
 bool KFParticlePerformanceBase::IsCollectZRHistogram(int iParticle) const
 {
+  /** Checks if Z-R histogram for decay "iParticle" should be created. */
   return (abs(fParteff.partPDG[iParticle]) == 310 ||
           abs(fParteff.partPDG[iParticle]) == 3122 ||
           abs(fParteff.partPDG[iParticle]) == 3312 ||
@@ -925,6 +941,7 @@ bool KFParticlePerformanceBase::IsCollectZRHistogram(int iParticle) const
 
 bool KFParticlePerformanceBase::IsCollect3DHistogram(int iParticle) const
 {
+  /** Checks if 3D histograms for decay "iParticle" should be created. */
   return abs(fParteff.partPDG[iParticle]) == 310 ||
          abs(fParteff.partPDG[iParticle]) == 3122 ||
          abs(fParteff.partPDG[iParticle]) == 3312 ||
@@ -953,6 +970,7 @@ bool KFParticlePerformanceBase::IsCollect3DHistogram(int iParticle) const
 
 bool KFParticlePerformanceBase::IsCollectArmenteros(int iParticle) const
 {
+  /** Checks if Armenteros-Podoliansky plot for decay "iParticle" should be created. */
   return abs(fParteff.partPDG[iParticle]) == 310 ||
          abs(fParteff.partPDG[iParticle]) == 3122 ||
          abs(fParteff.partPDG[iParticle]) == 3312 ||
@@ -987,6 +1005,7 @@ void KFParticlePerformanceBase::CreateParameterSubfolder(TString folderName,
                                                          TH2F* histoParameters2D[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D],
                                                          TH1F* histoFit[KFPartEfficiencies::nParticles][nFitQA], int iPart, bool withWrongPVHypothesis)
 {
+  /** Creates all subfolders in the current ROOT directory for the current decay channel. */
   gDirectory->mkdir(folderName.Data());
   gDirectory->cd(folderName.Data());
   {
@@ -1027,6 +1046,7 @@ void KFParticlePerformanceBase::CreateParameterSubfolder(TString folderName,
 
 TString KFParticlePerformanceBase::GetDirectoryPath()
 {
+  /** Returns the path to the current folder. It is used as an addition to the histogram name. */
   TString path = gDirectory->GetPath();
   int fileNamePosition = path.Index("Finder/");
   path.Remove(0, fileNamePosition+7);
@@ -1036,9 +1056,5 @@ TString KFParticlePerformanceBase::GetDirectoryPath()
   return path;
 }
 
-void KFParticlePerformanceBase::FillHistos()
-{
-
-} // void KFParticlePerformanceBase::FillHistos()
 #endif //DO_TPCCATRACKER_EFF_PERFORMANCE
 

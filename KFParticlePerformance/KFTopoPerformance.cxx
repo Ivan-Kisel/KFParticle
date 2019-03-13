@@ -41,7 +41,7 @@ using std::vector;
 
 KFTopoPerformance::KFTopoPerformance():KFParticlePerformanceBase(),fTopoReconstructor(0),fPrimVertices(0), fMCTrackToMCPVMatch(0), 
   fPVPurity(0), fNCorrectPVTracks(0), fTrackMatch(0), vMCTracks(0), vMCParticles(0), fNeutralIndex(0), MCtoRParticleId(0), RtoMCParticleId(0), 
-  MCtoRPVId(0), RtoMCPVId(0), fPrintEffFrequency(1), fPartInfo(), fCentralityBin(-1), fCentralityWeight(0.f)
+  MCtoRPVId(0), RtoMCPVId(0), fPrintEffFrequency(1), fCentralityBin(-1), fCentralityWeight(0.f)
 {
 }
 
@@ -74,11 +74,13 @@ void KFTopoPerformance::SetNewEvent(
 
 void KFTopoPerformance::SetTopoReconstructor( const KFParticleTopoReconstructor * const TopoReconstructor)
 {  
+  /** Sets a pointer to the external KFParticleTopoReconstructor object. */
   fTopoReconstructor = TopoReconstructor;
 } // void KFTopoPerformance::SetTopoReconstructor
 
 void KFTopoPerformance::CheckMCTracks()
-{  
+{
+  /** Cleans Monte Carlo information on primary vertices, and refill it with the current event. */
   fMCTrackToMCPVMatch.clear();
   fPrimVertices.clear();
 
@@ -123,7 +125,7 @@ void KFTopoPerformance::CheckMCTracks()
 
 void KFTopoPerformance::GetMCParticles()
 {
-  // convert MC tracks into KF MC Particles
+  /** Fills information on relations between Monte Carlo particles. */
 
   vMCParticles.clear();
   vMCParticles.reserve(vMCTracks.size());
@@ -460,6 +462,7 @@ void KFTopoPerformance::GetMCParticles()
 
 void KFTopoPerformance::FindReconstructableMCParticles()
 {
+  /** Check each Monte Carlo particle if it can be reconstructed. */
   const unsigned int nMCParticles = vMCParticles.size();
 
   for ( unsigned int iP = 0; iP < nMCParticles; iP++ ) {
@@ -470,6 +473,7 @@ void KFTopoPerformance::FindReconstructableMCParticles()
 
 void KFTopoPerformance::CheckMCParticleIsReconstructable(KFMCParticle &part)
 {
+  /** Checks if the given Monte Carlo particle can be reconstructed. */
   if ( part.IsReconstructable(0) ) return;
   if ( vMCTracks[part.GetMCTrackID()].IsOutOfDetector() ) return;
   
@@ -615,6 +619,7 @@ void KFTopoPerformance::CheckMCParticleIsReconstructable(KFMCParticle &part)
 
 void KFTopoPerformance::FindReconstructableMCVertices()
 {
+  /** Checks which Monte Carlo primary vertices can be reconstructed. */
   const unsigned int nMCVertices = fPrimVertices.size();
 
   for ( unsigned int iV = 0; iV < nMCVertices; iV++ ) {
@@ -642,7 +647,7 @@ void KFTopoPerformance::FindReconstructableMCVertices()
 
 void KFTopoPerformance::MatchParticles()
 {
-    // get all reco particles ( temp )
+  /** Matches Monte Carlo and reconstructed particles. */
   MCtoRParticleId.clear();
   RtoMCParticleId.clear();
   MCtoRParticleId.resize(vMCParticles.size());
@@ -790,6 +795,7 @@ void KFTopoPerformance::MatchParticles()
 
 void KFTopoPerformance::MatchPV()
 {
+  /** Matches Monte Carlo and reconstructed primary vertices. */
   MCtoRPVId.clear();
   RtoMCPVId.clear();
   MCtoRPVId.resize(fPrimVertices.size());
@@ -940,6 +946,7 @@ void KFTopoPerformance::MatchPV()
 
 void KFTopoPerformance::MatchTracks()
 {
+  /** Runs reading of Monte Carlo particles and vertices, their matching, calculation of efficiency. */
 #ifdef KFPWITHTRACKER
   for(int iTr=0; iTr<vMCTracks.size(); iTr++)
   {
@@ -969,6 +976,7 @@ void KFTopoPerformance::MatchTracks()
 
 void KFTopoPerformance::CalculateEfficiency()
 {
+  /** Calculates reconstruction efficiency of short-lived particles. */
   KFPartEfficiencies partEff; // efficiencies for current event
 
   const int NRP = fTopoReconstructor->GetParticles().size();
@@ -1132,6 +1140,7 @@ void KFTopoPerformance::CalculateEfficiency()
 
 void KFTopoPerformance::CalculatePVEfficiency()
 {
+  /** Calculates reconstruction efficiency of primary vertices. */
   KFPVEfficiencies pvEff; // efficiencies for current event
   KFPVEfficiencies pvEffMCReconstructable;
   int nTracks = 0;
@@ -1250,7 +1259,8 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
                                                TH1F* histoFitDaughtersQA[KFPartEfficiencies::nParticles][nFitQA],
                                                TH1F* histoDSToParticleQA[KFPartEfficiencies::nParticles][nDSToParticleQA],
                                                vector<int>* multiplicities)
-{ 
+{
+  /** Fills provided histograms with the parameters of the given particle. */
   float M, M_t, ErrM;
   float dL, ErrdL; // decay length
   float cT, ErrcT; // c*tau
@@ -1284,7 +1294,7 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
   if(Z>=1. && iParticle>=54 && iParticle<=64) return;
 #endif
   R = sqrt(X*X+Y*Y);
-  M_t = sqrt(Pt*Pt+fPartInfo.GetMass(iParticle)*fPartInfo.GetMass(iParticle))-fPartInfo.GetMass(iParticle);
+  M_t = sqrt(Pt*Pt+fParteff.GetMass(iParticle)*fParteff.GetMass(iParticle))-fParteff.GetMass(iParticle);
   
   KFParticleSIMD tempSIMDPart(TempPart);
   float_v l,dl;
@@ -1386,7 +1396,7 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
   //Fill histograms for the side bands analysis
   if(histoDSToParticleQA && IsCollect3DHistogram(iParticle))
   {
-    if(fabs(fPartInfo.GetMass(iParticle)-M) < 3.f*fPartInfo.GetMassSigma(iParticle))//SignalReco
+    if(fabs(fParteff.GetMass(iParticle)-M) < 3.f*fParteff.GetMassSigma(iParticle))//SignalReco
     {
       for(int iParam=0; iParam<17; iParam++)
         histoParameters[4][iParticle][iParam]->Fill(parameters[iParam]);
@@ -1406,8 +1416,8 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
       }
     }
     
-    if( fabs(fPartInfo.GetMass(iParticle)-M) > 3.f*fPartInfo.GetMassSigma(iParticle) &&
-        fabs(fPartInfo.GetMass(iParticle)-M) <= 6.f*fPartInfo.GetMassSigma(iParticle) )//BGReco
+    if( fabs(fParteff.GetMass(iParticle)-M) > 3.f*fParteff.GetMassSigma(iParticle) &&
+        fabs(fParteff.GetMass(iParticle)-M) <= 6.f*fParteff.GetMassSigma(iParticle) )//BGReco
     {
       for(int iParam=0; iParam<17; iParam++)
         histoParameters[5][iParticle][iParam]->Fill(parameters[iParam]);
@@ -1697,7 +1707,8 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
 }
 
 void KFTopoPerformance::FillHistos()
-{        
+{
+  /** Fills histograms with parameter  distributions and fit quality for all particle and primary vertex candidates. */
   vector<int> multiplicities[6];
   for(int iV=0; iV<6; iV++)
     multiplicities[iV].resize(KFPartEfficiencies::nParticles, 0);
@@ -2047,6 +2058,7 @@ void KFTopoPerformance::FillHistos()
 
 void KFTopoPerformance::FillMCHistos()
 {
+  /** Fills histograms of Monte Carlo particles. */
   for(unsigned int iMCTrack=0; iMCTrack<vMCTracks.size(); iMCTrack++)
   {
     int iPDG = fParteff.GetParticleIndex(vMCTracks[iMCTrack].PDG());
@@ -2129,6 +2141,7 @@ void KFTopoPerformance::FillMCHistos()
 
 void KFTopoPerformance::AddV0Histos()
 {
+  /** Copies histograms of K0s candidates to V0 folder. */
   int iV0 = fParteff.nParticles - 1;
   int iK0 = fParteff.GetParticleIndex(310);
   
@@ -2143,9 +2156,9 @@ void KFTopoPerformance::AddV0Histos()
       hPartParam[iV][iV0][iH]->Add(hPartParam[iV][iK0][iH]);
 }
 
-
 void KFTopoPerformance::FillHistos(const KFPHistogram* histograms)
 {
+  /** Fill histograms with the histograms from the provided KFPHistogram object. */
   for(int iParticle=0; iParticle<KFPartEfficiencies::nParticles; iParticle++)
   {
     const int& nHistograms = histograms->GetHistogramSet(0).GetNHisto1D();

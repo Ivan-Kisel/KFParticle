@@ -1976,7 +1976,8 @@ INCLUDE_FILE_PATTERNS  =
 
 PREDEFINED             = "NonhomogeneousField"\
                          "HomogeneousField"\
-                         "USE_TIMERS"
+                         "USE_TIMERS"\
+                         "DO_TPCCATRACKER_EFF_PERFORMANCE"\
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The
