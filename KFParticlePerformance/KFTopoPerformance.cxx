@@ -1035,7 +1035,7 @@ void KFTopoPerformance::CalculateEfficiency()
     isReco.push_back( MCtoRParticleId[iP].ids.size() != 0 );
     nClones.push_back( MCtoRParticleId[iP].ids.size() - 1 );
     
-    if(part.IsReconstructableV0(0) || part.IsReconstructableV0(1) || part.IsReconstructableV0(2) )
+    if(decays.empty() && (part.IsReconstructableV0(0) || part.IsReconstructableV0(1) || part.IsReconstructableV0(2)) )
     {
       iParticle.push_back(fParteff.nParticles - 1);
       vector<bool> isRecV0;
@@ -1261,6 +1261,11 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
                                                vector<int>* multiplicities)
 {
   /** Fills provided histograms with the parameters of the given particle. */
+  
+  const std::map<int,bool>& decays = fTopoReconstructor->GetKFParticleFinder()->GetReconstructionList();
+  if(!(decays.empty()) && (iParticle < fParteff.fFirstStableParticleIndex || iParticle > fParteff.fLastStableParticleIndex))
+    if(decays.find(TempPart.GetPDG()) == decays.end()) return;
+    
   float M, M_t, ErrM;
   float dL, ErrdL; // decay length
   float cT, ErrcT; // c*tau
@@ -1271,7 +1276,7 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
   float Phi;
   float X,Y,Z,R;
   float QtAlpha[2];
-  
+    
   TempPart.GetMass(M,ErrM);
   TempPart.GetMomentum(P,ErrP);
   Pt = TempPart.GetPt();

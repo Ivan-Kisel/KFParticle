@@ -367,6 +367,7 @@ class KFParticleFinder
    **/
   void AddDecayToReconstructionList(int pdg) { fDecayReconstructionList[pdg] = true; }
   const std::map<int,bool> GetReconstructionList() const { return fDecayReconstructionList; } ///< Returns list of decays to be reconstructed.
+  void SetReconstructionList(const std::map<int,bool>& decays) { fDecayReconstructionList = decays; } ///< Set enitre reconstruction list
 
  private:
 

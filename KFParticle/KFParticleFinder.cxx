@@ -1341,6 +1341,8 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
                   
                   //TODO optimize this part of code for D-mesons
                   if(motherPDG[iV] == 310 && 
+                     (fDecayReconstructionList.empty() ||
+                      (!(fDecayReconstructionList.empty()) && !(fDecayReconstructionList.find(420) == fDecayReconstructionList.end()) ) ) &&
                      negNPixelHits[iV] >= 3 && posNPixelHits[iV] >= 3 &&
                      chiPrimNeg[iV] > fCutCharmChiPrim && chiPrimPos[iV] > fCutCharmChiPrim &&
                      ptNeg2[iV] >= fCutCharmPt*fCutCharmPt && ptPos2[iV] >= fCutCharmPt*fCutCharmPt )
@@ -2945,8 +2947,10 @@ void KFParticleFinder::NeutralDaughterDecay(KFPTrackVector* vTracks,
             
             for(int iHypothesis=0; iHypothesis<nMotherHypothesis[iTC]; iHypothesis++)
             {
-              if(!(fDecayReconstructionList.empty()) && (fDecayReconstructionList.find(motherPDGHypothesis[iTC][iHypothesis]) == fDecayReconstructionList.end()))
-                continue;
+              int motherKFPDG = outMotherPDG[iTC][iHypothesis];
+              if(iTrTypeDaughter==0) motherKFPDG = -outMotherPDG[iTC][iHypothesis];
+              if(!(fDecayReconstructionList.empty()) && (fDecayReconstructionList.find(motherKFPDG) == fDecayReconstructionList.end())) continue;
+              
               int_m active = activeDaughter && (int_v::IndexesFromZero() < int(NTracks));
               
               MotherTrack.Load(MotherTracks, iTrM, motherPDGHypothesis[iTC][iHypothesis]);

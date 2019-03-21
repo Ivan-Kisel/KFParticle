@@ -63,7 +63,7 @@ class KFPEmcCluster
   void PrintTrack(int n);
   void PrintTracks();
   
-  KFPEmcCluster(const KFPEmcCluster& clusters)
+  KFPEmcCluster(const KFPEmcCluster& clusters): fId()
   {
     /** Copy-constructor. Makes one-to-one copy.*/
     const int localSize = clusters.Size();
