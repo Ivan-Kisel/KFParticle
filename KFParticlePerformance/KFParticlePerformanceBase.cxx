@@ -347,6 +347,7 @@ void KFParticlePerformanceBase::CreateHistos(std::string histoDir, TDirectory* o
                                         nBinsY2D[iH],yMin2D[iH],yMax2D[iH]);
         hPVParam2D[iH]->GetXaxis()->SetTitle(parXAxisName2D[iH].Data());
         hPVParam2D[iH]->GetYaxis()->SetTitle(parYAxisName2D[iH].Data());
+        hPVParam2D[iH]->GetYaxis()->SetTitleOffset(1.0);
       }
       
       gDirectory->mkdir("Efficiency");
@@ -669,6 +670,7 @@ void KFParticlePerformanceBase::CreateEfficiencyHistograms(TProfile* histo[3][nP
         {
           histo[iEff][iH] = new TProfile( partNameEff[iH].Data(), (GetDirectoryPath()+partAxisNameEff[iH]).Data(), nBinsEff[iH], xMinEff[iH], xMaxEff[iH]);
           histo[iEff][iH]->GetYaxis()->SetTitle("Efficiency");                  
+          histo[iEff][iH]->GetYaxis()->SetTitleOffset(1.0);  
           histo[iEff][iH]->GetXaxis()->SetTitle(partAxisNameEff[iH].Data());
         }
         
@@ -677,12 +679,14 @@ void KFParticlePerformanceBase::CreateEfficiencyHistograms(TProfile* histo[3][nP
         histo2[iEff][0]->GetZaxis()->SetTitle("Efficiency");
         histo2[iEff][0]->GetXaxis()->SetTitle(partAxisNameEff[2].Data());
         histo2[iEff][0]->GetYaxis()->SetTitle(partAxisNameEff[1].Data());
+        histo2[iEff][0]->GetYaxis()->SetTitleOffset(1.0);
         
         histo2[iEff][1] = new TProfile2D( "EffVsMtVsY", (GetDirectoryPath()+partAxisNameEff[2]+partAxisNameEff[8]).Data(), 
                                           nBinsEff[2], xMinEff[2], xMaxEff[2], nBinsEff[8], xMinEff[8], xMaxEff[8]);
         histo2[iEff][1]->GetZaxis()->SetTitle("Efficiency");
         histo2[iEff][1]->GetXaxis()->SetTitle(partAxisNameEff[2].Data());
         histo2[iEff][1]->GetYaxis()->SetTitle(partAxisNameEff[8].Data());
+        histo2[iEff][1]->GetYaxis()->SetTitleOffset(1.0);
       }
       gDirectory->cd("..");// particle directory / Efficiency
     }
@@ -850,6 +854,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                     nBins[2],xMin[2],xMax[2]);
   histoParameters2D[iPart][0]->GetXaxis()->SetTitle("y");
   histoParameters2D[iPart][0]->GetYaxis()->SetTitle("p_{t} [GeV/c]");
+  histoParameters2D[iPart][0]->GetYaxis()->SetTitleOffset(1.0);
 
   if(drawZR)
   {
@@ -858,6 +863,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                       nBins[13],xMin[13],xMax[13]);
     histoParameters2D[iPart][1]->GetXaxis()->SetTitle("Z [cm]");
     histoParameters2D[iPart][1]->GetYaxis()->SetTitle("R [cm]");
+    histoParameters2D[iPart][1]->GetYaxis()->SetTitleOffset(1.0);
   }
   else
     histoParameters2D[iPart][1] = NULL;
@@ -870,6 +876,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                           150,  0.f, 1.f);
     histoParameters2D[iPart][2]->GetXaxis()->SetTitle("#alpha (p_{L}^{+}-p_{L}^{-})/(p_{L}^{+}+p_{L}^{-})");
     histoParameters2D[iPart][2]->GetYaxis()->SetTitle("q_{t} [GeV/c]");
+    histoParameters2D[iPart][2]->GetYaxis()->SetTitleOffset(1.0);
   }
   else
     histoParameters2D[iPart][2] = NULL;
@@ -879,6 +886,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                          nBins[16],xMin[16],xMax[16]); //Mt
   histoParameters2D[iPart][3]->GetXaxis()->SetTitle("y");
   histoParameters2D[iPart][3]->GetYaxis()->SetTitle("m_{t} [GeV/c]");
+  histoParameters2D[iPart][3]->GetYaxis()->SetTitleOffset(1.0);
   
   
   if( histoParameters3D && IsCollect3DHistogram(iPart) )
@@ -889,6 +897,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                       nBins[0],xMin[0],xMax[0]);
     histoParameters3D[iPart][0]->GetXaxis()->SetTitle("y");
     histoParameters3D[iPart][0]->GetYaxis()->SetTitle("p_{t} [GeV/c]");
+    histoParameters3D[iPart][0]->GetYaxis()->SetTitleOffset(1.0);
     histoParameters3D[iPart][0]->GetZaxis()->SetTitle("M");
     
     histoParameters3D[iPart][1] = new TH3F(parName3D[1].Data(),parTitle3D[1].Data(),
@@ -897,6 +906,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                            nBins[0],xMin[0],xMax[0]);
     histoParameters3D[iPart][1]->GetXaxis()->SetTitle("y");
     histoParameters3D[iPart][1]->GetYaxis()->SetTitle("m_{t} [GeV/c]");
+    histoParameters3D[iPart][1]->GetYaxis()->SetTitleOffset(1.0);
     histoParameters3D[iPart][1]->GetZaxis()->SetTitle("M");
     
     int centralityHisto[3] = {2,3,16};
@@ -908,6 +918,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                                  nBins[0],xMin[0],xMax[0]);
       histoParameters3D[iPart][2+iCH]->GetXaxis()->SetTitle("centrality bin");
       histoParameters3D[iPart][2+iCH]->GetYaxis()->SetTitle(parAxisName[centralityHisto[iCH]]);
+      histoParameters3D[iPart][2+iCH]->GetYaxis()->SetTitleOffset(1.0);
       histoParameters3D[iPart][2+iCH]->GetZaxis()->SetTitle("M");
     }
     
@@ -917,6 +928,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                            nBins[0],xMin[0],xMax[0]);
     histoParameters3D[iPart][5]->GetXaxis()->SetTitle("c#tau [cm]");
     histoParameters3D[iPart][5]->GetYaxis()->SetTitle("p_{t} [GeV/c]");
+    histoParameters3D[iPart][5]->GetYaxis()->SetTitleOffset(1.0);
     histoParameters3D[iPart][5]->GetZaxis()->SetTitle("M");
   }
   else if(histoParameters3D)
