@@ -64,7 +64,7 @@ class KFParticlePVReconstructor{
 
   /** \brief Sets cut fChi2Cut on chi2-deviation of primary tracks from the vertex candidate to "chi2"
    ** and a soft preparation cut fChi2CutPreparation to "10*chi2". */
-  void SetChi2PrimaryCut(float chi2) { fChi2Cut = chi2; fChi2CutPreparation = chi2*10; }
+  void SetChi2PrimaryCut(float chi2) { fChi2Cut = chi2; fChi2CutPreparation = chi2*5; }
   
  private:
   KFParticlePVReconstructor &operator=(KFParticlePVReconstructor &); ///< Is not defined. Deny copying of the objects of this class.

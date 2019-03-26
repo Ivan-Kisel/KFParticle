@@ -40,11 +40,26 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
   fParticles.resize(fNParticles);
   fWeight.resize(fNParticles);
   
+  float C[3] = {0,0,0};
+  int nC[3] = {0,0,0};
+  
   KFPTrack track;
   for ( int iTr = 0; iTr < fNParticles; iTr++ ) {
     tracks->GetTrack(track,iTr);
     fParticles[iTr] = KFParticle( track, 211 );
     fParticles[iTr].AddDaughterId(track.Id());
+    float zeroPoint[3]{0,0,0};
+    fParticles[iTr].TransportToPoint(zeroPoint);
+    
+    for(int iC=0; iC<3; iC++)
+    {
+      if(!(fParticles[0].Covariance(iC,iC)==fParticles[0].Covariance(iC,iC))) continue; 
+      if(fParticles[0].Covariance(iC,iC) < 10.f && fParticles[0].Covariance(iC,iC) > 0.f )
+      {
+        C[iC] += fParticles[0].Covariance(iC,iC);
+        nC[iC]++;
+      }
+    }
   }
   
   fPrimVertices.clear();
@@ -56,11 +71,18 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
   float parTmp[8] = {0.};
   float covTmp[36] = {0.};
   
+  for(int iC=0; iC<3; iC++)
+  {
+    if(nC[iC] >0)
+      C[iC] /= nC[iC];
+    else
+      C[iC] = 1.e-2;
+  }
+  
   for(int iIter=0; iIter<3; iIter++)
   {
-    float C[3] = {100.,100.,100.};
+    C[0]*=100.f; C[1]*=100.f; C[2]*=100.f;
     for ( int iTr = 0; iTr < fNParticles; iTr++ ) {
-      
       float ds = 0.f;
       float dsdr[6] = {0.f};
       if(iIter>0)
@@ -68,10 +90,11 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
       fParticles[iTr].Transport( ds, dsdr, parTmp, covTmp);
 
       float r2 = parTmp[0]*parTmp[0] + parTmp[1]*parTmp[1];
-      if(r2!=r2) continue;
-      if(r2 > 100 ) continue;  
+      if(!(r2==r2)) continue;
+      if(r2 > 25 ) continue;  
       
       const float V[3] = {covTmp[0], covTmp[2], covTmp[5]}; 
+      
       for(int iComp=0; iComp<3; iComp++)
       {
         float K = C[iComp]/(C[iComp]+V[iComp]);
@@ -79,6 +102,8 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
         if(C[iComp] > 16*V[iComp])
           K = 1.f - V[iComp]/C[iComp];
         const float dzeta = parTmp[iComp]-pvEstimation[iComp];
+        if(K!=K) continue;
+        if(K<0. || K>0.999) continue;
         pvEstimation[iComp] += K*dzeta;
         C[iComp] -= K*C[iComp];
       }
@@ -86,48 +111,6 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
     pvEstimationTr[0] = pvEstimation[0];
     pvEstimationTr[1] = pvEstimation[1];
     pvEstimationTr[2] = pvEstimation[2];
-  }
-
-  {
-    int nPrimCand = fParticles.size();
-
-    const KFParticle **pParticles = new const KFParticle*[nPrimCand+1]; // tmp array
-    bool *vFlags = new bool[nPrimCand];  // flags returned by the vertex finder
-
-    KFVertex primVtx;
-//     primVtx.SetVtxGuess(pvEstimation[0], pvEstimation[1], pvEstimation[2]);
-    primVtx.X() = pvEstimation[0];
-    primVtx.Y() = pvEstimation[1];
-    primVtx.Z() = pvEstimation[2];
-    
-    nPrimCand = 0;
-    for ( unsigned int iP = 0; iP < fParticles.size(); iP++ )
-    {
-      const KFParticle &p = fParticles[iP];
-      float chi = p.GetDeviationFromVertex( primVtx );      
-       
-      bool isBadDaughter=0;
-      for(int iParam=0; iParam<8; iParam++)
-        isBadDaughter|= p.GetParameter(iParam) != p.GetParameter(iParam);
-      for(int iC=0; iC<36; iC++)
-        isBadDaughter|= p.GetCovariance(iC) != p.GetCovariance(iC);
-
-      if( chi >= fChi2CutPreparation || isBadDaughter)
-         continue;
-      
-      pParticles[nPrimCand] = &fParticles[iP];
-      vFlags[nPrimCand] = 1;
-      nPrimCand++;
-    }
-  
-    primVtx.SetConstructMethod(0);
-    primVtx.ConstructPrimaryVertex( pParticles, nPrimCand, vFlags, fChi2CutPreparation );
-      
-    delete [] pParticles;
-    delete [] vFlags;
-    pvEstimation[0] = primVtx.GetX();
-    pvEstimation[1] = primVtx.GetY();
-    pvEstimation[2] = primVtx.GetZ();
   }
 
   for(int iP=0; iP<fNParticles; iP++)
@@ -212,8 +195,8 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
     for(unsigned short int iTr = 0; iTr < nNotUsedTracks; iTr++)
     {
       unsigned short int &curTrack = (*notUsedTracksPtr)[iTr];
-
-      if( ( fParticles[curTrack].GetDeviationFromVertex(rBest, covBest) < fChi2CutPreparation && fWeight[curTrack] > -1.f) || curTrack == bestTrack)
+      float chi2deviation = fParticles[curTrack].GetDeviationFromVertex(rBest, covBest);
+      if( ( chi2deviation < fChi2CutPreparation && chi2deviation >= 0 && fWeight[curTrack] > -1.f) || curTrack == bestTrack)
       {
         for(int iP=0; iP<3; iP++)
           rVertex[iP] += fWeight[curTrack] * fParticles[curTrack].Parameters()[iP];
@@ -309,7 +292,7 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
         }
       }      
       cluster.fTracks = clearClusterInd;
-      
+
       notUsedTracksPtrSave = notUsedTracksPtr;
       notUsedTracksPtr = notUsedTracksNewPtr;
       notUsedTracksNewPtr = notUsedTracksPtrSave;
