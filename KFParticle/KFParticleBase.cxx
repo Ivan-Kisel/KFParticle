@@ -2281,43 +2281,43 @@ void KFParticleBase::GetDStoParticleBz( float Bz, const KFParticleBase &p, float
   }
     
   //find correct parts of helices
-  int n1(0);
-  int n2(0);
-  float dzMin = fabs( (z01-z02) + dS[0]*pz1 - dS[1]*pz2 );
-  const float pi2(6.283185307f);
+//   int n1(0);
+//   int n2(0);
+//   float dzMin = fabs( (z01-z02) + dS[0]*pz1 - dS[1]*pz2 );
+//   const float pi2(6.283185307f);
   
   //TODO optimise for loops for neutral particles
-  const float& i1Float = -bq1/pi2*(z01/pz1+dS[0]);
-  for(int di1=-1; di1<=1; di1++)
-  {
-    int i1(0);
-    if(!isStraight1)
-      i1 = int(i1Float) + di1;
-    
-    const float& i2Float = ( ((z01-z02) + (dS[0]+pi2*i1/bq1)*pz1)/pz2 - dS[1]) * bq2/pi2;
-    for(int di2 = -1; di2<=1; di2++)
-    {
-      int i2(0);
-      if(!isStraight2)
-        i2 = int(i2Float) + di2;
-      
-      const float& z1 = z01 + (dS[0]+pi2*i1/bq1)*pz1;
-      const float& z2 = z02 + (dS[1]+pi2*i2/bq2)*pz2;
-      const float& dz = fabs( z1-z2 );
-    
-      if(dz < dzMin)
-      {
-        n1 = i1;
-        n2 = i2;
-        dzMin = dz;
-      }
-    }
-  }
-
-  if(!isStraight1)
-    dS[0] += float(n1)*pi2/bq1;
-  if(!isStraight2)
-    dS[1] += float(n2)*pi2/bq2;
+//   const float& i1Float = -bq1/pi2*(z01/pz1+dS[0]);
+//   for(int di1=-1; di1<=1; di1++)
+//   {
+//     int i1(0);
+//     if(!isStraight1)
+//       i1 = int(i1Float) + di1;
+//     
+//     const float& i2Float = ( ((z01-z02) + (dS[0]+pi2*i1/bq1)*pz1)/pz2 - dS[1]) * bq2/pi2;
+//     for(int di2 = -1; di2<=1; di2++)
+//     {
+//       int i2(0);
+//       if(!isStraight2)
+//         i2 = int(i2Float) + di2;
+//       
+//       const float& z1 = z01 + (dS[0]+pi2*i1/bq1)*pz1;
+//       const float& z2 = z02 + (dS[1]+pi2*i2/bq2)*pz2;
+//       const float& dz = fabs( z1-z2 );
+//     
+//       if(dz < dzMin)
+//       {
+//         n1 = i1;
+//         n2 = i2;
+//         dzMin = dz;
+//       }
+//     }
+//   }
+// 
+//   if(!isStraight1)
+//     dS[0] += float(n1)*pi2/bq1;
+//   if(!isStraight2)
+//     dS[1] += float(n2)*pi2/bq2;
 
   //Line correction
   {
