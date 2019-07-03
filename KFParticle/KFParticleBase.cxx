@@ -1454,8 +1454,8 @@ void KFParticleBase::SetNonlinearMassConstraint( float mass )
   const float& energy  = fP[6];
   
   const float residual = (energy*energy - px*px - py*py - pz*pz) - mass*mass;
-  const float dm2 = float(4.f) * ( fC[9]*px*px + fC[14]*py*py + fC[20]*pz*pz + fC[27]*energy*energy +
-                      float(2.f) * ( (fC[13]*py + fC[18]*pz - fC[24]*energy)*px + (fC[19]*pz - fC[25]*energy)*py - fC[26]*pz*energy) );
+  const float dm2 = float(4.f) * ( px*px*fC[9] + py*py*fC[14] + pz*pz*fC[20] + energy*energy*fC[27] + 
+                    float(2.f) * ( px*py*fC[13] + pz*(px*fC[18]+py*fC[19]) - energy*(px*fC[24]+py*fC[25]+pz*fC[26]) ) );
   const float dChi2 = residual*residual / dm2;
   fChi2 += dChi2;
   fNDF  += 1;
