@@ -1,19 +1,24 @@
-//---------------------------------------------------------------------------------
-// The KFParticleBaseSIMD class
-// .
-// @author  I.Kisel, I.Kulakov, M.Zyzak
-// @version 1.0
-// @since   13.05.07
-// 
-// Class to reconstruct and store the decayed particle parameters.
-// The method is described in CBM-SOFT note 2007-003, 
-// ``Reconstruction of decayed particles based on the Kalman filter'', 
-// http://www.gsi.de/documents/DOC-2007-May-14-1.pdf
-//
-// This class describes general mathematics which is used by KFParticle class
-// 
-//  -= Copyright &copy ALICE HLT and CBM L1 Groups =-
-//_________________________________________________________________________________
+/*
+ * This file is part of KFParticle package
+ * Copyright (C) 2007-2019 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2019 Goethe University of Frankfurt
+ *               2007-2019 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Maksym Zyzak
+ *               2007-2019 Sergey Gorbunov
+ *
+ * KFParticle is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * KFParticle is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 
 #ifndef KFParticleDef_H
