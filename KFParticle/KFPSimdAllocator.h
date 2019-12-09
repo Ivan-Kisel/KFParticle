@@ -4,7 +4,6 @@
  *               2007-2019 Goethe University of Frankfurt
  *               2007-2019 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
  *               2007-2019 Maksym Zyzak
- *               2007-2019 Sergey Gorbunov
  *
  * KFParticle is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
