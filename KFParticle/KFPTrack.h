@@ -44,7 +44,7 @@ class KFPTrack
 
 public:
   KFPTrack():fChi2(-1.f), fQ(0), fNDF(-1), fId(-1) { }
-  ~KFPTrack() { }
+  virtual ~KFPTrack() { }
 
   int    GetID() const { return fId; } ///< Returns Id of the track.
   

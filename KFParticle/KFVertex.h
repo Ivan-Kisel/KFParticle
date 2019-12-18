@@ -43,7 +43,7 @@ class KFVertex : public KFParticle
   KFVertex():KFParticle(),fIsConstrained(0){ } 
   KFVertex( const KFParticle &particle ): KFParticle(particle), fIsConstrained(0) {} ///< Vertex is constructed from the current position of a given particle.
   KFVertex( const KFPVertex &vertex );
-  ~KFVertex(){}
+  virtual ~KFVertex(){}
 
   Int_t GetNContributors() const { return fIsConstrained ?fNDF/2:(fNDF+3)/2; } ///< Returns number of particles used for construction of the vertex.
 

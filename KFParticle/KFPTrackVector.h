@@ -51,7 +51,7 @@ class KFPTrackVector
   friend class KFParticleTopoReconstructor;
  public:
   KFPTrackVector():fId(), fPDG(), fQ(), fPVIndex(), fNPixelHits(), fNE(0), fNMu(0), fNPi(0), fNK(0), fNP(0), fND(0), fNT(0), fNHe3(0), fNHe4(0) { }
-  ~KFPTrackVector() { }
+  virtual ~KFPTrackVector() { }
 
   /**Returns size of the vectors. All data vectors have the same size. */
   int Size() const { return fP[0].size(); }

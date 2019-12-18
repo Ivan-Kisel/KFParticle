@@ -40,7 +40,7 @@ class KFPVertex
 {
  public:
   KFPVertex();
-  ~KFPVertex() { }
+  virtual ~KFPVertex() { }
 
 /*  KFPVertex(const KFPVertex& vVert); 
   KFPVertex& operator=(const KFPVertex& vVert);*/

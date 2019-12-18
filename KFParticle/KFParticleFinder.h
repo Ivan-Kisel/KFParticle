@@ -49,7 +49,7 @@ class KFParticleFinder
  public:
 
   KFParticleFinder();
-  ~KFParticleFinder() {};
+  virtual ~KFParticleFinder() {};
   
   void Init(int nPV);
   void SetNThreads(short int n) { fNThreads = n;} ///< Sets the number of threads to by run in parallel. Currently not used.

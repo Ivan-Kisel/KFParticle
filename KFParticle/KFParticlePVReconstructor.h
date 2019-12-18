@@ -45,7 +45,7 @@ class KFPTrackVector;
 class KFParticlePVReconstructor{
  public:
   KFParticlePVReconstructor():fParticles(0), fNParticles(0), fWeight(0.f), fBeamLine(), fIsBeamLine(0), fClusters(0), fPrimVertices(0), fChi2CutPreparation(100), fChi2Cut(16) {};
-  ~KFParticlePVReconstructor(){};
+  virtual ~KFParticlePVReconstructor(){};
   
   void Init(KFPTrackVector *tracks, int nParticles);
   

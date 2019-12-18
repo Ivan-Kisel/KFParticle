@@ -94,7 +94,7 @@ class KFParticleSIMD :public KFParticleBaseSIMD
 
   //* Destructor (empty)
 
-  ~KFParticleSIMD(){ ; }
+  virtual ~KFParticleSIMD(){ ; }
 
   //* Construction of mother particle by its 2-3-4 daughters
 

@@ -77,7 +77,7 @@ class KFParticleTopoReconstructor{
     fKFParticleFinder = new KFParticleFinder;
     fKFParticleFinder->SetNThreads(fNThreads);
   }
-  ~KFParticleTopoReconstructor();
+  virtual ~KFParticleTopoReconstructor();
 
 #ifdef KFPWITHTRACKER
   /** Copies tracks from the standalone CA track finder to the vector KFParticleTopoReconstructor::fTracks

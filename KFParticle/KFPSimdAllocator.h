@@ -70,7 +70,7 @@ class KFPSimdAllocator {
   KFPSimdAllocator(const KFPSimdAllocator&) throw() {  }
   template <class U>
   KFPSimdAllocator (const KFPSimdAllocator<U>&) throw() {  }
-  ~KFPSimdAllocator() throw() {  }
+  virtual ~KFPSimdAllocator() throw() {  }
 
   /** Return maximum number of elements that can be allocated. */
   size_type max_size () const throw() {

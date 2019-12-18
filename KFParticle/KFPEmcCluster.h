@@ -43,7 +43,7 @@ class KFPEmcCluster
 {
  public:
   KFPEmcCluster():fP(), fC(), fId() { }
-  ~KFPEmcCluster() { }
+  virtual ~KFPEmcCluster() { }
 
   /**Returns size of the vectors. All data vectors have the same size. */
   int Size() const { return fP[0].size(); }

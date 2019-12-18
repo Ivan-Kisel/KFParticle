@@ -68,7 +68,7 @@ class KFParticle :public KFParticleBase
 
   //* Destructor (empty)
 
-  ~KFParticle(){ ; }
+  virtual ~KFParticle(){ ; }
 
   //* Construction of mother particle by its 2-3-4 daughters
 
