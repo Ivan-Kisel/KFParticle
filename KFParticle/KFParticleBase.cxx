@@ -1708,17 +1708,20 @@ float KFParticleBase::GetDStoPointBz( float B, const float xyz[3], float dsdr[6]
   if(fabs(bq) < LocalSmall)
     bq = LocalSmall;
   float bbq = bq*(dx*py - dy*px) - pt2;
-  
-  dsdr[0] = (px*bbq - py*abq)/(abq*abq + bbq*bbq);
-  dsdr[1] = (px*abq + py*bbq)/(abq*abq + bbq*bbq);
+
+  float den = (abq*abq + bbq*bbq);
+  den = den < LocalSmall ? LocalSmall : den;
+
+  dsdr[0] = (px*bbq - py*abq)/den;
+  dsdr[1] = (px*abq + py*bbq)/den;
   dsdr[2] = 0;
-  dsdr[3] = -(dx*bbq + dy*abq + 2.f*px*a)/(abq*abq + bbq*bbq);
-  dsdr[4] = (dx*abq - dy*bbq - 2.f*py*a)/(abq*abq + bbq*bbq);
+  dsdr[3] = -(dx*bbq + dy*abq + 2.f*px*a)/den;
+  dsdr[4] = (dx*abq - dy*bbq - 2.f*py*a)/den;
   dsdr[5] = 0;
   
   float sz(0.f);
   float cCoeff =  (bbq*c - abq*s) - pz*pz ;
-  if(fabs(cCoeff) > 1.e-8f)
+  if(fabs(cCoeff) > LocalSmall)
     sz = (dS*pz - dz)*pz / cCoeff;
 
   float dcdr[6] = {0.f};
