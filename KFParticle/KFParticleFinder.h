@@ -339,37 +339,37 @@ class KFParticleFinder
   }
   
   //Functionality to check the cuts
-  const float GetMaxDistanceBetweenParticlesCut() const { return fDistanceCut; } ///< Returns cut on the distance between secondary tracks at the DCA point.
-  const float GetLCut() const { return fLCut; } ///< Returns cut on the distance to the primary vertex from the decay vertex.
+  float GetMaxDistanceBetweenParticlesCut() const { return fDistanceCut; } ///< Returns cut on the distance between secondary tracks at the DCA point.
+  float GetLCut() const { return fLCut; } ///< Returns cut on the distance to the primary vertex from the decay vertex.
   
-  const float GetChiPrimaryCut2D() const { return fCuts2D[0]; } ///< Returns cut on \f$\chi^2_{prim}\f$ of each track for 2-daughter decays.
-  const float GetChi2Cut2D()       const { return fCuts2D[1]; } ///< Returns cut on \f$\chi^2_{geo}\f$ for 2-daughter decays.
-  const float GetLdLCut2D()        const { return fCuts2D[2]; } ///< Returns cut on \f$l/\Delta l\f$ for 2-daughter decays.
+  float GetChiPrimaryCut2D() const { return fCuts2D[0]; } ///< Returns cut on \f$\chi^2_{prim}\f$ of each track for 2-daughter decays.
+  float GetChi2Cut2D()       const { return fCuts2D[1]; } ///< Returns cut on \f$\chi^2_{geo}\f$ for 2-daughter decays.
+  float GetLdLCut2D()        const { return fCuts2D[2]; } ///< Returns cut on \f$l/\Delta l\f$ for 2-daughter decays.
   
-  const float GetSecondarySigmaMassCut() const { return fSecCuts[0]; } ///< Returns \f$\sigma_{M}\f$ cut for selection of primary and secondary candidates.
-  const float GetSecondaryChi2TopoCut()  const { return fSecCuts[1]; } ///< Returns \f$\chi^2_{topo}\f$ cut for selection of primary and secondary candidates.
-  const float GetSecondaryLdLCut()       const { return fSecCuts[2]; } ///< Returns \f$l/\Delta l\f$ cut for selection of primary and secondary candidates.
+  float GetSecondarySigmaMassCut() const { return fSecCuts[0]; } ///< Returns \f$\sigma_{M}\f$ cut for selection of primary and secondary candidates.
+  float GetSecondaryChi2TopoCut()  const { return fSecCuts[1]; } ///< Returns \f$\chi^2_{topo}\f$ cut for selection of primary and secondary candidates.
+  float GetSecondaryLdLCut()       const { return fSecCuts[2]; } ///< Returns \f$l/\Delta l\f$ cut for selection of primary and secondary candidates.
   
-  const float GetLdLCutXiOmega()      const { return fCutsTrackV0[0][0]; } ///< Returns \f$l/\Delta l\f$ cut for \f$\Xi\f$ and \f$\Omega\f$.
-  const float GetChi2TopoCutXiOmega() const { return fCutsTrackV0[0][1]; } ///< Returns \f$\chi^2_{topo}\f$ cut for \f$\Xi\f$ and \f$\Omega\f$.
-  const float GetChi2CutXiOmega()     const { return fCutsTrackV0[0][2]; } ///< Returns \f$\chi^2_{geo}\f$ cut for \f$\Xi\f$ and \f$\Omega\f$.
+  float GetLdLCutXiOmega()      const { return fCutsTrackV0[0][0]; } ///< Returns \f$l/\Delta l\f$ cut for \f$\Xi\f$ and \f$\Omega\f$.
+  float GetChi2TopoCutXiOmega() const { return fCutsTrackV0[0][1]; } ///< Returns \f$\chi^2_{topo}\f$ cut for \f$\Xi\f$ and \f$\Omega\f$.
+  float GetChi2CutXiOmega()     const { return fCutsTrackV0[0][2]; } ///< Returns \f$\chi^2_{geo}\f$ cut for \f$\Xi\f$ and \f$\Omega\f$.
 
-  const float GetChi2TopoCutResonances() const { return fCutsTrackV0[2][1]; } ///< Returns \f$\chi^2_{topo}\f$ cut for resonances.
-  const float GetChi2CutResonances()     const { return fCutsTrackV0[2][2]; } ///< Returns \f$\chi^2_{geo}\f$ cut for resonances.
+  float GetChi2TopoCutResonances() const { return fCutsTrackV0[2][1]; } ///< Returns \f$\chi^2_{topo}\f$ cut for resonances.
+  float GetChi2CutResonances()     const { return fCutsTrackV0[2][2]; } ///< Returns \f$\chi^2_{geo}\f$ cut for resonances.
 
-  const float GetPtCutLMVM() const { return fCutLVMPt; }  ///< Returns cut on transverse momentum of each daughter track of low mass vector mesons.
-  const float GetPCutLMVM()  const { return fCutLVMP; }   ///< Returns cut on momentum of each daughter track of low mass vector mesons in dimuon channel.
-  const float GetPtCutJPsi() const { return fCutJPsiPt; } ///< Returns cut on transverse momentum of each daughter track of \f$J/\psi\f$.
+  float GetPtCutLMVM() const { return fCutLVMPt; }  ///< Returns cut on transverse momentum of each daughter track of low mass vector mesons.
+  float GetPCutLMVM()  const { return fCutLVMP; }   ///< Returns cut on momentum of each daughter track of low mass vector mesons in dimuon channel.
+  float GetPtCutJPsi() const { return fCutJPsiPt; } ///< Returns cut on transverse momentum of each daughter track of \f$J/\psi\f$.
   
-  const float GetPtCutCharm()         const { return fCutCharmPt; } ///< Returns the cut on transverse momentum of each daughter track of open charm particles.
-  const float GetChiPrimaryCutCharm() const { return fCutCharmChiPrim; } ///< Returns cut on \f$\chi^2_{prim}\f$ of each track for open charm particles.
-  const float GetLdLCutCharmManybodyDecays()      const { return fCutsTrackV0[1][0]; } ///< Returns \f$l/\Delta l\f$ cut for open charm with >=3 daughters.
-  const float GetChi2TopoCutCharmManybodyDecays() const { return fCutsTrackV0[1][1]; } ///< Returns \f$\chi^2_{topo}\f$ cut for open charm with >=3 daughters.
-  const float GetChi2CutCharmManybodyDecays()     const { return fCutsTrackV0[1][2]; } ///< Returns \f$\chi^2_{geo}\f$ cut for open charm with >=3 daughters.
+  float GetPtCutCharm()         const { return fCutCharmPt; } ///< Returns the cut on transverse momentum of each daughter track of open charm particles.
+  float GetChiPrimaryCutCharm() const { return fCutCharmChiPrim; } ///< Returns cut on \f$\chi^2_{prim}\f$ of each track for open charm particles.
+  float GetLdLCutCharmManybodyDecays()      const { return fCutsTrackV0[1][0]; } ///< Returns \f$l/\Delta l\f$ cut for open charm with >=3 daughters.
+  float GetChi2TopoCutCharmManybodyDecays() const { return fCutsTrackV0[1][1]; } ///< Returns \f$\chi^2_{topo}\f$ cut for open charm with >=3 daughters.
+  float GetChi2CutCharmManybodyDecays()     const { return fCutsTrackV0[1][2]; } ///< Returns \f$\chi^2_{geo}\f$ cut for open charm with >=3 daughters.
 
-  const float GetLdLCutCharm2D()      const { return fCutsCharm[1]; } ///< Returns \f$l/\Delta l\f$ cut for open charm with 2 daughters.
-  const float GetChi2TopoCutCharm2D() const { return fCutsCharm[2]; } ///< Returns \f$\chi^2_{topo}\f$ cut for open charm with 2 daughters.
-  const float GetChi2CutCharm2D()     const { return fCutsCharm[0]; } ///< Returns \f$\chi^2_{geo}\f$ cut for open charm with 2 daughters.
+  float GetLdLCutCharm2D()      const { return fCutsCharm[1]; } ///< Returns \f$l/\Delta l\f$ cut for open charm with 2 daughters.
+  float GetChi2TopoCutCharm2D() const { return fCutsCharm[2]; } ///< Returns \f$\chi^2_{topo}\f$ cut for open charm with 2 daughters.
+  float GetChi2CutCharm2D()     const { return fCutsCharm[0]; } ///< Returns \f$\chi^2_{geo}\f$ cut for open charm with 2 daughters.
   
   /** Add decay to the reconstruction list. If at least one is added - only those channels are considered which are in the list. Otherwise 
    ** all decays are reconstructed.

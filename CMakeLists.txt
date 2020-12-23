@@ -76,9 +76,28 @@ set (HEADERS
   KFParticleTest/KFParticleTest.h
 )
 
+Message("CMAKE_BUILD_DIRECTORY: ${CMAKE_BUILD_DIRECTORY}")
+
 if(FIXTARGET)
   ROOT_GENERATE_DICTIONARY(G__KFParticle ${HEADERS} LINKDEF KFLinkDef.h OPTIONS "-DDO_TPCCATRACKER_EFF_PERFORMANCE" "-DNonhomogeneousField" "-DCBM" "-DUSE_TIMERS")
-  add_library(KFParticle SHARED ${SOURCES} G__KFParticle.cxx)
+
+  find_program(BIN_SED sed)
+  if(BIN_SED)
+    add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/G__KFParticle_mod.cxx
+                       COMMAND sed -e "s#${CMAKE_SOURCE_DIR}/##g" ${CMAKE_BINARY_DIR}/G__KFParticle.cxx > ${CMAKE_BINARY_DIR}/G__KFParticle_mod.cxx
+                       DEPENDS ${CMAKE_BINARY_DIR}/G__KFParticle.cxx
+                      )
+  else()
+    Message("Can't correct KFParticle dictionary. Running KFParticle from an installed CbmRoot will not be possible")
+  endif()
+
+#  set(SourceFile "${CMAKE_BINARY_DIR}/G__KFParticle.cxx")
+#  set(SourceFile_new "${CMAKE_BINARY_DIR}/G__KFParticle_mod.cxx")
+#  file(READ ${SourceFile} Contents)
+#  STRING(REGEX REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" Contents_Modified "${Contents}" )
+#  file(WRITE ${SourceFile_new} ${Contents_Modified})
+
+  add_library(KFParticle SHARED ${SOURCES} G__KFParticle_mod.cxx)
   target_link_libraries(KFParticle ${ROOT_LIBRARIES} ${Vc_LIBRARIES} )
   add_target_property(KFParticle COMPILE_FLAGS "-DDO_TPCCATRACKER_EFF_PERFORMANCE -DNonhomogeneousField -DCBM -DUSE_TIMERS")
 else(FIXTARGET)
