@@ -42,11 +42,10 @@
  ** KFPTrackVector object.
  **/
 
-struct KFPTrackIndex
-{
+struct KFPTrackIndex {
   int fIndex; ///< index of the track in the KFPTrackVector object.
   int fPdg;   ///< PDG hypothesis of the track
-  
+
   static bool Compare(const KFPTrackIndex& a, const KFPTrackIndex& b)
   {
     /** Static sorting function for comparison of the two input objects of class KFPTrackIndex.
@@ -63,7 +62,6 @@ struct KFPTrackIndex
   }
 };
 
-
 /** @class KFPInputData
  ** @brief Class with the input data for KF Particle Finder: tracks, primary vertex and magnetic field.
  ** @author  M.Zyzak, I.Kisel
@@ -77,106 +75,96 @@ struct KFPTrackIndex
 class KFPInputData
 {
  public:
-   
-  void *operator new(size_t size) { return _mm_malloc(size, sizeof(float_v)); }      ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
-  void *operator new[](size_t size) { return _mm_malloc(size, sizeof(float_v)); }    ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
-  void *operator new(size_t size, void *ptr) { return ::operator new(size, ptr);}    ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
-  void *operator new[](size_t size, void *ptr) { return ::operator new(size, ptr);}  ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
-  void operator delete(void *ptr, size_t) { _mm_free(ptr); }                         ///< delete operator for the SIMD-alligned dynamic memory release
-  void operator delete[](void *ptr, size_t) { _mm_free(ptr); }                       ///< delete operator for the SIMD-alligned dynamic memory release
-  
-  KFPInputData():fPV(0),fBz(0.f) {};
-  virtual ~KFPInputData() {};
+  void* operator new(size_t size) { return _mm_malloc(size, sizeof(float_v)); }      ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
+  void* operator new[](size_t size) { return _mm_malloc(size, sizeof(float_v)); }    ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
+  void* operator new(size_t size, void* ptr) { return ::operator new(size, ptr); }   ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
+  void* operator new[](size_t size, void* ptr) { return ::operator new(size, ptr); } ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
+  void operator delete(void* ptr, size_t) { _mm_free(ptr); }                         ///< delete operator for the SIMD-alligned dynamic memory release
+  void operator delete[](void* ptr, size_t) { _mm_free(ptr); }                       ///< delete operator for the SIMD-alligned dynamic memory release
 
-  bool ReadDataFromFile( std::string prefix )
+  KFPInputData() : fPV(0), fBz(0.f){};
+  virtual ~KFPInputData(){};
+
+  bool ReadDataFromFile(std::string prefix)
   {
     /** Reads the input data from the input file with the name defined by "prefix".
      ** \param[in] prefix - string with the name of the input file
-     **/ 
+     **/
     std::ifstream ifile(prefix.data());
-    if ( !ifile.is_open() ) return 0;
+    if (!ifile.is_open())
+      return 0;
     int nSets;
     ifile >> fBz;
     ifile >> nSets;
-    for(int iSet=0; iSet<nSets; iSet++)
-    {
+    for (int iSet = 0; iSet < nSets; iSet++) {
       int nTracks = 0;
       ifile >> nTracks;
       fTracks[iSet].Resize(nTracks);
-      
-      for(int iP=0; iP<6; iP++)
-      {
+
+      for (int iP = 0; iP < 6; iP++) {
         float value;
-        for(int iTr=0; iTr<fTracks[iSet].Size(); iTr++)
-        {
+        for (int iTr = 0; iTr < fTracks[iSet].Size(); iTr++) {
           ifile >> value;
           fTracks[iSet].SetParameter(value, iP, iTr);
         }
       }
 
-      for(int iC=0; iC<21; iC++)
-      {
+      for (int iC = 0; iC < 21; iC++) {
         float value;
-        for(int iTr=0; iTr<fTracks[iSet].Size(); iTr++)
-        {
+        for (int iTr = 0; iTr < fTracks[iSet].Size(); iTr++) {
           ifile >> value;
           fTracks[iSet].SetCovariance(value, iC, iTr);
         }
       }
 
       int tmpInt;
-      for(int iTr=0; iTr<fTracks[iSet].Size(); iTr++)
-      {
+      for (int iTr = 0; iTr < fTracks[iSet].Size(); iTr++) {
         ifile >> tmpInt;
         fTracks[iSet].SetId(tmpInt, iTr);
       }
-      
-      for(int iTr=0; iTr<fTracks[iSet].Size(); iTr++)
-      {
+
+      for (int iTr = 0; iTr < fTracks[iSet].Size(); iTr++) {
         ifile >> tmpInt;
         fTracks[iSet].SetPDG(tmpInt, iTr);
       }
 
-      for(int iTr=0; iTr<fTracks[iSet].Size(); iTr++)
-      {
+      for (int iTr = 0; iTr < fTracks[iSet].Size(); iTr++) {
         ifile >> tmpInt;
         fTracks[iSet].SetQ(tmpInt, iTr);
       }
-      
-      for(int iTr=0; iTr<fTracks[iSet].Size(); iTr++)
-      {
+
+      for (int iTr = 0; iTr < fTracks[iSet].Size(); iTr++) {
         ifile >> tmpInt;
         fTracks[iSet].SetPVIndex(tmpInt, iTr);
       }
-      
+
       ifile >> tmpInt;
       fTracks[iSet].SetLastElectron(tmpInt);
       ifile >> tmpInt;
-      fTracks[iSet].SetLastMuon    (tmpInt);
+      fTracks[iSet].SetLastMuon(tmpInt);
       ifile >> tmpInt;
-      fTracks[iSet].SetLastPion    (tmpInt);
+      fTracks[iSet].SetLastPion(tmpInt);
       ifile >> tmpInt;
-      fTracks[iSet].SetLastKaon    (tmpInt);
+      fTracks[iSet].SetLastKaon(tmpInt);
       ifile >> tmpInt;
-      fTracks[iSet].SetLastProton  (tmpInt);
+      fTracks[iSet].SetLastProton(tmpInt);
     }
 
     int nPV;
-    ifile>>nPV;
+    ifile >> nPV;
     fPV.resize(nPV);
-    for(unsigned int iPV=0; iPV < fPV.size(); iPV++)
-    {
-      for(int iP=0; iP<3; iP++)
+    for (unsigned int iPV = 0; iPV < fPV.size(); iPV++) {
+      for (int iP = 0; iP < 3; iP++)
         ifile >> fPV[iPV].Parameter(iP);
-  
-      for(int iC=0; iC<6; iC++)
+
+      for (int iC = 0; iC < 6; iC++)
         ifile >> fPV[iPV].Covariance(iC);
     }
-    
+
     ifile.close();
     return 1;
   }
-  
+
   void SetDataToVector(int* data, int& dataSize)
   {
     /** Stores information to the memory under pointer "data".
@@ -184,41 +172,37 @@ class KFPInputData
      ** \param[out] dataSize - size of the stored memory in "int" (or bloks of 4 bytes, or 32 bits)
      **/
     dataSize = NInputSets + 1 + 1; //sizes of the track vectors and pv vector, and field
-    for(int iSet=0; iSet<NInputSets; iSet++)
+    for (int iSet = 0; iSet < NInputSets; iSet++)
       dataSize += fTracks[iSet].DataSize();
     dataSize += fPV.size() * 9;
-        
-    for(int iSet=0; iSet<NInputSets; iSet++)
+
+    for (int iSet = 0; iSet < NInputSets; iSet++)
       data[iSet] = fTracks[iSet].Size();
     data[NInputSets] = fPV.size();
-    
-    float& field = reinterpret_cast<float&>(data[NInputSets+1]);
+
+    float& field = reinterpret_cast<float&>(data[NInputSets + 1]);
     field = fBz;
-    
-    int offset = NInputSets+2;
-        
-    for(int iSet=0; iSet<NInputSets; iSet++)
+
+    int offset = NInputSets + 2;
+
+    for (int iSet = 0; iSet < NInputSets; iSet++)
       fTracks[iSet].SetDataToVector(data, offset);
-    
-    for(int iP=0; iP<3; iP++)
-    {
-      for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
-      {
+
+    for (int iP = 0; iP < 3; iP++) {
+      for (unsigned int iPV = 0; iPV < fPV.size(); iPV++) {
         float& tmpFloat = reinterpret_cast<float&>(data[offset + iPV]);
         tmpFloat = fPV[iPV].Parameter(iP);
       }
       offset += fPV.size();
     }
-    
-    for(int iC=0; iC<6; iC++)
-    {
-      for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
-      {
+
+    for (int iC = 0; iC < 6; iC++) {
+      for (unsigned int iPV = 0; iPV < fPV.size(); iPV++) {
         float& tmpFloat = reinterpret_cast<float&>(data[offset + iPV]);
         tmpFloat = fPV[iPV].Covariance(iC);
       }
       offset += fPV.size();
-    }    
+    }
   }
 
   void ReadDataFromVector(int* data)
@@ -226,94 +210,88 @@ class KFPInputData
     /** Reads input data from the given memory.
      ** \param[in] data - pointer to the memory with the input data
      **/
-    int offset = NInputSets+2;
-    for(int iSet=0; iSet<NInputSets; iSet++)
-    {
+    int offset = NInputSets + 2;
+    for (int iSet = 0; iSet < NInputSets; iSet++) {
       fTracks[iSet].Resize(data[iSet]);
       fTracks[iSet].ReadDataFromVector(data, offset);
     }
-    
-    float& field = reinterpret_cast<float&>(data[NInputSets+1]);
+
+    float& field = reinterpret_cast<float&>(data[NInputSets + 1]);
     fBz = field;
-    
+
     fPV.resize(data[NInputSets]);
-                
-    for(int iP=0; iP<3; iP++)
-    {
-      for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
-      {
+
+    for (int iP = 0; iP < 3; iP++) {
+      for (unsigned int iPV = 0; iPV < fPV.size(); iPV++) {
         float& tmpFloat = reinterpret_cast<float&>(data[offset + iPV]);
         fPV[iPV].Parameter(iP) = tmpFloat;
       }
       offset += fPV.size();
     }
-    
-    for(int iC=0; iC<6; iC++)
-    {
-      for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
-      {
+
+    for (int iC = 0; iC < 6; iC++) {
+      for (unsigned int iPV = 0; iPV < fPV.size(); iPV++) {
         float& tmpFloat = reinterpret_cast<float&>(data[offset + iPV]);
         fPV[iPV].Covariance(iC) = tmpFloat;
       }
       offset += fPV.size();
-    }        
+    }
   }
-  
+
   void Print()
   {
     /**Prints all fields of the current object.*/
-    for(int iSet=0; iSet<NInputSets; iSet++)
+    for (int iSet = 0; iSet < NInputSets; iSet++)
       fTracks[iSet].Print();
     std::cout << "N PV: " << fPV.size() << std::endl;
-    
+
     std::cout << "X: ";
-    for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
-      std::cout << fPV[iPV].X() <<" ";
+    for (unsigned int iPV = 0; iPV < fPV.size(); iPV++)
+      std::cout << fPV[iPV].X() << " ";
     std::cout << std::endl;
-        std::cout << "Y: ";
-    for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
-      std::cout << fPV[iPV].Y() <<" ";
+    std::cout << "Y: ";
+    for (unsigned int iPV = 0; iPV < fPV.size(); iPV++)
+      std::cout << fPV[iPV].Y() << " ";
     std::cout << std::endl;
     std::cout << "Z: ";
-    for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
-      std::cout << fPV[iPV].Z() <<" ";
+    for (unsigned int iPV = 0; iPV < fPV.size(); iPV++)
+      std::cout << fPV[iPV].Z() << " ";
     std::cout << std::endl;
 
     std::cout << "Cov matrix: " << std::endl;
-    for(int iC=0; iC<6; iC++)
-    {
+    for (int iC = 0; iC < 6; iC++) {
       std::cout << "  iC " << iC << ":  ";
-      for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
-        std::cout << fPV[iPV].Covariance(iC) <<" ";
+      for (unsigned int iPV = 0; iPV < fPV.size(); iPV++)
+        std::cout << fPV[iPV].Covariance(iC) << " ";
       std::cout << std::endl;
     }
-    
+
     std::cout << "Field: " << fBz << std::endl;
   }
-  
-  KFPTrackVector* GetTracks()  { return fTracks; } ///< Returns pointer to the array with track vectors.
-  float GetBz() const { return fBz; } ///< Returns value of the constant field Bz.
+
+  KFPTrackVector* GetTracks() { return fTracks; }              ///< Returns pointer to the array with track vectors.
+  float GetBz() const { return fBz; }                          ///< Returns value of the constant field Bz.
   const std::vector<KFParticle>& GetPV() const { return fPV; } ///< Returns vector with primary vertices.
 
-  const KFPInputData& operator = (const KFPInputData& data)
+  const KFPInputData& operator=(const KFPInputData& data)
   {
     /** Copies input data from object "data" to the current object. Returns the current object. \param[in] data - input data*/
-    for(int i=0; i<NInputSets; i++)
+    for (int i = 0; i < NInputSets; i++)
       fTracks[i] = data.fTracks[i];
     fPV = data.fPV;
     fBz = data.fBz;
-    
+
     return *this;
   }
-  KFPInputData(const KFPInputData& data):fPV(0),fBz(0.f)
+  KFPInputData(const KFPInputData& data) : fPV(0), fBz(0.f)
   {
     /** Copies input data from object "data" to the current object. \param[in] data - input data */
-    for(int i=0; i<NInputSets; i++)
+    for (int i = 0; i < NInputSets; i++)
       fTracks[i] = data.fTracks[i];
     fPV = data.fPV;
     fBz = data.fBz;
   }
-  
+
  protected:
   /** Array of track vectors: \n
    ** 0 - positive secondary tracks stored at the first point; \n
@@ -326,9 +304,9 @@ class KFPInputData
    ** 7 - positive primary tracks stored at the last point.
    ** \see KFPTrackVector for documentation.
    **/
-  KFPTrackVector fTracks[NInputSets]__attribute__((aligned(sizeof(float_v)))); 
+  KFPTrackVector fTracks[NInputSets] __attribute__((aligned(sizeof(float_v))));
   std::vector<KFParticle> fPV; ///< Vector with primary vertices.
-  float fBz; ///< Constant homogenious one-component magnetic field Bz.
+  float fBz;                   ///< Constant homogenious one-component magnetic field Bz.
 } __attribute__((aligned(sizeof(float_v))));
 
 /** @class KFPInputDataArray
@@ -341,17 +319,20 @@ class KFPInputData
  ** objects of this structure is disabled.
  **/
 
-struct KFPInputDataArray{
-  KFPInputDataArray():fInput(0){};
-  virtual ~KFPInputDataArray() { if(fInput) delete [] fInput; }
+struct KFPInputDataArray {
+  KFPInputDataArray() : fInput(0){};
+  virtual ~KFPInputDataArray()
+  {
+    if (fInput)
+      delete[] fInput;
+  }
 
-  KFPInputData *fInput; ///< Pointer to the array of the input data objects.
-  
+  KFPInputData* fInput; ///< Pointer to the array of the input data objects.
+
  private:
-   const KFPInputDataArray& operator = (const KFPInputDataArray&);
-   KFPInputDataArray(const KFPInputDataArray&);
+  const KFPInputDataArray& operator=(const KFPInputDataArray&);
+  KFPInputDataArray(const KFPInputDataArray&);
 };
-
 
 /** @class KFPLinkedList
  ** @brief Structure to creat a linked list of the input data.
@@ -364,17 +345,16 @@ struct KFPInputDataArray{
  ** at the device side (Intel Xeon Phi).
  **/
 
-struct KFPLinkedList
-{
-  void *operator new(size_t size) { return _mm_malloc(size, sizeof(float_v)); }      ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
-  void *operator new[](size_t size) { return _mm_malloc(size, sizeof(float_v)); }    ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
-  void *operator new(size_t size, void *ptr) { return ::operator new(size, ptr);}    ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
-  void *operator new[](size_t size, void *ptr) { return ::operator new(size, ptr);}  ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
-  void operator delete(void *ptr, size_t) { _mm_free(ptr); }                         ///< delete operator for the SIMD-alligned dynamic memory release
-  void operator delete[](void *ptr, size_t) { _mm_free(ptr); }                       ///< delete operator for the SIMD-alligned dynamic memory release
-  
+struct KFPLinkedList {
+  void* operator new(size_t size) { return _mm_malloc(size, sizeof(float_v)); }      ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
+  void* operator new[](size_t size) { return _mm_malloc(size, sizeof(float_v)); }    ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
+  void* operator new(size_t size, void* ptr) { return ::operator new(size, ptr); }   ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
+  void* operator new[](size_t size, void* ptr) { return ::operator new(size, ptr); } ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
+  void operator delete(void* ptr, size_t) { _mm_free(ptr); }                         ///< delete operator for the SIMD-alligned dynamic memory release
+  void operator delete[](void* ptr, size_t) { _mm_free(ptr); }                       ///< delete operator for the SIMD-alligned dynamic memory release
+
   KFPInputData data __attribute__((aligned(sizeof(float_v)))); ///< Input data for KF Particle Finder \see KFPInputData.
-  KFPLinkedList* next; ///< Link to the nex object in the linked list.
+  KFPLinkedList* next;                                         ///< Link to the nex object in the linked list.
 } __attribute__((aligned(sizeof(float_v))));
 
 #endif
