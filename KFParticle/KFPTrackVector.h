@@ -246,43 +246,51 @@ class KFPTrackVector
 
     for (int i = 0; i < 6; i++) {
       fP[i].resize(localSize);
-      for (int n = 0; n < localSize; n++)
+      for (int n = 0; n < localSize; n++) {
         fP[i][n] = track.fP[i][n];
+      }
     }
 
     for (int i = 0; i < 21; i++) {
       fC[i].resize(localSize);
-      for (int n = 0; n < localSize; n++)
+      for (int n = 0; n < localSize; n++) {
         fC[i][n] = track.fC[i][n];
+      }
     }
 
 #ifdef NonhomogeneousField
     for (int i = 0; i < 10; i++) {
       fField[i].resize(localSize);
-      for (int n = 0; n < localSize; n++)
+      for (int n = 0; n < localSize; n++) {
         fField[i][n] = track.fField[i][n];
+      }
     }
 #endif
 
     fId.resize(localSize);
-    for (int n = 0; n < localSize; n++)
+    for (int n = 0; n < localSize; n++) {
       fId[n] = track.fId[n];
+    }
 
     fPDG.resize(localSize);
-    for (int n = 0; n < localSize; n++)
+    for (int n = 0; n < localSize; n++) {
       fPDG[n] = track.fPDG[n];
+    }
 
     fQ.resize(localSize);
-    for (int n = 0; n < localSize; n++)
+    for (int n = 0; n < localSize; n++) {
       fQ[n] = track.fQ[n];
+    }
 
     fPVIndex.resize(localSize);
-    for (int n = 0; n < localSize; n++)
+    for (int n = 0; n < localSize; n++) {
       fPVIndex[n] = track.fPVIndex[n];
+    }
 
     fNPixelHits.resize(localSize);
-    for (int n = 0; n < localSize; n++)
+    for (int n = 0; n < localSize; n++) {
       fNPixelHits[n] = track.fNPixelHits[n];
+    }
 
     fNE = track.fNE;
     fNMu = track.fNMu;

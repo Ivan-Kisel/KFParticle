@@ -53,10 +53,12 @@ void KFParticleBaseSIMD::Initialize(const float_v Param[], const float_v Cov[], 
    ** \param[in] mass - the mass hypothesis
    **/
 
-  for (Int_t i = 0; i < 6; i++)
+  for (Int_t i = 0; i < 6; i++) {
     fP[i] = Param[i];
-  for (Int_t i = 0; i < 21; i++)
+  }
+  for (Int_t i = 0; i < 21; i++) {
     fC[i] = Cov[i];
+  }
 
   float_v energy = sqrt(Mass * Mass + fP[3] * fP[3] + fP[4] * fP[4] + fP[5] * fP[5]);
   fP[6] = energy;
@@ -80,8 +82,9 @@ void KFParticleBaseSIMD::Initialize(const float_v Param[], const float_v Cov[], 
   fC[25] = h0 * fC[13] + h1 * fC[14] + h2 * fC[19];
   fC[26] = h0 * fC[18] + h1 * fC[19] + h2 * fC[20];
   fC[27] = (h0 * h0 * fC[9] + h1 * h1 * fC[14] + h2 * h2 * fC[20] + 2 * (h0 * h1 * fC[13] + h0 * h2 * fC[18] + h1 * h2 * fC[19]));
-  for (Int_t i = 28; i < 36; i++)
+  for (Int_t i = 28; i < 36; i++) {
     fC[i] = 0.f;
+  }
   fC[35] = 1.f;
 
   SumDaughterMass = Mass;
@@ -98,10 +101,12 @@ void KFParticleBaseSIMD::Initialize()
    ** 5) NDF = -3, since 3 parameters should be fitted: X, Y, Z. 
    **/
 
-  for (Int_t i = 0; i < 8; i++)
+  for (Int_t i = 0; i < 8; i++) {
     fP[i] = 0.f;
-  for (Int_t i = 0; i < 36; ++i)
+  }
+  for (Int_t i = 0; i < 36; ++i) {
     fC[i] = 0.f;
+  }
   fC[0] = fC[2] = fC[5] = 100.f;
   fC[35] = 1.f;
   fNDF = -3;
@@ -384,8 +389,9 @@ void KFParticleBaseSIMD::GetMeasurement(const KFParticleBaseSIMD& daughter, floa
     float_v V1Tmp[36];
 
     float_v C[36];
-    for (int iC = 0; iC < 36; iC++)
+    for (int iC = 0; iC < 36; iC++) {
       C[iC] = fC[iC];
+    }
 
     Transport(ds[0], dsdr[0], fP, fC, dsdr[1], F1, F2);
     daughter.Transport(ds[1], dsdr[3], m, V, dsdr[2], F4, F3);
@@ -399,36 +405,40 @@ void KFParticleBaseSIMD::GetMeasurement(const KFParticleBaseSIMD& daughter, floa
     }
 
     float_v C1F1T[6][6];
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 6; i++) {
       for (int j = 0; j < 6; j++) {
         C1F1T[i][j] = 0;
         for (int k = 0; k < 6; k++) {
           C1F1T[i][j] += C[IJ(i, k)] * F1[j * 6 + k];
         }
       }
+    }
     float_v F3C1F1T[6][6];
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 6; i++) {
       for (int j = 0; j < 6; j++) {
         F3C1F1T[i][j] = 0;
         for (int k = 0; k < 6; k++) {
           F3C1F1T[i][j] += F3[i * 6 + k] * C1F1T[k][j];
         }
       }
+    }
     float_v C2F2T[6][6];
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 6; i++) {
       for (int j = 0; j < 6; j++) {
         C2F2T[i][j] = 0;
         for (int k = 0; k < 6; k++) {
           C2F2T[i][j] += daughter.fC[IJ(i, k)] * F2[j * 6 + k];
         }
       }
-    for (int i = 0; i < 3; i++)
+    }
+    for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
         D[i][j] = F3C1F1T[i][j];
         for (int k = 0; k < 6; k++) {
           D[i][j] += F4[i * 6 + k] * C2F2T[k][j];
         }
       }
+    }
   } else {
     float_v dsdr[6];
     float_v dS = daughter.GetDStoPoint(fP, dsdr);
@@ -449,30 +459,31 @@ void KFParticleBaseSIMD::GetMeasurement(const KFParticleBaseSIMD& daughter, floa
     //       V[iC] += V1Tmp[iC];
 
     float_v VFT[3][6];
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 6; j++) {
         VFT[i][j] = 0;
         for (int k = 0; k < 3; k++) {
           VFT[i][j] += fC[IJ(i, k)] * F1[j * 6 + k];
         }
       }
-
+    }
     float_v FVFT[6][6];
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 6; i++) {
       for (int j = 0; j < 6; j++) {
         FVFT[i][j] = 0;
         for (int k = 0; k < 3; k++) {
           FVFT[i][j] += F1[i * 6 + k] * VFT[k][j];
         }
       }
-
-    for (int i = 0; i < 3; i++)
+    }
+    for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
         D[i][j] = 0;
         for (int k = 0; k < 3; k++) {
           D[i][j] += fC[IJ(j, k)] * F1[i * 6 + k];
         }
       }
+    }
 
     V[0] += FVFT[0][0];
     V[1] += FVFT[1][0];
@@ -503,21 +514,23 @@ void KFParticleBaseSIMD::AddDaughter(const KFParticleBaseSIMD& Daughter)
   if (int(fNDF[0]) < -1) { // first daughter -> just copy
     fNDF = -1;
     fQ = Daughter.GetQ();
-    for (Int_t i = 0; i < 7; i++)
+    for (Int_t i = 0; i < 7; i++) {
       fP[i] = Daughter.fP[i];
-    for (Int_t i = 0; i < 28; i++)
+    }
+    for (Int_t i = 0; i < 28; i++) {
       fC[i] = Daughter.fC[i];
+    }
     fSFromDecay = 0;
     fMassHypo = Daughter.fMassHypo;
     SumDaughterMass = Daughter.SumDaughterMass;
     return;
   }
 
-  if (fConstructMethod == 0)
+  if (fConstructMethod == 0) {
     AddDaughterWithEnergyFit(Daughter);
-  else if (fConstructMethod == 2)
+  } else if (fConstructMethod == 2) {
     AddDaughterWithEnergyFitMC(Daughter);
-
+  }
   SumDaughterMass += Daughter.SumDaughterMass;
   fMassHypo = -1.f;
 }
@@ -550,13 +563,14 @@ void KFParticleBaseSIMD::AddDaughterWithEnergyFit(const KFParticleBaseSIMD& Daug
     float_v zeta[3] = {m[0] - fP[0], m[1] - fP[1], m[2] - fP[2]};
 
     float_v K[3][3];
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
         K[i][j] = 0;
-        for (int k = 0; k < 3; k++)
+        for (int k = 0; k < 3; k++) {
           K[i][j] += fC[IJ(i, k)] * mS[IJ(k, j)];
+        }
       }
-
+    }
     //* CHt = CH' - D'
     float_v mCHt0[7], mCHt1[7], mCHt2[7];
 
@@ -612,9 +626,9 @@ void KFParticleBaseSIMD::AddDaughterWithEnergyFit(const KFParticleBaseSIMD& Daug
 
     //* New estimation of the vertex position r += K*zeta
 
-    for (Int_t i = 0; i < 7; ++i)
+    for (Int_t i = 0; i < 7; ++i) {
       fP[i] = fP[i] + k0[i] * zeta[0] + k1[i] * zeta[1] + k2[i] * zeta[2];
-
+    }
     //* New covariance matrix C -= K*(mCH')'
 
     for (Int_t i = 0, k = 0; i < 7; ++i) {
@@ -625,28 +639,31 @@ void KFParticleBaseSIMD::AddDaughterWithEnergyFit(const KFParticleBaseSIMD& Daug
 
     float_v K2[3][3];
     for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 3; j++)
+      for (int j = 0; j < 3; j++) {
         K2[i][j] = -K[j][i];
+      }
       K2[i][i] += 1;
     }
 
     float_v A[3][3];
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
         A[i][j] = 0;
         for (int k = 0; k < 3; k++) {
           A[i][j] += D[i][k] * K2[k][j];
         }
       }
+    }
 
     float_v M[3][3];
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
         M[i][j] = 0;
         for (int k = 0; k < 3; k++) {
           M[i][j] += K[i][k] * A[k][j];
         }
       }
+    }
 
     fC[0] += 2.f * M[0][0];
     fC[1] += M[0][1] + M[1][0];
@@ -690,12 +707,14 @@ void KFParticleBaseSIMD::AddDaughterWithEnergyFitMC(const KFParticleBaseSIMD& Da
     float_v zeta[3] = {m[0] - fP[0], m[1] - fP[1], m[2] - fP[2]};
 
     float_v K[3][6];
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
         K[i][j] = 0;
-        for (int k = 0; k < 3; k++)
+        for (int k = 0; k < 3; k++) {
           K[i][j] += fC[IJ(i, k)] * mS[IJ(k, j)];
+        }
       }
+    }
 
     //* CHt = CH'
 
@@ -771,11 +790,13 @@ void KFParticleBaseSIMD::AddDaughterWithEnergyFitMC(const KFParticleBaseSIMD& Da
       km2[i] = mVHt0[i] * mS[3] + mVHt1[i] * mS[4] + mVHt2[i] * mS[5];
     }
 
-    for (Int_t i = 0; i < 7; ++i)
+    for (Int_t i = 0; i < 7; ++i) {
       fP[i] = fP[i] + k0[i] * zeta[0] + k1[i] * zeta[1] + k2[i] * zeta[2];
+    }
 
-    for (Int_t i = 0; i < 7; ++i)
+    for (Int_t i = 0; i < 7; ++i) {
       m[i] = m[i] - km0[i] * zeta[0] - km1[i] * zeta[1] - km2[i] * zeta[2];
+    }
 
     for (Int_t i = 0, k = 0; i < 7; ++i) {
       for (Int_t j = 0; j <= i; ++j, ++k) {
@@ -886,28 +907,31 @@ void KFParticleBaseSIMD::AddDaughterWithEnergyFitMC(const KFParticleBaseSIMD& Da
 
     float_v K2[3][3];
     for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 3; j++)
+      for (int j = 0; j < 3; j++) {
         K2[i][j] = -K[j][i];
+      }
       K2[i][i] += 1;
     }
 
     float_v A[3][3];
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
         A[i][j] = 0.f;
         for (int k = 0; k < 3; k++) {
           A[i][j] += D[i][k] * K2[k][j];
         }
       }
+    }
 
     float_v M[3][3];
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
         M[i][j] = 0.f;
         for (int k = 0; k < 3; k++) {
           M[i][j] += K[i][k] * A[k][j];
         }
       }
+    }
 
     fC[0] += 2 * M[0][0];
     fC[1] += M[0][1] + M[1][0];
@@ -948,12 +972,14 @@ void KFParticleBaseSIMD::SubtractDaughter(const KFParticleBaseSIMD& Daughter)
   float_v zeta[3] = {m[0] - fP[0], m[1] - fP[1], m[2] - fP[2]};
 
   float_v K[3][3];
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       K[i][j] = 0;
-      for (int k = 0; k < 3; k++)
+      for (int k = 0; k < 3; k++) {
         K[i][j] += fC[IJ(i, k)] * mS[IJ(k, j)];
+      }
     }
+  }
 
   //* CHt = CH' - D'
   float_v mCHt0[7], mCHt1[7], mCHt2[7];
@@ -1010,8 +1036,9 @@ void KFParticleBaseSIMD::SubtractDaughter(const KFParticleBaseSIMD& Daughter)
 
   //* New estimation of the vertex position r += K*zeta
 
-  for (Int_t i = 0; i < 7; ++i)
+  for (Int_t i = 0; i < 7; ++i) {
     fP[i] = fP[i] + k0[i] * zeta[0] + k1[i] * zeta[1] + k2[i] * zeta[2];
+  }
 
   //* New covariance matrix C -= K*(mCH')'
 
@@ -1023,28 +1050,31 @@ void KFParticleBaseSIMD::SubtractDaughter(const KFParticleBaseSIMD& Daughter)
 
   float_v K2[3][3];
   for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++)
+    for (int j = 0; j < 3; j++) {
       K2[i][j] = -K[j][i];
-    K2[i][i] += 1;
+      K2[i][i] += 1;
+    }
   }
 
   float_v A[3][3];
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       A[i][j] = 0;
       for (int k = 0; k < 3; k++) {
         A[i][j] += D[i][k] * K2[k][j];
       }
     }
+  }
 
   float_v M[3][3];
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       M[i][j] = 0;
       for (int k = 0; k < 3; k++) {
         M[i][j] += K[i][k] * A[k][j];
       }
     }
+  }
 
   fC[0] += 2.f * M[0][0];
   fC[1] += M[0][1] + M[1][0];
@@ -1077,9 +1107,11 @@ void KFParticleBaseSIMD::SetProductionVertex(const KFParticleBaseSIMD& Vtx)
   float_v decayPointCov[6] = {fC[0], fC[1], fC[2], fC[3], fC[4], fC[5]};
 
   float_v D[6][6];
-  for (int iD1 = 0; iD1 < 6; iD1++)
-    for (int iD2 = 0; iD2 < 6; iD2++)
+  for (int iD1 = 0; iD1 < 6; iD1++) {
+    for (int iD2 = 0; iD2 < 6; iD2++) {
       D[iD1][iD2] = 0.f;
+    }
+  }
 
   Bool_t noS = (fC[35][0] <= 0.f); // no decay length allowed
 
@@ -1103,16 +1135,18 @@ void KFParticleBaseSIMD::SetProductionVertex(const KFParticleBaseSIMD& Vtx)
     float_v CTmp[36];
     MultQSQt(F1, mV, CTmp, 6);
 
-    for (int iC = 0; iC < 21; iC++)
+    for (int iC = 0; iC < 21; iC++) {
       fC[iC] += CTmp[iC];
+    }
 
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 6; i++) {
       for (int j = 0; j < 3; j++) {
         D[i][j] = 0;
         for (int k = 0; k < 3; k++) {
           D[i][j] += mV[IJ(j, k)] * F1[i * 6 + k];
         }
       }
+    }
   }
 
   float_v mS[6] = {fC[0] + mV[0],
@@ -1123,12 +1157,14 @@ void KFParticleBaseSIMD::SetProductionVertex(const KFParticleBaseSIMD& Vtx)
   float_v res[3] = {m[0] - X(), m[1] - Y(), m[2] - Z()};
 
   float_v K[3][6];
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       K[i][j] = 0;
-      for (int k = 0; k < 3; k++)
+      for (int k = 0; k < 3; k++) {
         K[i][j] += fC[IJ(i, k)] * mS[IJ(k, j)];
+      }
     }
+  }
 
   float_v mCHt0[7], mCHt1[7], mCHt2[7];
   mCHt0[0] = fC[0];
@@ -1160,8 +1196,9 @@ void KFParticleBaseSIMD::SetProductionVertex(const KFParticleBaseSIMD& Vtx)
     k2[i] = mCHt0[i] * mS[3] + mCHt1[i] * mS[4] + mCHt2[i] * mS[5];
   }
 
-  for (Int_t i = 0; i < 7; ++i)
+  for (Int_t i = 0; i < 7; ++i) {
     fP[i] = fP[i] + k0[i] * res[0] + k1[i] * res[1] + k2[i] * res[2];
+  }
 
   for (Int_t i = 0, k = 0; i < 7; ++i) {
     for (Int_t j = 0; j <= i; ++j, ++k) {
@@ -1171,28 +1208,31 @@ void KFParticleBaseSIMD::SetProductionVertex(const KFParticleBaseSIMD& Vtx)
 
   float_v K2[3][3];
   for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++)
+    for (int j = 0; j < 3; j++) {
       K2[i][j] = -K[j][i];
+    }
     K2[i][i] += 1;
   }
 
   float_v A[3][3];
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       A[i][j] = 0;
       for (int k = 0; k < 3; k++) {
         A[i][j] += D[k][i] * K2[k][j];
       }
     }
+  }
 
   float_v M[3][3];
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       M[i][j] = 0;
       for (int k = 0; k < 3; k++) {
         M[i][j] += K[i][k] * A[k][j];
       }
     }
+  }
 
   fC[0] += 2 * M[0][0];
   fC[1] += M[0][1] + M[1][0];
@@ -1226,14 +1266,15 @@ void KFParticleBaseSIMD::SetProductionVertex(const KFParticleBaseSIMD& Vtx)
     for (int iDsDr = 0; iDsDr < 6; iDsDr++) {
       float_v dsdrC = 0.f, dsdpV = 0.f;
 
-      for (int k = 0; k < 6; k++)
+      for (int k = 0; k < 6; k++) {
         dsdrC += dsdr[k] * fC[IJ(k, iDsDr)]; // (-dsdr[k])*fC[k,j]
-
+      }
       fC[iDsDr + 28] = dsdrC;
       fC[35] += dsdrC * dsdr[iDsDr];
       if (iDsDr < 3) {
-        for (int k = 0; k < 3; k++)
+        for (int k = 0; k < 3; k++) {
           dsdpV -= dsdr[k] * decayPointCov[IJ(k, iDsDr)]; //
+        }
         fC[35] -= dsdpV * dsdr[iDsDr];
       }
     }
@@ -1296,24 +1337,31 @@ void KFParticleBaseSIMD::SetMassConstraint(float_v* mP, float_v* mC, float_v mJ[
   dfx[3] = 2.f * (1.f - lambda) * (1.f - lambda) * mP[6];
   float_v dlx[4] = {1.f, 1.f, 1.f, 1.f};
 
-  for (int i = 0; i < 4; i++)
+  for (int i = 0; i < 4; i++) {
     dlx[i](abs(dfl) > float_v(1.e-10f)) = -dfx[i] / dfl;
+  }
 
   float_v dxx[4] = {mP[3] * lm2i, mP[4] * lm2i, mP[5] * lm2i, -mP[6] * lp2i};
 
-  for (Int_t i = 0; i < 7; i++)
-    for (Int_t j = 0; j < 7; j++)
+  for (Int_t i = 0; i < 7; i++) {
+    for (Int_t j = 0; j < 7; j++) {
       mJ[i][j] = 0;
+    }
+  }
   mJ[0][0] = 1.;
   mJ[1][1] = 1.;
   mJ[2][2] = 1.;
 
-  for (Int_t i = 3; i < 7; i++)
-    for (Int_t j = 3; j < 7; j++)
+  for (Int_t i = 3; i < 7; i++) {
+    for (Int_t j = 3; j < 7; j++) {
       mJ[i][j] = dlx[j - 3] * dxx[i - 3];
+    }
+  }
 
-  for (Int_t i = 3; i < 6; i++)
+  for (Int_t i = 3; i < 6; i++) {
     mJ[i][i] += lmi;
+  }
+
   mJ[6][6] += lpi;
 
   float_v mCJ[7][7];
@@ -1397,8 +1445,9 @@ void KFParticleBaseSIMD::SetMassConstraint(float_v Mass, float_v SigmaMass)
   float_v mCHt[8], s2_est = 0.f;
   for (Int_t i = 0; i < 8; ++i) {
     mCHt[i] = 0.0f;
-    for (Int_t j = 0; j < 8; ++j)
+    for (Int_t j = 0; j < 8; ++j) {
       mCHt[i] += Cij(i, j) * mH[j];
+    }
     s2_est += mH[i] * mCHt[i];
   }
 
@@ -1412,8 +1461,9 @@ void KFParticleBaseSIMD::SetMassConstraint(float_v Mass, float_v SigmaMass)
   for (Int_t i = 0, ii = 0; i < 8; ++i) {
     float_v ki = mCHt[i] * w2;
     fP[i] += ki * zeta;
-    for (Int_t j = 0; j <= i; ++j)
+    for (Int_t j = 0; j <= i; ++j) {
       fC[ii++] -= ki * mCHt[j];
+    }
   }
 }
 
@@ -1430,8 +1480,9 @@ void KFParticleBaseSIMD::SetNoDecayLength()
   h[7] = 1.f;
 
   float_v zeta = 0.f - fP[7];
-  for (Int_t i = 0; i < 8; ++i)
+  for (Int_t i = 0; i < 8; ++i) {
     zeta -= h[i] * (fP[i] - fP[i]);
+  }
 
   float_v s = fC[35];
   //  if( s>1.e-20 ) //TODO add protection
@@ -1442,8 +1493,9 @@ void KFParticleBaseSIMD::SetNoDecayLength()
     for (Int_t i = 0, ii = 0; i < 7; ++i) {
       float_v ki = fC[28 + i] * s;
       fP[i] += ki * zeta;
-      for (Int_t j = 0; j <= i; ++j)
+      for (Int_t j = 0; j <= i; ++j) {
         fC[ii++] -= ki * fC[28 + j];
+      }
     }
   }
   fP[7] = 0.f;
@@ -1474,8 +1526,9 @@ void KFParticleBaseSIMD::Construct(const KFParticleBaseSIMD* vDaughters[], Int_t
     fSFromDecay = float_v(Vc::Zero);
     SumDaughterMass = float_v(Vc::Zero);
 
-    for (Int_t i = 0; i < 36; ++i)
+    for (Int_t i = 0; i < 36; ++i) {
       fC[i] = 0.;
+    }
     fC[35] = 1.;
 
     fNDF = -3;
@@ -1487,10 +1540,12 @@ void KFParticleBaseSIMD::Construct(const KFParticleBaseSIMD* vDaughters[], Int_t
     }
   }
 
-  if (Mass >= 0)
+  if (Mass >= 0) {
     SetMassConstraint(Mass);
-  if (Parent)
+  }
+  if (Parent) {
     SetProductionVertex(*Parent);
+  }
 }
 
 void KFParticleBaseSIMD::TransportToDecayVertex()
@@ -1619,8 +1674,9 @@ float_v KFParticleBaseSIMD::GetDStoPointBz(float_v B, const float_v xyz[3], floa
    ** to other coordinate system (see GetDStoPointBy() function), otherwise fP are used
    **/
 
-  if (!param)
+  if (!param) {
     param = fP;
+  }
   //* Get dS to a certain space point for Bz field
 
   const float_v& x = param[0];
@@ -1655,8 +1711,9 @@ float_v KFParticleBaseSIMD::GetDStoPointBz(float_v B, const float_v xyz[3], floa
     dsdr[4](mask && float_m(p2 > 1.e-4f)) = (dy * p2 - 2.f * py * (a + dz * pz)) / (p2 * p2);
     dsdr[5](mask && float_m(p2 > 1.e-4f)) = (dz * p2 - 2.f * pz * (a + dz * pz)) / (p2 * p2);
 
-    if (mask.isFull())
+    if (mask.isFull()) {
       return dS;
+    }
   }
 
   dS(!mask) = KFPMath::ATan2(abq, pt2 + bq * (dy * px - dx * py)) / bq;
@@ -1686,8 +1743,9 @@ float_v KFParticleBaseSIMD::GetDStoPointBz(float_v B, const float_v xyz[3], floa
   dcdr[4] = (bq * dx - 2 * py) * c - bbq * s * bq * dsdr[4] - dy * bq * s - abq * c * bq * dsdr[4];
   dcdr[5] = -2 * pz;
 
-  for (int iP = 0; iP < 6; iP++)
+  for (int iP = 0; iP < 6; iP++) {
     dsdr[iP](!mask) += pz * pz / cCoeff * dsdr[iP] - sz / cCoeff * dcdr[iP];
+  }
 
   dsdr[2](!mask) += pz / cCoeff;
   dsdr[5](!mask) += (2.f * pz * dS - dz) / cCoeff;
@@ -2072,12 +2130,14 @@ void KFParticleBaseSIMD::GetDStoParticleBz(float_v B, const KFParticleBaseSIMD& 
   float_v pointCov[2][36];
 
   float_v dsdrM1[6] = {0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
-  for (int iP = 0; iP < 6; iP++)
+  for (int iP = 0; iP < 6; iP++) {
     dsdrM1[iP] = (dS1dR1[0][iP] + dS1dR1[1][iP]) / 2.f;
+  }
   Transport((dS1[0] + dS1[1]) / 2.f, dsdrM1, pointParam[0], pointCov[0]);
   float_v dsdrM2[6] = {0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
-  for (int iP = 0; iP < 6; iP++)
+  for (int iP = 0; iP < 6; iP++) {
     dsdrM2[iP] = (dS2dR2[0][iP] + dS2dR2[1][iP]) / 2.f;
+  }
   p.Transport((dS2[0] + dS2[1]) / 2.f, dsdrM2, pointParam[1], pointCov[1]);
 
   const float_v drPoint[3] = {pointParam[0][0] - pointParam[1][0], pointParam[0][1] - pointParam[1][1], pointParam[0][2] - pointParam[1][2]};
@@ -2413,9 +2473,11 @@ void KFParticleBaseSIMD::GetDStoParticleBz(float_v B, const KFParticleBaseSIMD& 
       dsldr[3][iP] = dsl2ds0 * dsdr[1][iP] + dsl2ds1 * dsdr[3][iP];
     }
 
-    for (int iDS = 0; iDS < 4; iDS++)
-      for (int iP = 0; iP < 6; iP++)
+    for (int iDS = 0; iDS < 4; iDS++) {
+      for (int iP = 0; iP < 6; iP++) {
         dsdr[iDS][iP] += dsldr[iDS][iP];
+      }
+    }
 
     const float_v lp1p2_dr0[6] = {0.f, 0.f, 0.f, ccc * ppx2 - ppy2 * sss, ccc * ppy2 + ppx2 * sss, pz2};
     const float_v lp1p2_dr1[6] = {0.f, 0.f, 0.f, ccc1 * ppx1 - ppy1 * sss1, ccc1 * ppy1 + ppx1 * sss1, pz1};
@@ -2719,9 +2781,11 @@ void KFParticleBaseSIMD::GetDStoParticleBy(float_v B, const KFParticleBaseSIMD& 
   const float_v param2[6] = {p.fP[0], -p.fP[2], p.fP[1], p.fP[3], -p.fP[5], p.fP[4]};
 
   float_v dsdrBz[4][6];
-  for (int i1 = 0; i1 < 4; i1++)
-    for (int i2 = 0; i2 < 6; i2++)
+  for (int i1 = 0; i1 < 4; i1++) {
+    for (int i2 = 0; i2 < 6; i2++) {
       dsdrBz[i1][i2] = 0.f;
+    }
+  }
 
   GetDStoParticleBz(B, p, dS, dsdrBz, param1, param2);
 
@@ -2808,9 +2872,11 @@ void KFParticleBaseSIMD::GetDStoParticleB(float_v B[3], const KFParticleBaseSIMD
                              cosP * sinA * p.fP[3] + sinP * p.fP[4] + cosA * cosP * p.fP[5]};
 
   float_v dsdrBz[4][6];
-  for (int i1 = 0; i1 < 4; i1++)
-    for (int i2 = 0; i2 < 6; i2++)
+  for (int i1 = 0; i1 < 4; i1++) {
+    for (int i2 = 0; i2 < 6; i2++) {
       dsdrBz[i1][i2] = 0.f;
+    }
+  }
 
   GetDStoParticleBz(Br, p, dS, dsdrBz, param1, param2);
 
@@ -3004,10 +3070,11 @@ void KFParticleBaseSIMD::GetDStoParticleCBM(const KFParticleBaseSIMD& p, float_v
   const float_m& isStraight1 = abs(bq1) < float_v(1.e-8f);
   const float_m& isStraight2 = abs(bq2) < float_v(1.e-8f);
 
-  if (isStraight1.isFull() && isStraight2.isFull())
+  if (isStraight1.isFull() && isStraight2.isFull()) {
     GetDStoParticleLine(p, dS, dsdr);
-  else
+  } else {
     GetDStoParticleBy(fld[1], p, dS, dsdr);
+  }
 }
 
 void KFParticleBaseSIMD::GetDStoParticleCBM(const KFParticleBaseSIMD& p, float_v dS[2]) const
@@ -3033,10 +3100,11 @@ void KFParticleBaseSIMD::GetDStoParticleCBM(const KFParticleBaseSIMD& p, float_v
   const float_m& isStraight1 = abs(bq1) < float_v(1.e-8f);
   const float_m& isStraight2 = abs(bq2) < float_v(1.e-8f);
 
-  if (isStraight1.isFull() && isStraight2.isFull())
+  if (isStraight1.isFull() && isStraight2.isFull()) {
     GetDStoParticleLine(p, dS);
-  else
+  } else {
     GetDStoParticleBy(fld[1], p, dS);
+  }
 }
 
 void KFParticleBaseSIMD::TransportCBM(float_v dS, const float_v* dsdr, float_v P[], float_v C[], float_v* dsdr1, float_v* F, float_v* F1) const
@@ -3118,9 +3186,11 @@ void KFParticleBaseSIMD::TransportCBM(float_v dS, const float_v* dsdr, float_v P
     GetFieldValue(p1, fld[1]);
     GetFieldValue(p2, fld[2]);
 
-    for (int iF1 = 0; iF1 < 3; iF1++)
-      for (int iF2 = 0; iF2 < 3; iF2++)
+    for (int iF1 = 0; iF1 < 3; iF1++) {
+      for (int iF2 = 0; iF2 < 3; iF2++) {
         fld[iF1][iF2](abs(fld[iF1][iF2]) > float_v(100.f)) = 0.f;
+      }
+    }
 
     sx = c * (fld[0][0] + 4 * fld[1][0] + fld[2][0]) * dS / 6.f;
     sy = c * (fld[0][1] + 4 * fld[1][1] + fld[2][1]) * dS / 6.f;
@@ -3132,11 +3202,12 @@ void KFParticleBaseSIMD::TransportCBM(float_v dS, const float_v* dsdr, float_v P
 
     float_v c2[3][3] = {{5.f, -4.f, -1.f}, {44.f, 80.f, -4.f}, {11.f, 44.f, 5.f}};    // /=360.
     float_v cc2[3][3] = {{38.f, 8.f, -4.f}, {148.f, 208.f, -20.f}, {3.f, 36.f, 3.f}}; // /=2520.
-    for (Int_t n = 0; n < 3; n++)
+    for (Int_t n = 0; n < 3; n++) {
       for (Int_t m = 0; m < 3; m++) {
         syz += c2[n][m] * fld[n][1] * fld[m][2];
         ssyz += cc2[n][m] * fld[n][1] * fld[m][2];
       }
+    }
 
     syz *= c * c * dS * dS / 360.f;
     ssyz *= c * c * dS * dS * dS / 2520.f;
@@ -3187,9 +3258,11 @@ void KFParticleBaseSIMD::TransportCBM(float_v dS, const float_v* dsdr, float_v P
   //   multQSQt1( mJ, C);
 
   float_v mJ[8][8];
-  for (Int_t i = 0; i < 8; i++)
-    for (Int_t j = 0; j < 8; j++)
+  for (Int_t i = 0; i < 8; i++) {
+    for (Int_t j = 0; j < 8; j++) {
       mJ[i][j] = 0;
+    }
+  }
 
   mJ[0][0] = 1;
   mJ[0][1] = 0;
@@ -3240,9 +3313,11 @@ void KFParticleBaseSIMD::TransportCBM(float_v dS, const float_v* dsdr, float_v P
   P[7] = fP[7];
 
   float_v mJds[6][6];
-  for (Int_t i = 0; i < 6; i++)
-    for (Int_t j = 0; j < 6; j++)
+  for (Int_t i = 0; i < 6; i++) {
+    for (Int_t j = 0; j < 6; j++) {
       mJds[i][j] = 0;
+    }
+  }
 
   mJds[0][3] = 1.f;
   mJds[1][4] = 1.f;
@@ -3268,20 +3343,26 @@ void KFParticleBaseSIMD::TransportCBM(float_v dS, const float_v* dsdr, float_v P
   mJds[5][4](abs(dS) > 0.f) = -sx / dS;
   mJds[5][5](abs(dS) > 0.f) = -2.f * syy / dS;
 
-  for (int i1 = 0; i1 < 6; i1++)
-    for (int i2 = 0; i2 < 6; i2++)
+  for (int i1 = 0; i1 < 6; i1++) {
+    for (int i2 = 0; i2 < 6; i2++) {
       mJ[i1][i2] += mJds[i1][3] * px * dsdr[i2] + mJds[i1][4] * py * dsdr[i2] + mJds[i1][5] * pz * dsdr[i2];
+    }
+  }
 
   MultQSQt(mJ[0], fC, C, 8);
 
   if (F) {
-    for (int i = 0; i < 6; i++)
-      for (int j = 0; j < 6; j++)
+    for (int i = 0; i < 6; i++) {
+      for (int j = 0; j < 6; j++) {
         F[i * 6 + j] = mJ[i][j];
+      }
+    }
 
-    for (int i1 = 0; i1 < 6; i1++)
-      for (int i2 = 0; i2 < 6; i2++)
+    for (int i1 = 0; i1 < 6; i1++) {
+      for (int i2 = 0; i2 < 6; i2++) {
         F1[i1 * 6 + i2] = mJds[i1][3] * px * dsdr1[i2] + mJds[i1][4] * py * dsdr1[i2] + mJds[i1][5] * pz * dsdr1[i2];
+      }
+    }
   }
 }
 
@@ -3351,9 +3432,11 @@ void KFParticleBaseSIMD::TransportCBM(float_v dS, float_v P[]) const
     GetFieldValue(p1, fld[1]);
     GetFieldValue(p2, fld[2]);
 
-    for (int iF1 = 0; iF1 < 3; iF1++)
-      for (int iF2 = 0; iF2 < 3; iF2++)
+    for (int iF1 = 0; iF1 < 3; iF1++) {
+      for (int iF2 = 0; iF2 < 3; iF2++) {
         fld[iF1][iF2](abs(fld[iF1][iF2]) > float_v(100.f)) = 0.f;
+      }
+    }
 
     sx = c * (fld[0][0] + 4 * fld[1][0] + fld[2][0]) * dS / 6.f;
     sy = c * (fld[0][1] + 4 * fld[1][1] + fld[2][1]) * dS / 6.f;
@@ -3365,11 +3448,12 @@ void KFParticleBaseSIMD::TransportCBM(float_v dS, float_v P[]) const
 
     float_v c2[3][3] = {{5.f, -4.f, -1.f}, {44.f, 80.f, -4.f}, {11.f, 44.f, 5.f}};    // /=360.
     float_v cc2[3][3] = {{38.f, 8.f, -4.f}, {148.f, 208.f, -20.f}, {3.f, 36.f, 3.f}}; // /=2520.
-    for (Int_t n = 0; n < 3; n++)
+    for (Int_t n = 0; n < 3; n++) {
       for (Int_t m = 0; m < 3; m++) {
         syz += c2[n][m] * fld[n][1] * fld[m][2];
         ssyz += cc2[n][m] * fld[n][1] * fld[m][2];
       }
+    }
 
     syz *= c * c * dS * dS / 360.f;
     ssyz *= c * c * dS * dS * dS / 2520.f;
@@ -3393,9 +3477,11 @@ void KFParticleBaseSIMD::TransportCBM(float_v dS, float_v P[]) const
   }
 
   float_v mJ[8][8];
-  for (Int_t i = 0; i < 8; i++)
-    for (Int_t j = 0; j < 8; j++)
+  for (Int_t i = 0; i < 8; i++) {
+    for (Int_t j = 0; j < 8; j++) {
       mJ[i][j] = 0;
+    }
+  }
 
   mJ[0][0] = 1;
   mJ[0][1] = 0;
@@ -3500,12 +3586,16 @@ void KFParticleBaseSIMD::TransportBz(float_v Bz, float_v dS, const float_v* dsdr
   P[7] = fP[7];
 
   float_v mJ[8][8];
-  for (Int_t i = 0; i < 8; i++)
-    for (Int_t j = 0; j < 8; j++)
+  for (Int_t i = 0; i < 8; i++) {
+    for (Int_t j = 0; j < 8; j++) {
       mJ[i][j] = 0;
+    }
+  }
 
-  for (int i = 0; i < 8; i++)
+  for (int i = 0; i < 8; i++) {
     mJ[i][i] = 1;
+  }
+
   mJ[0][3] = sB;
   mJ[0][4] = cB;
   mJ[1][3] = -cB;
@@ -3517,9 +3607,12 @@ void KFParticleBaseSIMD::TransportBz(float_v Bz, float_v dS, const float_v* dsdr
   mJ[4][4] = c;
 
   float_v mJds[6][6];
-  for (Int_t i = 0; i < 6; i++)
-    for (Int_t j = 0; j < 6; j++)
+  for (Int_t i = 0; i < 6; i++) {
+    for (Int_t j = 0; j < 6; j++) {
       mJds[i][j] = 0;
+    }
+  }
+
   mJds[0][3] = c;
   mJds[0][4] = s;
   mJds[1][3] = -s;
@@ -3530,20 +3623,25 @@ void KFParticleBaseSIMD::TransportBz(float_v Bz, float_v dS, const float_v* dsdr
   mJds[4][3] = -Bz * c;
   mJds[4][4] = -Bz * s;
 
-  for (int i1 = 0; i1 < 6; i1++)
-    for (int i2 = 0; i2 < 6; i2++)
+  for (int i1 = 0; i1 < 6; i1++) {
+    for (int i2 = 0; i2 < 6; i2++) {
       mJ[i1][i2] += mJds[i1][3] * px * dsdr[i2] + mJds[i1][4] * py * dsdr[i2] + mJds[i1][5] * pz * dsdr[i2];
+    }
+  }
 
   MultQSQt(mJ[0], fC, C, 8);
 
   if (F) {
-    for (int i = 0; i < 6; i++)
-      for (int j = 0; j < 6; j++)
+    for (int i = 0; i < 6; i++) {
+      for (int j = 0; j < 6; j++) {
         F[i * 6 + j] = mJ[i][j];
-
-    for (int i1 = 0; i1 < 6; i1++)
-      for (int i2 = 0; i2 < 6; i2++)
+      }
+    }
+    for (int i1 = 0; i1 < 6; i1++) {
+      for (int i2 = 0; i2 < 6; i2++) {
         F1[i1 * 6 + i2] = mJds[i1][3] * px * dsdr1[i2] + mJds[i1][4] * py * dsdr1[i2] + mJds[i1][5] * pz * dsdr1[i2];
+      }
+    }
   }
 }
 
@@ -3659,22 +3757,24 @@ float_v KFParticleBaseSIMD::GetDeviationFromVertex(const float_v v[], const floa
 
   if (Cv) {
     float_v VFT[3][6];
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 6; j++) {
         VFT[i][j] = 0;
         for (int k = 0; k < 3; k++) {
           VFT[i][j] += Cv[IJ(i, k)] * F1[j * 6 + k];
         }
       }
+    }
 
     float_v FVFT[6][6];
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 6; i++) {
       for (int j = 0; j < 6; j++) {
         FVFT[i][j] = 0;
         for (int k = 0; k < 3; k++) {
           FVFT[i][j] += F1[i * 6 + k] * VFT[k][j];
         }
       }
+    }
     mC[0] += FVFT[0][0] + Cv[0];
     mC[1] += FVFT[1][0] + Cv[1];
     mC[2] += FVFT[1][1] + Cv[2];
@@ -3719,8 +3819,9 @@ float_v KFParticleBaseSIMD::GetDeviationFromParticle(const KFParticleBaseSIMD& p
   MultQSQt(F2, p.fC, V0Tmp, 6);
   MultQSQt(F3, fC, V1Tmp, 6);
 
-  for (int iC = 0; iC < 6; iC++)
+  for (int iC = 0; iC < 6; iC++) {
     mC1[iC] += V0Tmp[iC] + mC2[iC] + V1Tmp[iC];
+  }
 
   float_v d[3] = {mP2[0] - mP1[0], mP2[1] - mP1[1], mP2[2] - mP1[2]};
 
@@ -3776,14 +3877,16 @@ void KFParticleBaseSIMD::SubtractFromVertex(KFParticleBaseSIMD& Vtx) const
 
   float_v dChi2 = ((mS[0] * zeta[0] + mS[1] * zeta[1] + mS[3] * zeta[2]) * zeta[0] + (mS[1] * zeta[0] + mS[2] * zeta[1] + mS[4] * zeta[2]) * zeta[1] + (mS[3] * zeta[0] + mS[4] * zeta[1] + mS[5] * zeta[2]) * zeta[2]);
 
-  for (Int_t i = 0; i < 3; ++i)
+  for (Int_t i = 0; i < 3; ++i) {
     Vtx.fP[i] -= k0[i] * zeta[0] + k1[i] * zeta[1] + k2[i] * zeta[2];
+  }
 
   //* New covariance matrix C -= K*(mCH')'
 
   for (Int_t i = 0, k = 0; i < 3; ++i) {
-    for (Int_t j = 0; j <= i; ++j, ++k)
+    for (Int_t j = 0; j <= i; ++j, ++k) {
       Vtx.fC[k] += k0[i] * mCHt0[j] + k1[i] * mCHt1[j] + k2[i] * mCHt2[j];
+    }
   }
 
   //* Calculate Chi^2
@@ -3870,10 +3973,12 @@ void KFParticleBaseSIMD::SubtractFromParticle(KFParticleBaseSIMD& Vtx) const
 
   //* New estimation of the vertex position r += K*zeta
 
-  for (Int_t i = 0; i < 3; ++i)
+  for (Int_t i = 0; i < 3; ++i) {
     Vtx.fP[i] = m[i] - (k0[i] * zeta[0] + k1[i] * zeta[1] + k2[i] * zeta[2]);
-  for (Int_t i = 3; i < 7; ++i)
+  }
+  for (Int_t i = 3; i < 7; ++i) {
     Vtx.fP[i] = Vtx.fP[i] - (k0[i] * zeta[0] + k1[i] * zeta[1] + k2[i] * zeta[2]);
+  }
 
   //* New covariance matrix C -= K*(mCH')'
 
@@ -3922,9 +4027,11 @@ void KFParticleBaseSIMD::TransportLine(float_v dS, const float_v* dsdr, float_v 
    **/
 
   float_v mJ[8][8];
-  for (Int_t i = 0; i < 8; i++)
-    for (Int_t j = 0; j < 8; j++)
+  for (Int_t i = 0; i < 8; i++) {
+    for (Int_t j = 0; j < 8; j++) {
       mJ[i][j] = 0;
+    }
+  }
 
   mJ[0][0] = 1;
   mJ[0][1] = 0;
@@ -3977,27 +4084,36 @@ void KFParticleBaseSIMD::TransportLine(float_v dS, const float_v* dsdr, float_v 
   P[7] = fP[7];
 
   float_v mJds[6][6];
-  for (Int_t i = 0; i < 6; i++)
-    for (Int_t j = 0; j < 6; j++)
+  for (Int_t i = 0; i < 6; i++) {
+    for (Int_t j = 0; j < 6; j++) {
       mJds[i][j] = 0;
+    }
+  }
 
   mJds[0][3] = 1;
   mJds[1][4] = 1;
   mJds[2][5] = 1;
 
-  for (int i1 = 0; i1 < 6; i1++)
-    for (int i2 = 0; i2 < 6; i2++)
+  for (int i1 = 0; i1 < 6; i1++) {
+    for (int i2 = 0; i2 < 6; i2++) {
       mJ[i1][i2] += mJds[i1][3] * px * dsdr[i2] + mJds[i1][4] * py * dsdr[i2] + mJds[i1][5] * pz * dsdr[i2];
+    }
+  }
+
   MultQSQt(mJ[0], fC, C, 8);
 
   if (F) {
-    for (int i = 0; i < 6; i++)
-      for (int j = 0; j < 6; j++)
+    for (int i = 0; i < 6; i++) {
+      for (int j = 0; j < 6; j++) {
         F[i * 6 + j] = mJ[i][j];
+      }
+    }
 
-    for (int i1 = 0; i1 < 6; i1++)
-      for (int i2 = 0; i2 < 6; i2++)
+    for (int i1 = 0; i1 < 6; i1++) {
+      for (int i2 = 0; i2 < 6; i2++) {
         F1[i1 * 6 + i2] = mJds[i1][3] * px * dsdr1[i2] + mJds[i1][4] * py * dsdr1[i2] + mJds[i1][5] * pz * dsdr1[i2];
+      }
+    }
   }
 }
 
@@ -4144,14 +4260,16 @@ void KFParticleBaseSIMD::InvertCholetsky3(float_v a[6])
   float_v d[3], uud, u[3][3];
   for (int i = 0; i < 3; i++) {
     d[i] = 0.f;
-    for (int j = 0; j < 3; j++)
+    for (int j = 0; j < 3; j++) {
       u[i][j] = 0.f;
+    }
   }
 
   for (int i = 0; i < 3; i++) {
     uud = 0.f;
-    for (int j = 0; j < i; j++)
+    for (int j = 0; j < i; j++) {
       uud += u[j][i] * u[j][i] * d[j];
+    }
     uud = a[i * (i + 3) / 2] - uud;
 
     uud(abs(uud) < 1.e-8f) = 1.e-8f;
@@ -4160,8 +4278,9 @@ void KFParticleBaseSIMD::InvertCholetsky3(float_v a[6])
 
     for (int j = i + 1; j < 3; j++) {
       uud = 0.f;
-      for (int k = 0; k < i; k++)
+      for (int k = 0; k < i; k++) {
         uud += u[k][i] * u[k][j] * d[k];
+      }
       uud = a[j * (j + 1) / 2 + i] - uud;
       u[i][j] = d[i] / u[i][i] * uud;
     }
@@ -4179,11 +4298,12 @@ void KFParticleBaseSIMD::InvertCholetsky3(float_v a[6])
   for (int i = 0; i < 1; i++) {
     u[i][i + 2] = u[i][i + 1] * u1[i + 1] * u[i + 1][i + 2] - u[i][i + 2] * u[i][i] * u[i + 2][i + 2];
   }
-
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < 3; i++) {
     a[i + 3] = u[i][2] * u[2][2] * d[2];
-  for (int i = 0; i < 2; i++)
+  }
+  for (int i = 0; i < 2; i++) {
     a[i + 1] = u[i][1] * u[1][1] * d[1] + u[i][2] * u[1][2] * d[2];
+  }
   a[0] = u[0][0] * u[0][0] * d[0] + u[0][1] * u[0][1] * d[1] + u[0][2] * u[0][2] * d[2];
 }
 
@@ -4201,8 +4321,9 @@ void KFParticleBaseSIMD::MultQSQt(const float_v Q[], const float_v S[], float_v 
   for (Int_t i = 0, ij = 0; i < kN; i++) {
     for (Int_t j = 0; j < kN; j++, ++ij) {
       mA[ij] = 0;
-      for (Int_t k = 0; k < kN; ++k)
+      for (Int_t k = 0; k < kN; ++k) {
         mA[ij] += S[(k <= i) ? i * (i + 1) / 2 + k : k * (k + 1) / 2 + i] * Q[j * kN + k];
+      }
     }
   }
 
@@ -4210,13 +4331,15 @@ void KFParticleBaseSIMD::MultQSQt(const float_v Q[], const float_v S[], float_v 
     for (Int_t j = 0; j <= i; j++) {
       Int_t ij = (j <= i) ? i * (i + 1) / 2 + j : j * (j + 1) / 2 + i;
       SOut[ij] = 0;
-      for (Int_t k = 0; k < kN; k++)
+      for (Int_t k = 0; k < kN; k++) {
         SOut[ij] += Q[i * kN + k] * mA[k * kN + j];
+      }
     }
   }
 
-  if (mA)
+  if (mA) {
     delete[] mA;
+  }
 }
 
 // 72-charachters line to define the printer border

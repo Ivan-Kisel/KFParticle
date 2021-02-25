@@ -460,91 +460,61 @@ inline float KFParticle::GetCovariance(int i, int j) const
 inline float KFParticle::GetP() const
 {
   float par, err;
-  if (KFParticleBase::GetMomentum(par, err))
-    return 0;
-  else
-    return par;
+  return (KFParticleBase::GetMomentum(par, err)) ? 0.f : par;
 }
 
 inline float KFParticle::GetPt() const
 {
   float par, err;
-  if (KFParticleBase::GetPt(par, err))
-    return 0;
-  else
-    return par;
+  return (KFParticleBase::GetPt(par, err)) ? 0.f : par;
 }
 
 inline float KFParticle::GetEta() const
 {
   float par, err;
-  if (KFParticleBase::GetEta(par, err))
-    return 0;
-  else
-    return par;
+  return (KFParticleBase::GetEta(par, err)) ? 0.f : par;
 }
 
 inline float KFParticle::GetPhi() const
 {
   float par, err;
-  if (KFParticleBase::GetPhi(par, err))
-    return 0;
-  else
-    return par;
+  return (KFParticleBase::GetPhi(par, err)) ? 0.f : par;
 }
 
 inline float KFParticle::GetMomentum() const
 {
   float par, err;
-  if (KFParticleBase::GetMomentum(par, err))
-    return 0;
-  else
-    return par;
+  return (KFParticleBase::GetMomentum(par, err)) ? 0.f : par;
 }
 
 inline float KFParticle::GetMass() const
 {
   float par, err;
-  if (KFParticleBase::GetMass(par, err))
-    return 0;
-  else
-    return par;
+  return (KFParticleBase::GetMass(par, err)) ? 0.f : par;
 }
 
 inline float KFParticle::GetDecayLength() const
 {
   float par, err;
-  if (KFParticleBase::GetDecayLength(par, err))
-    return 0;
-  else
-    return par;
+  return (KFParticleBase::GetDecayLength(par, err)) ? 0.f : par;
 }
 
 inline float KFParticle::GetDecayLengthXY() const
 {
   float par, err;
-  if (KFParticleBase::GetDecayLengthXY(par, err))
-    return 0;
-  else
-    return par;
+  return (KFParticleBase::GetDecayLengthXY(par, err)) ?: 0.f : par;
 }
 
 inline float KFParticle::GetLifeTime() const
 {
   float par, err;
-  if (KFParticleBase::GetLifeTime(par, err))
-    return 0;
-  else
-    return par;
+  return (KFParticleBase::GetLifeTime(par, err)) ? 0.f : par;
 }
 
 inline float KFParticle::GetR() const
 {
   float par, err;
-  if (KFParticleBase::GetR(par, err))
-    return 0;
-  else
-    return par;
+  return (KFParticleBase::GetR(par, err)) ? 0.f : par;
 }
 
 inline float KFParticle::GetErrX() const
@@ -590,91 +560,61 @@ inline float KFParticle::GetErrS() const
 inline float KFParticle::GetErrP() const
 {
   float par, err;
-  if (KFParticleBase::GetMomentum(par, err))
-    return 1.e10;
-  else
-    return err;
+  return (KFParticleBase::GetMomentum(par, err)) ? 1.e10 : err;
 }
 
 inline float KFParticle::GetErrPt() const
 {
   float par, err;
-  if (KFParticleBase::GetPt(par, err))
-    return 1.e10;
-  else
-    return err;
+  return (KFParticleBase::GetPt(par, err)) ? 1.e10 : err;
 }
 
 inline float KFParticle::GetErrEta() const
 {
   float par, err;
-  if (KFParticleBase::GetEta(par, err))
-    return 1.e10;
-  else
-    return err;
+  return (KFParticleBase::GetEta(par, err)) ? 1.e10 : err;
 }
 
 inline float KFParticle::GetErrPhi() const
 {
   float par, err;
-  if (KFParticleBase::GetPhi(par, err))
-    return 1.e10;
-  else
-    return err;
+  return (KFParticleBase::GetPhi(par, err)) ? 1.e10 : err;
 }
 
 inline float KFParticle::GetErrMomentum() const
 {
   float par, err;
-  if (KFParticleBase::GetMomentum(par, err))
-    return 1.e10;
-  else
-    return err;
+  return (KFParticleBase::GetMomentum(par, err)) ? 1.e10 : err;
 }
 
 inline float KFParticle::GetErrMass() const
 {
   float par, err;
-  if (KFParticleBase::GetMass(par, err))
-    return 1.e10;
-  else
-    return err;
+  return (KFParticleBase::GetMass(par, err)) ? 1.e10 : err;
 }
 
 inline float KFParticle::GetErrDecayLength() const
 {
   float par, err;
-  if (KFParticleBase::GetDecayLength(par, err))
-    return 1.e10;
-  else
-    return err;
+  return (KFParticleBase::GetDecayLength(par, err)) ? 1.e10 : err;
 }
 
 inline float KFParticle::GetErrDecayLengthXY() const
 {
   float par, err;
-  if (KFParticleBase::GetDecayLengthXY(par, err))
-    return 1.e10;
-  else
-    return err;
+  return (KFParticleBase::GetDecayLengthXY(par, err)) ? 1.e10 : err;
 }
 
 inline float KFParticle::GetErrLifeTime() const
 {
   float par, err;
-  if (KFParticleBase::GetLifeTime(par, err))
-    return 1.e10;
-  else
-    return err;
+  return (KFParticleBase::GetLifeTime(par, err)) ? 1.e10 : err;
 }
 
 inline float KFParticle::GetErrR() const
 {
   float par, err;
-  if (KFParticleBase::GetR(par, err))
-    return 1.e10;
-  else
-    return err;
+  return (KFParticleBase::GetR(par, err)) ? 1.e10 : err;
 }
 
 inline int KFParticle::GetP(float& P, float& SigmaP) const
@@ -854,19 +794,20 @@ inline float* KFParticle::CovarianceMatrix()
 
 inline void KFParticle::operator+=(const KFParticle& Daughter)
 {
-  /** Operator to add daughter to the current particle. Calls AddDaughter() function.
+/** Operator to add daughter to the current particle. Calls AddDaughter() function.
    ** \param[in] Daughter - the daughter particle
    **/
 #ifdef NonhomogeneousField
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < 10; i++) {
     SetFieldCoeff(Daughter.GetFieldCoeff()[i], i);
+  }
 #endif
   KFParticleBase::operator+=(Daughter);
 }
 
 inline void KFParticle::AddDaughter(const KFParticle& Daughter)
 {
-  /** Adds daughter to the current particle. Depending on the selected construction method uses: \n
+/** Adds daughter to the current particle. Depending on the selected construction method uses: \n
    ** 1) Either simplifyed fast mathematics which consideres momentum and energy as
    ** independent variables and thus ignores constraint on the fixed mass (fConstructMethod = 0).
    ** In this case the mass of the daughter particle can be corrupted when the constructed vertex
@@ -879,8 +820,9 @@ inline void KFParticle::AddDaughter(const KFParticle& Daughter)
    ** \param[in] Daughter - the daughter particle
    **/
 #ifdef NonhomogeneousField
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < 10; i++) {
     SetFieldCoeff(Daughter.GetFieldCoeff()[i], i);
+  }
 #endif
   KFParticleBase::AddDaughter(Daughter);
 }
@@ -888,7 +830,7 @@ inline void KFParticle::AddDaughter(const KFParticle& Daughter)
 inline void KFParticle::Construct(const KFParticle* vDaughters[], int nDaughters,
                                   const KFParticle* ProdVtx, float Mass)
 {
-  /** Constructs a short-lived particle from a set of daughter particles:\n
+/** Constructs a short-lived particle from a set of daughter particles:\n
    ** 1) all parameters of the "this" objects are initialised;\n
    ** 2) daughters are added one after another;\n
    ** 3) if Parent pointer is not null, the production vertex is set to it;\n
@@ -899,8 +841,9 @@ inline void KFParticle::Construct(const KFParticle* vDaughters[], int nDaughters
    ** \param[in] Mass - optional mass hypothesis
    **/
 #ifdef NonhomogeneousField
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < 10; i++) {
     SetFieldCoeff(vDaughters[0]->GetFieldCoeff()[i], i);
+  }
 #endif
   KFParticleBase::Construct((const KFParticleBase**)vDaughters, nDaughters,
                             (const KFParticleBase*)ProdVtx, Mass);
@@ -937,7 +880,7 @@ inline void KFParticle::TransportToParticle(const KFParticle& p)
 
 inline float KFParticle::GetDStoPoint(const float xyz[], float* dsdr) const
 {
-  /** Returns dS = l/p parameter, where \n
+/** Returns dS = l/p parameter, where \n
    ** 1) l - signed distance to the DCA point with the input xyz point;\n
    ** 2) p - momentum of the particle; \n
    ** Also calculates partial derivatives dsdr of the parameter dS over the state vector of the current particle.
@@ -998,7 +941,7 @@ inline void KFParticle::GetFieldValue(const float xyz[], float B[]) const
 
 inline void KFParticle::GetDStoParticle(const KFParticleBase& p, float dS[2], float dsdr[4][6]) const
 {
-  /** Calculates dS = l/p parameters for two particles, where \n
+/** Calculates dS = l/p parameters for two particles, where \n
    ** 1) l - signed distance to the DCA point with the other particle;\n
    ** 2) p - momentum of the particle \n
    ** dS[0] is the transport parameter for the current particle, dS[1] - for the particle "p".
@@ -1024,7 +967,7 @@ inline void KFParticle::GetDStoParticle(const KFParticleBase& p, float dS[2], fl
 
 inline void KFParticle::Transport(float dS, const float* dsdr, float P[], float C[], float* dsdr1, float* F, float* F1) const
 {
-  /** Transports the parameters and their covariance matrix of the current particle
+/** Transports the parameters and their covariance matrix of the current particle
    ** on a length defined by the transport parameter dS = l/p, where l is the signed distance and p is 
    ** the momentum of the current particle. If "HomogeneousField" is defined KFParticleBase::TransportBz()
    ** is called, if "NonhomogeneousField" - KFParticleBase::TransportCBM().

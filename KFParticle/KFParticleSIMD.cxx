@@ -63,8 +63,9 @@ void KFParticleSIMD::Create(const float_v Param[], const float_v Cov[], int_v Ch
    **/
 
   float_v C[21];
-  for (int i = 0; i < 21; i++)
+  for (int i = 0; i < 21; i++) {
     C[i] = Cov[i];
+  }
 
   KFParticleBaseSIMD::Initialize(Param, C, Charge, mass);
 }
@@ -85,15 +86,18 @@ KFParticleSIMD::KFParticleSIMD(const KFPTrack* track, Int_t PID) : KFParticleBas
 
   for (Int_t iPart = 0; iPart < float_vLen; iPart++) {
     track[iPart].XvYvZv(r);
-    for (Int_t i = 0; i < 3; i++)
+    for (Int_t i = 0; i < 3; i++) {
       fP[i][iPart] = r[i];
+    }
     track[iPart].PxPyPz(r);
-    for (Int_t i = 0; i < 3; i++)
+    for (Int_t i = 0; i < 3; i++) {
       fP[i + 3][iPart] = r[i];
+    }
     fQ[iPart] = track[iPart].Charge();
     track[iPart].GetCovarianceXYZPxPyPz(C);
-    for (Int_t i = 0; i < 21; i++)
+    for (Int_t i = 0; i < 21; i++) {
       fC[i][iPart] = C[i];
+    }
   }
 
   float_v mass = KFParticleDatabase::Instance()->GetMass(PID);
@@ -120,15 +124,18 @@ KFParticleSIMD::KFParticleSIMD(KFPTrack& Track, const Int_t* pdg) : KFParticleBa
   Double_t C[21];
 
   Track.XvYvZv(r);
-  for (Int_t i = 0; i < 3; i++)
+  for (Int_t i = 0; i < 3; i++) {
     fP[i] = r[i];
+  }
   Track.PxPyPz(r);
-  for (Int_t i = 0; i < 3; i++)
+  for (Int_t i = 0; i < 3; i++) {
     fP[i + 3] = r[i];
+  }
   fQ = Track.Charge();
   Track.GetCovarianceXYZPxPyPz(C);
-  for (Int_t i = 0; i < 21; i++)
+  for (Int_t i = 0; i < 21; i++) {
     fC[i] = C[i];
+  }
 
   float_v mass = KFParticleDatabase::Instance()->GetMass(*pdg);
   Create(fP, fC, fQ, mass);
@@ -150,13 +157,16 @@ KFParticleSIMD::KFParticleSIMD(KFPTrackVector& track, int n, const Int_t* pdg) :
    ** \param[in] pdg - pointer to the pdg hypothesis
    **/
 
-  for (int i = 0; i < 6; i++)
+  for (int i = 0; i < 6; i++) {
     fP[i] = track.Parameter(i)[n];
-  for (int i = 0; i < 21; i++)
+  }
+  for (int i = 0; i < 21; i++) {
     fC[i] = track.Covariance(i)[n];
+  }
 #ifdef NonhomogeneousField
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < 10; i++) {
     fField.fField[i] = track.FieldCoefficient(i)[n];
+  }
 #endif
   fQ = track.Q()[n];
 
@@ -192,15 +202,18 @@ void KFParticleSIMD::Create(KFPTrack* Track[], int NTracks, const Int_t* pdg)
   for (Int_t iPart = 0; iPart < float_vLen; iPart++) {
     Int_t iEntry = (iPart < NTracks) ? iPart : 0;
     Track[iEntry]->XvYvZv(r);
-    for (Int_t i = 0; i < 3; i++)
+    for (Int_t i = 0; i < 3; i++) {
       fP[i][iEntry] = r[i];
+    }
     Track[iEntry]->PxPyPz(r);
-    for (Int_t i = 0; i < 3; i++)
+    for (Int_t i = 0; i < 3; i++) {
       fP[i + 3][iEntry] = r[i];
+    }
     fQ[iEntry] = Track[iEntry]->Charge();
     Track[iEntry]->GetCovarianceXYZPxPyPz(C);
-    for (Int_t i = 0; i < 21; i++)
+    for (Int_t i = 0; i < 21; i++) {
       fC[i][iEntry] = C[i];
+    }
   }
 
   float_v mass = KFParticleDatabase::Instance()->GetMass(*pdg);
@@ -238,13 +251,16 @@ void KFParticleSIMD::Create(KFPTrackVector& track, uint_v& index, const int_v& p
    ** \param[in] pdg - a SIMD vector with an individual pdg hypothesis for each element
    **/
 
-  for (int i = 0; i < 6; i++)
+  for (int i = 0; i < 6; i++) {
     fP[i].gather(&(track.Parameter(i)[0]), index);
-  for (int i = 0; i < 21; i++)
+  }
+  for (int i = 0; i < 21; i++) {
     fC[i].gather(&(track.Covariance(i)[0]), index);
+  }
 #ifdef NonhomogeneousField
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < 10; i++) {
     fField.fField[i].gather(&(track.FieldCoefficient(i)[0]), index);
+  }
 #endif
 
   //   fPDG.gather(&(track.PDG()[0]), index);
@@ -263,13 +279,16 @@ void KFParticleSIMD::Load(KFPTrackVector& track, int index, const int_v& pdg)
    ** \param[in] pdg - a SIMD vector with an individual pdg hypothesis for each element
    **/
 
-  for (int i = 0; i < 6; i++)
+  for (int i = 0; i < 6; i++) {
     fP[i] = reinterpret_cast<const float_v&>(track.Parameter(i)[index]);
-  for (int i = 0; i < 21; i++)
+  }
+  for (int i = 0; i < 21; i++) {
     fC[i] = reinterpret_cast<const float_v&>(track.Covariance(i)[index]);
+  }
 #ifdef NonhomogeneousField
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < 10; i++) {
     fField.fField[i] = reinterpret_cast<const float_v&>(track.FieldCoefficient(i)[index]);
+  }
 #endif
 
   //   fPDG.gather(&(track.PDG()[0]), index);
@@ -283,13 +302,16 @@ void KFParticleSIMD::Rotate()
 {
   /** Rotates the entries of each SIMD vector of the data members. */
 
-  for (int i = 0; i < 7; i++)
+  for (int i = 0; i < 7; i++) {
     fP[i] = fP[i].rotated(1);
-  for (int i = 0; i < 27; i++)
+  }
+  for (int i = 0; i < 27; i++) {
     fC[i] = fC[i].rotated(1);
+  }
 #ifdef NonhomogeneousField
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < 10; i++) {
     fField.fField[i] = fField.fField[i].rotated(1);
+  }
 #endif
   fQ = fQ.rotated(1);
   fId = fId.rotated(1);
@@ -320,8 +342,9 @@ void KFParticleSIMD::Create(KFPEmcCluster& track, uint_v& index, const KFParticl
    ** \param[in] vertexGuess - vertex guess for estimation of the momentum of created gamma particles
    **/
 
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < 3; i++) {
     fP[i].gather(&(track.Parameter(i)[0]), index);
+  }
   fP[6].gather(&(track.Parameter(3)[0]), index);
 
   const float_v& dx = fP[0] - vertexGuess.fP[0];
@@ -339,13 +362,15 @@ void KFParticleSIMD::Create(KFPEmcCluster& track, uint_v& index, const KFParticl
   fP[5] = dz / dl * fP[6];
 
   float_v V[10];
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < 10; i++) {
     V[i].gather(&(track.Covariance(i)[0]), index);
-
+  }
   float_v J[7][4];
-  for (int i = 0; i < 7; i++)
-    for (int j = 0; j < 4; j++)
+  for (int i = 0; i < 7; i++) {
+    for (int j = 0; j < 4; j++) {
       J[i][j] = 0.f;
+    }
+  }
   J[0][0] = 1.f;
   J[1][1] = 1.f;
   J[2][2] = 1.f;
@@ -367,18 +392,23 @@ void KFParticleSIMD::Create(KFPEmcCluster& track, uint_v& index, const KFParticl
   for (Int_t i = 0; i < 4; i++) {
     for (Int_t j = 0; j < 7; j++) {
       VJT[i][j] = 0.f;
-      for (Int_t k = 0; k < 4; k++)
+      for (Int_t k = 0; k < 4; k++) {
         VJT[i][j] += V[IJ(i, k)] * J[j][k];
+      }
     }
   }
   //Calculate the covariance matrix of the particle fC
-  for (Int_t i = 0; i < 36; i++)
+  for (Int_t i = 0; i < 36; i++) {
     fC[i] = 0.f;
+  }
 
-  for (Int_t i = 0; i < 7; ++i)
-    for (Int_t j = 0; j <= i; ++j)
-      for (Int_t l = 0; l < 4; l++)
+  for (Int_t i = 0; i < 7; ++i) {
+    for (Int_t j = 0; j <= i; ++j) {
+      for (Int_t l = 0; l < 4; l++) {
         fC[IJ(i, j)] += J[i][l] * VJT[l][j];
+      }
+    }
+  }
   fC[35] = 1.f;
 
   fQ = int_v(Vc::Zero);
@@ -414,8 +444,9 @@ void KFParticleSIMD::Load(KFPEmcCluster& track, int index, const KFParticleSIMD&
    ** \param[in] vertexGuess - vertex guess for estimation of the momentum of created gamma particles
    **/
 
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < 3; i++) {
     fP[i] = reinterpret_cast<const float_v&>(track.Parameter(i)[index]);
+  }
   fP[6] = reinterpret_cast<const float_v&>(track.Parameter(3)[index]);
   const float_v& dx = fP[0] - vertexGuess.fP[0];
   const float_v& dy = fP[1] - vertexGuess.fP[1];
@@ -432,13 +463,15 @@ void KFParticleSIMD::Load(KFPEmcCluster& track, int index, const KFParticleSIMD&
   fP[5] = dz / dl * fP[6];
 
   float_v V[10];
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < 10; i++) {
     V[i] = reinterpret_cast<const float_v&>(track.Covariance(i)[index]);
-
+  }
   float_v J[7][4];
-  for (int i = 0; i < 7; i++)
-    for (int j = 0; j < 4; j++)
+  for (int i = 0; i < 7; i++) {
+    for (int j = 0; j < 4; j++) {
       J[i][j] = 0.f;
+    }
+  }
   J[0][0] = 1.f;
   J[1][1] = 1.f;
   J[2][2] = 1.f;
@@ -460,18 +493,23 @@ void KFParticleSIMD::Load(KFPEmcCluster& track, int index, const KFParticleSIMD&
   for (Int_t i = 0; i < 4; i++) {
     for (Int_t j = 0; j < 7; j++) {
       VJT[i][j] = 0.f;
-      for (Int_t k = 0; k < 4; k++)
+      for (Int_t k = 0; k < 4; k++) {
         VJT[i][j] += V[IJ(i, k)] * J[j][k];
+      }
     }
   }
   //Calculate the covariance matrix of the particle fC
-  for (Int_t i = 0; i < 36; i++)
+  for (Int_t i = 0; i < 36; i++) {
     fC[i] = 0.f;
+  }
 
-  for (Int_t i = 0; i < 7; ++i)
-    for (Int_t j = 0; j <= i; ++j)
-      for (Int_t l = 0; l < 4; l++)
+  for (Int_t i = 0; i < 7; ++i) {
+    for (Int_t j = 0; j <= i; ++j) {
+      for (Int_t l = 0; l < 4; l++) {
         fC[IJ(i, j)] += J[i][l] * VJT[l][j];
+      }
+    }
+  }
   fC[35] = 1.f;
 
   fQ = int_v(Vc::Zero);
@@ -496,11 +534,13 @@ KFParticleSIMD::KFParticleSIMD(const KFPVertex& vertex) : KFParticleBaseSIMD()
   Double_t C[21];
 
   vertex.GetXYZ(r);
-  for (Int_t i = 0; i < 3; i++)
+  for (Int_t i = 0; i < 3; i++) {
     fP[i] = r[i];
+  }
   vertex.GetCovarianceMatrix(C);
-  for (Int_t i = 0; i < 21; i++)
+  for (Int_t i = 0; i < 21; i++) {
     fC[i] = C[i];
+  }
   fChi2 = vertex.GetChi2();
   fNDF = 2 * vertex.GetNContributors() - 3;
   fQ = int_v(Vc::Zero);
@@ -516,10 +556,12 @@ void KFParticleSIMD::SetOneEntry(int iEntry, KFParticleSIMD& part, int iEntryPar
    ** \param[in] iEntryPart - index of the element of particle part, which should be copied to the current particle
    **/
 
-  for (int i = 0; i < 7; ++i)
+  for (int i = 0; i < 7; ++i) {
     fP[i][iEntry] = part.Parameters()[i][iEntryPart];
-  for (int i = 0; i < 36; ++i)
+  }
+  for (int i = 0; i < 36; ++i) {
     fC[i][iEntry] = part.CovarianceMatrix()[i][iEntryPart];
+  }
 
   fQ[iEntry] = part.Q()[iEntryPart];
   fNDF[iEntry] = part.NDF()[iEntryPart];
@@ -533,11 +575,13 @@ void KFParticleSIMD::SetOneEntry(int iEntry, KFParticleSIMD& part, int iEntryPar
 
   fPDG[iEntry] = part.GetPDG()[iEntryPart];
 
-  if (iEntry == 0)
+  if (iEntry == 0) {
     fDaughterIds.resize(part.NDaughters(), int_v(-1));
+  }
 
-  for (int iD = 0; iD < part.NDaughters(); iD++)
+  for (int iD = 0; iD < part.NDaughters(); iD++) {
     fDaughterIds[iD][iEntry] = part.fDaughterIds[iD][iEntryPart];
+  }
 
 #ifdef NonhomogeneousField
   fField.SetOneEntry(iEntry, part.fField, iEntryPart); //CHECKME
@@ -575,16 +619,17 @@ KFParticleSIMD::KFParticleSIMD(KFParticle* parts[], const int nPart) : KFParticl
     KFParticle& part = *(parts[iEntry]);
 
     fId[iEntry] = part.Id();
-    for (int iD = 0; iD < part.NDaughters(); iD++)
+    for (int iD = 0; iD < part.NDaughters(); iD++) {
       fDaughterIds[iD][iEntry] = part.DaughterIds()[iD];
-
+    }
     fPDG[iEntry] = part.GetPDG();
 
-    for (int i = 0; i < 8; ++i)
+    for (int i = 0; i < 8; ++i) {
       fP[i][iEntry] = part.Parameters()[i];
-    for (int i = 0; i < 36; ++i)
+    }
+    for (int i = 0; i < 36; ++i) {
       fC[i][iEntry] = part.CovarianceMatrix()[i];
-
+    }
     fNDF[iEntry] = part.GetNDF();
     fChi2[iEntry] = part.GetChi2();
     fQ[iEntry] = part.GetQ();
@@ -617,11 +662,12 @@ KFParticleSIMD::KFParticleSIMD(KFParticle& part) : KFParticleBaseSIMD()
     fDaughterIds.push_back(part.DaughterIds()[i]);
   }
 
-  for (int i = 0; i < 8; ++i)
+  for (int i = 0; i < 8; ++i) {
     fP[i] = part.Parameters()[i];
-  for (int i = 0; i < 36; ++i)
+  }
+  for (int i = 0; i < 36; ++i) {
     fC[i] = part.CovarianceMatrix()[i];
-
+  }
 #ifdef NonhomogeneousField
   fField = KFParticleFieldRegion(part.GetFieldCoeff());
 #endif
@@ -793,8 +839,9 @@ float_v KFParticleSIMD::GetDeviationFromParticleXY(const KFParticleSIMD& p) cons
   MultQSQt(F2, p.fC, V0Tmp, 6);
   MultQSQt(F3, fC, V1Tmp, 6);
 
-  for (int iC = 0; iC < 3; iC++)
+  for (int iC = 0; iC < 3; iC++) {
     mC1[iC] += V0Tmp[iC] + mC2[iC] + V1Tmp[iC];
+  }
 
   float_v d[3] = {mP2[0] - mP1[0], mP2[1] - mP1[1], mP2[2] - mP1[2]};
 
@@ -822,22 +869,25 @@ float_v KFParticleSIMD::GetDeviationFromVertexXY(const float_v vtx[], const floa
 
   if (Cv) {
     float_v VFT[3][6];
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 6; j++) {
         VFT[i][j] = 0;
         for (int k = 0; k < 3; k++) {
           VFT[i][j] += Cv[IJ(i, k)] * F1[j * 6 + k];
         }
       }
+    }
 
     float_v FVFT[6][6];
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 6; i++) {
       for (int j = 0; j < 6; j++) {
         FVFT[i][j] = 0;
         for (int k = 0; k < 3; k++) {
           FVFT[i][j] += F1[i * 6 + k] * VFT[k][j];
         }
       }
+    }
+
     mC[0] += FVFT[0][0] + Cv[0];
     mC[1] += FVFT[1][0] + Cv[1];
     mC[2] += FVFT[1][1] + Cv[2];
@@ -1028,23 +1078,26 @@ void KFParticleSIMD::GetKFParticle(KFParticle& Part, int iPart)
   Part.SetId(static_cast<int>(Id()[iPart]));
 
   Part.CleanDaughtersId();
-  for (unsigned int i = 0; i < DaughterIds().size(); i++)
+  for (unsigned int i = 0; i < DaughterIds().size(); i++) {
     Part.AddDaughterId(static_cast<int>(DaughterIds()[i][iPart]));
+  }
 
   Part.SetPDG(static_cast<int>(GetPDG()[iPart]));
 
-  for (int iP = 0; iP < 8; iP++)
+  for (int iP = 0; iP < 8; iP++) {
     Part.Parameters()[iP] = Parameters()[iP][iPart];
-  for (int iC = 0; iC < 36; iC++)
+  }
+  for (int iC = 0; iC < 36; iC++) {
     Part.CovarianceMatrix()[iC] = CovarianceMatrix()[iC][iPart];
-
+  }
   Part.NDF() = static_cast<int>(GetNDF()[iPart]);
   Part.Chi2() = GetChi2()[iPart];
   Part.Q() = GetQ()[iPart];
   Part.SetAtProductionVertex(fAtProductionVertex);
 #ifdef NonhomogeneousField
-  for (int iF = 0; iF < 10; iF++)
+  for (int iF = 0; iF < 10; iF++) {
     Part.SetFieldCoeff(fField.fField[iF][iPart], iF);
+  }
 #endif
 }
 
@@ -1055,6 +1108,7 @@ void KFParticleSIMD::GetKFParticle(KFParticle* Part, int nPart)
    ** \param[in] nPart - number of elements to be copied to the array of scalar objects
    **/
 
-  for (int i = 0; i < nPart; i++)
+  for (int i = 0; i < nPart; i++) {
     GetKFParticle(Part[i], i);
+  }
 }

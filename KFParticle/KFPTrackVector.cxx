@@ -39,14 +39,16 @@ void KFPTrackVector::SetParameter(const float_v& value, int iP, int iTr)
   //     (reinterpret_cast<float_v&>(fP[iP][iTr])).gather(reinterpret_cast<const float*>(&value), index, float_m(index<(Size() - iTr)));
   //   }
 
-  if ((iTr + float_vLen) < Size())
+  if (iTr + float_vLen < Size()) {
     reinterpret_cast<float_v&>(fP[iP][iTr]) = value;
-  else
+  } else {
     for (int i = 0; i < float_v::Size; i++) {
-      if (iTr + i >= Size())
+      if (iTr + i >= Size()) {
         continue;
+      }
       fP[iP][iTr + i] = value[i];
     }
+  }
 }
 void KFPTrackVector::SetCovariance(const float_v& value, int iC, int iTr)
 {
@@ -65,14 +67,16 @@ void KFPTrackVector::SetCovariance(const float_v& value, int iC, int iTr)
   //     (reinterpret_cast<float_v&>(fC[iC][iTr])).gather(reinterpret_cast<const float*>(&value), index, float_m(index<(Size() - iTr)));
   //   }
 
-  if ((iTr + float_vLen) < Size())
+  if (iTr + float_vLen < Size()) {
     reinterpret_cast<float_v&>(fC[iC][iTr]) = value;
-  else
+  } else {
     for (int i = 0; i < float_v::Size; i++) {
-      if (iTr + i >= Size())
+      if (iTr + i >= Size()) {
         continue;
+      }
       fC[iC][iTr + i] = value[i];
     }
+  }
 }
 
 void KFPTrackVector::Resize(const int n)
@@ -80,13 +84,16 @@ void KFPTrackVector::Resize(const int n)
   /** Resizes all vectors in the class to a given value.
    ** \param[in] n - new size of the vector
    **/
-  for (int i = 0; i < 6; i++)
+  for (int i = 0; i < 6; i++) {
     fP[i].resize(n);
-  for (int i = 0; i < 21; i++)
+  }
+  for (int i = 0; i < 21; i++) {
     fC[i].resize(n);
+  }
 #ifdef NonhomogeneousField
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < 10; i++) {
     fField[i].resize(n);
+  }
 #endif
   //     fChi2.resize(n);
   //     fNDF.resize(n);
@@ -106,13 +113,16 @@ void KFPTrackVector::Set(KFPTrackVector& v, int vSize, int offset)
    ** \param[in] offset - offset position in the current object, starting from which input tracks will be stored
    **/
   for (int iV = 0; iV < vSize; iV++) {
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 6; i++) {
       fP[i][offset + iV] = v.fP[i][iV];
-    for (int i = 0; i < 21; i++)
+    }
+    for (int i = 0; i < 21; i++) {
       fC[i][offset + iV] = v.fC[i][iV];
+    }
 #ifdef NonhomogeneousField
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 10; i++) {
       fField[i][offset + iV] = v.fField[i][iV];
+    }
 #endif
     //       fChi2[offset+iV] = v.fChi2[iV];
     //       fNDF[offset+iV] = v.fNDF[iV];
@@ -131,8 +141,9 @@ void KFPTrackVector::SetTracks(const KFPTrackVector& track, const kfvector_uint&
    ** \param[in] trackIndex - indices of tracks in a vector "track", which should be stored to the current object
    ** \param[in] nIndexes - number of tracks to be copied, defines the new size of the current object
    **/
-  if (nIndexes == 0)
+  if (nIndexes == 0) {
     return;
+  }
 
   Resize(nIndexes);
 
@@ -235,16 +246,18 @@ void KFPTrackVector::GetTrack(KFPTrack& track, const int n)
    ** \param[in] n - index of the track to be copied
    **/
   track.SetParameters(fP[0][n], fP[1][n], fP[2][n], fP[3][n], fP[4][n], fP[5][n]);
-  for (int i = 0; i < 21; i++)
+  for (int i = 0; i < 21; i++) {
     track.SetCovariance(i, fC[i][n]);
+  }
   //     track.SetChi2(fChi2[n]);
   //     track.SetNDF(fNDF[n]);
   track.SetId(fId[n]);
   track.SetCharge(fQ[n]);
 
 #ifdef NonhomogeneousField
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < 10; i++) {
     track.SetFieldCoeff(fField[i][n], i);
+  }
 #endif
 }
 
@@ -286,8 +299,9 @@ void KFPTrackVector::RotateXY(float_v alpha, int firstElement)
   py = pxInit * cA - pyInit * sA;
 
   float_v cov[21];
-  for (int iC = 0; iC < 21; iC++)
+  for (int iC = 0; iC < 21; iC++) {
     cov[iC] = reinterpret_cast<const float_v&>(fC[iC][firstElement]);
+  }
 
   reinterpret_cast<float_v&>(fC[0][firstElement]) = cA * cA * cov[2] + 2 * cA * cov[1] * sA + cov[0] * sA * sA;
 
@@ -322,12 +336,14 @@ void KFPTrackVector::PrintTrack(int n)
   /** Prints parameters of the track with index "n".
    ** \param[in] n - index of track to be printed
    **/
-  for (int i = 0; i < 6; i++)
+  for (int i = 0; i < 6; i++) {
     std::cout << fP[i][n] << " ";
+  }
   std::cout << std::endl;
 
-  for (int i = 0; i < 21; i++)
+  for (int i = 0; i < 21; i++) {
     std::cout << fC[i][n] << " ";
+  }
   std::cout << std::endl;
 
   std::cout << fId[n] << " " << fPDG[n] << " " << fQ[n] << " " << fPVIndex[n] << " " << fNPixelHits[n] << std::endl;
@@ -338,56 +354,65 @@ void KFPTrackVector::Print()
   /** Prints all field of the current object. **/
 
   std::cout << "NTracks " << Size() << std::endl;
-  if (Size() == 0)
+  if (Size() == 0) {
     return;
+  }
 
   std::cout << "Parameters: " << std::endl;
   for (int iP = 0; iP < 6; iP++) {
     std::cout << "  iP " << iP << ": ";
-    for (int iTr = 0; iTr < Size(); iTr++)
+    for (int iTr = 0; iTr < Size(); iTr++) {
       std::cout << Parameter(iP)[iTr] << " ";
+    }
     std::cout << std::endl;
   }
 
   std::cout << "Cov matrix: " << std::endl;
   for (int iC = 0; iC < 21; iC++) {
     std::cout << "  iC " << iC << ": ";
-    for (int iTr = 0; iTr < Size(); iTr++)
+    for (int iTr = 0; iTr < Size(); iTr++) {
       std::cout << Covariance(iC)[iTr] << " ";
+    }
     std::cout << std::endl;
   }
 
   std::cout << "Id: " << std::endl;
-  for (int iTr = 0; iTr < Size(); iTr++)
+  for (int iTr = 0; iTr < Size(); iTr++) {
     std::cout << Id()[iTr] << " ";
+  }
   std::cout << std::endl;
 
   std::cout << "Pdg: " << std::endl;
-  for (int iTr = 0; iTr < Size(); iTr++)
+  for (int iTr = 0; iTr < Size(); iTr++) {
     std::cout << PDG()[iTr] << " ";
+  }
   std::cout << std::endl;
 
   std::cout << "Q: " << std::endl;
-  for (int iTr = 0; iTr < Size(); iTr++)
+  for (int iTr = 0; iTr < Size(); iTr++) {
     std::cout << Q()[iTr] << " ";
+  }
   std::cout << std::endl;
 
   std::cout << "PV index: " << std::endl;
-  for (int iTr = 0; iTr < Size(); iTr++)
+  for (int iTr = 0; iTr < Size(); iTr++) {
     std::cout << PVIndex()[iTr] << " ";
+  }
   std::cout << std::endl;
 
   std::cout << "fNPixelHits: " << std::endl;
-  for (int iTr = 0; iTr < Size(); iTr++)
+  for (int iTr = 0; iTr < Size(); iTr++) {
     std::cout << NPixelHits()[iTr] << " ";
+  }
   std::cout << std::endl;
 
 #ifdef NonhomogeneousField
   std::cout << "Field: " << std::endl;
   for (int iF = 0; iF < 6; iF++) {
     std::cout << "  iF " << iF << ": ";
-    for (int iTr = 0; iTr < Size(); iTr++)
+    for (int iTr = 0; iTr < Size(); iTr++) {
       std::cout << FieldCoefficient(iF)[iTr] << " ";
+    }
     std::cout << std::endl;
   }
 #endif

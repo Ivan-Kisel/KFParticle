@@ -63,8 +63,9 @@ void KFParticle::Create(const float Param[], const float Cov[], Int_t Charge, fl
    ** \param[in] mass - the mass hypothesis
    **/
   float C[21];
-  for (int i = 0; i < 21; i++)
+  for (int i = 0; i < 21; i++) {
     C[i] = Cov[i];
+  }
 
   KFParticleBase::Initialize(Param, C, Charge, mass);
 }
@@ -86,11 +87,13 @@ void KFParticle::Create(const Double_t Param[], const Double_t Cov[], Int_t Char
    ** \param[in] mass - the mass hypothesis
    **/
   float P[6];
-  for (int i = 0; i < 6; i++)
+  for (int i = 0; i < 6; i++) {
     P[i] = Param[i];
+  }
   float C[21];
-  for (int i = 0; i < 21; i++)
+  for (int i = 0; i < 21; i++) {
     C[i] = Cov[i];
+  }
 
   KFParticleBase::Initialize(P, C, Charge, mass);
 }
@@ -114,8 +117,9 @@ KFParticle::KFParticle(const KFPTrack& track, const int PID) : KFParticleBase()
   fNDF = track.GetNDF();
   SetPDG(PID);
 #ifdef NonhomogeneousField
-  for (int iF = 0; iF < 10; iF++)
+  for (int iF = 0; iF < 10; iF++) {
     SetFieldCoeff(track.GetFieldCoeff()[iF], iF);
+  }
 #endif
 }
 
@@ -309,10 +313,11 @@ float KFParticle::GetDeviationFromVertexXY(const float vtx[], const float Cv[]) 
 
   float val, err;
   Bool_t problem = GetDistanceFromVertexXY(vtx, Cv, val, err);
-  if (problem || err < 1.e-20)
+  if (problem || err < 1.e-20) {
     return 1.e4;
-  else
+  } else {
     return val / err;
+  }
 }
 
 float KFParticle::GetDeviationFromVertexXY(const KFParticle& Vtx) const
@@ -358,12 +363,14 @@ void KFParticle::GetParametersAtPoint(const float* point, const float* pointCov,
   Transport(dS, dsdr, m, mV, dsdp, F, F1);
 
   float V1Tmp[36];
-  for (int i = 0; i < 36; i++)
+  for (int i = 0; i < 36; i++) {
     V1Tmp[i] = 0.f;
+  }
   KFParticle::MultQSQt(F1, pointCov, V1Tmp, 6);
 
-  for (int iC = 0; iC < 21; iC++)
+  for (int iC = 0; iC < 21; iC++) {
     mV[iC] += V1Tmp[iC];
+  }
 }
 
 float KFParticle::GetAngle(const KFParticle& p) const
@@ -382,12 +389,14 @@ float KFParticle::GetAngle(const KFParticle& p) const
   float n1 = sqrt(mP1[3] * mP1[3] + mP1[4] * mP1[4] + mP1[5] * mP1[5]);
   n *= n1;
   float a = 0;
-  if (n > 1.e-8)
+  if (n > 1.e-8) {
     a = (mP[3] * mP1[3] + mP[4] * mP1[4] + mP[5] * mP1[5]) / n;
-  if (fabs(a) < 1.)
+  }
+  if (fabs(a) < 1.) {
     a = acos(a);
-  else
+  } else {
     a = (a >= 0) ? 0 : 3.14;
+  }
   return a;
 }
 
@@ -407,12 +416,14 @@ float KFParticle::GetAngleXY(const KFParticle& p) const
   float n1 = sqrt(mP1[3] * mP1[3] + mP1[4] * mP1[4]);
   n *= n1;
   float a = 0;
-  if (n > 1.e-8)
+  if (n > 1.e-8) {
     a = (mP[3] * mP1[3] + mP[4] * mP1[4]) / n;
-  if (fabs(a) < 1.)
+  }
+  if (fabs(a) < 1.) {
     a = acos(a);
-  else
+  } else {
     a = (a >= 0) ? 0 : 3.14;
+  }
   return a;
 }
 
@@ -434,12 +445,14 @@ float KFParticle::GetAngleRZ(const KFParticle& p) const
   float n1 = sqrt(n1r * n1r + mP1[5] * mP1[5]);
   n *= n1;
   float a = 0;
-  if (n > 1.e-8)
+  if (n > 1.e-8) {
     a = (nr * n1r + mP[5] * mP1[5]) / n;
-  if (fabs(a) < 1.)
+  }
+  if (fabs(a) < 1.) {
     a = acos(a);
-  else
+  } else {
     a = (a >= 0) ? 0 : 3.14;
+  }
   return a;
 }
 
