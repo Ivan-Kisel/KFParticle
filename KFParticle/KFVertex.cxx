@@ -19,28 +19,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "KFVertex.h"
 
 #ifndef KFParticleStandalone
 ClassImp(KFVertex);
 #endif
 
-KFVertex::KFVertex( const KFPVertex &vertex ): fIsConstrained(0)
+KFVertex::KFVertex(const KFPVertex& vertex) : fIsConstrained(0)
 {
   /** Constructor from KFPVertex. **/
 
-  vertex.GetXYZ( fP );
-  vertex.GetCovarianceMatrix( fC );  
-  fChi2 = vertex.GetChi2();  
-  fNDF = 2*vertex.GetNContributors() - 3;
+  vertex.GetXYZ(fP);
+  vertex.GetCovarianceMatrix(fC);
+  fChi2 = vertex.GetChi2();
+  fNDF = 2 * vertex.GetNContributors() - 3;
   fQ = 0;
   fAtProductionVertex = 0;
   fSFromDecay = 0;
 }
 
-void KFVertex::SetBeamConstraint( float x, float y, float z, 
-                                  float errX, float errY, float errZ )
+void KFVertex::SetBeamConstraint(float x, float y, float z,
+                                 float errX, float errY, float errZ)
 {
   /** Sets a soft beam constraint on the vertex position.
    ** \param[in] x, y, z - coordinates of the constraint
@@ -49,12 +48,12 @@ void KFVertex::SetBeamConstraint( float x, float y, float z,
   fP[0] = x;
   fP[1] = y;
   fP[2] = z;
-  fC[0] = errX*errX;
+  fC[0] = errX * errX;
   fC[1] = 0;
-  fC[2] = errY*errY;
+  fC[2] = errY * errY;
   fC[3] = 0;
   fC[4] = 0;
-  fC[5] = errZ*errZ;
+  fC[5] = errZ * errZ;
   fIsConstrained = 1;
 }
 
@@ -64,9 +63,9 @@ void KFVertex::SetBeamConstraintOff()
   fIsConstrained = 0;
 }
 
-void KFVertex::ConstructPrimaryVertex( const KFParticle *vDaughters[], 
-                                       int nDaughters, Bool_t vtxFlag[],
-                                       float ChiCut  )
+void KFVertex::ConstructPrimaryVertex(const KFParticle* vDaughters[],
+                                      int nDaughters, Bool_t vtxFlag[],
+                                      float ChiCut)
 {
   /** Reconstructs the primary vertex from a set of particles. Reconstruction is 
    ** parformed in three steps:\n
@@ -82,67 +81,73 @@ void KFVertex::ConstructPrimaryVertex( const KFParticle *vDaughters[],
    ** seed, by default the cut is set to 3.5
    **/
 
-  if( nDaughters<2 ) return;
-  float constrP[3]={fP[0], fP[1], fP[2]};
-  float constrC[6]={fC[0], fC[1], fC[2], fC[3], fC[4], fC[5]};
+  if (nDaughters < 2)
+    return;
+  float constrP[3] = {fP[0], fP[1], fP[2]};
+  float constrC[6] = {fC[0], fC[1], fC[2], fC[3], fC[4], fC[5]};
 
-  Construct( vDaughters, nDaughters, 0, -1 );
+  Construct(vDaughters, nDaughters, 0, -1);
 
-//   SetVtxGuess( fVtxGuess[0], fVtxGuess[1], fVtxGuess[2] );
+  //   SetVtxGuess( fVtxGuess[0], fVtxGuess[1], fVtxGuess[2] );
 
-  for( int i=0; i<nDaughters; i++ ) vtxFlag[i] = 1;
+  for (int i = 0; i < nDaughters; i++)
+    vtxFlag[i] = 1;
 
   Int_t nRest = nDaughters;
-//   while( nRest>2 )
-//   {    
-//     float worstChi = 0.;
-//     Int_t worstDaughter = 0;
-//     for( Int_t it=0; it<nDaughters; it++ ){
-//       if( !vtxFlag[it] ) continue;        
-//       const KFParticle &p = *(vDaughters[it]);
-//       //KFVertex tmp = *this - p;
-//       //float chi = p.GetDeviationFromVertex( tmp );      
-//       float chi = p.GetDeviationFromVertex( *this );      
-//       if( worstChi < chi ){
-//         worstChi = chi;
-//         worstDaughter = it;
-//       }
-//     }
-//     if( worstChi < ChiCut ) break;
-//       std::cout <<"worst 1 " <<  worstDaughter << " " << worstChi << std::endl;
-//     vtxFlag[worstDaughter] = 0;    
-//     //*this -= *(vDaughters[worstDaughter]);
-//     nRest--;
-//   } 
+  //   while( nRest>2 )
+  //   {
+  //     float worstChi = 0.;
+  //     Int_t worstDaughter = 0;
+  //     for( Int_t it=0; it<nDaughters; it++ ){
+  //       if( !vtxFlag[it] ) continue;
+  //       const KFParticle &p = *(vDaughters[it]);
+  //       //KFVertex tmp = *this - p;
+  //       //float chi = p.GetDeviationFromVertex( tmp );
+  //       float chi = p.GetDeviationFromVertex( *this );
+  //       if( worstChi < chi ){
+  //         worstChi = chi;
+  //         worstDaughter = it;
+  //       }
+  //     }
+  //     if( worstChi < ChiCut ) break;
+  //       std::cout <<"worst 1 " <<  worstDaughter << " " << worstChi << std::endl;
+  //     vtxFlag[worstDaughter] = 0;
+  //     //*this -= *(vDaughters[worstDaughter]);
+  //     nRest--;
+  //   }
 
-  for( Int_t it=0; it<nDaughters; it++ ){
-    const KFParticle &p = *(vDaughters[it]);
-    float chi = p.GetDeviationFromVertex( *this );      
-    if( chi >= ChiCut ){
-      vtxFlag[it] = 0;    
+  for (Int_t it = 0; it < nDaughters; it++) {
+    const KFParticle& p = *(vDaughters[it]);
+    float chi = p.GetDeviationFromVertex(*this);
+    if (chi >= ChiCut) {
+      vtxFlag[it] = 0;
       nRest--;
     }
   }
 
-  if( nRest>=2 ) {// final refit     
-//     SetVtxGuess( fP[0], fP[1], fP[2] );
-    if( fIsConstrained ){
+  if (nRest >= 2) { // final refit
+                    //     SetVtxGuess( fP[0], fP[1], fP[2] );
+    if (fIsConstrained) {
       fP[0] = constrP[0];
       fP[1] = constrP[1];
       fP[2] = constrP[2];
-      for( int i=0; i<6; i++ ) fC[i] = constrC[i];
+      for (int i = 0; i < 6; i++)
+        fC[i] = constrC[i];
     }
-    int nDaughtersNew=0;
-    const KFParticle **vDaughtersNew=new const KFParticle *[nDaughters];
-    for( int i=0; i<nDaughters; i++ ){
-      if( vtxFlag[i] )  vDaughtersNew[nDaughtersNew++] = vDaughters[i];
+    int nDaughtersNew = 0;
+    const KFParticle** vDaughtersNew = new const KFParticle*[nDaughters];
+    for (int i = 0; i < nDaughters; i++) {
+      if (vtxFlag[i])
+        vDaughtersNew[nDaughtersNew++] = vDaughters[i];
     }
-    Construct( vDaughtersNew, nDaughtersNew, 0, -1 );
-    if (vDaughtersNew) delete[] vDaughtersNew;
+    Construct(vDaughtersNew, nDaughtersNew, 0, -1);
+    if (vDaughtersNew)
+      delete[] vDaughtersNew;
   }
 
-  if( nRest<=2 && GetChi2() > ChiCut*ChiCut*GetNDF() ) {
-    for( int i=0; i<nDaughters; i++ ) vtxFlag[i] = 0;
+  if (nRest <= 2 && GetChi2() > ChiCut * ChiCut * GetNDF()) {
+    for (int i = 0; i < nDaughters; i++)
+      vtxFlag[i] = 0;
     fNDF = -3;
     fChi2 = 0;
   }
