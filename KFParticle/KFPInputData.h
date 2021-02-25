@@ -91,8 +91,9 @@ class KFPInputData
      ** \param[in] prefix - string with the name of the input file
      **/
     std::ifstream ifile(prefix.data());
-    if (!ifile.is_open())
+    if (!ifile.is_open()) {
       return 0;
+    }
     int nSets;
     ifile >> fBz;
     ifile >> nSets;
@@ -154,11 +155,12 @@ class KFPInputData
     ifile >> nPV;
     fPV.resize(nPV);
     for (unsigned int iPV = 0; iPV < fPV.size(); iPV++) {
-      for (int iP = 0; iP < 3; iP++)
+      for (int iP = 0; iP < 3; iP++) {
         ifile >> fPV[iPV].Parameter(iP);
-
-      for (int iC = 0; iC < 6; iC++)
+      }
+      for (int iC = 0; iC < 6; iC++) {
         ifile >> fPV[iPV].Covariance(iC);
+      }
     }
 
     ifile.close();
@@ -172,12 +174,14 @@ class KFPInputData
      ** \param[out] dataSize - size of the stored memory in "int" (or bloks of 4 bytes, or 32 bits)
      **/
     dataSize = NInputSets + 1 + 1; //sizes of the track vectors and pv vector, and field
-    for (int iSet = 0; iSet < NInputSets; iSet++)
+    for (int iSet = 0; iSet < NInputSets; iSet++) {
       dataSize += fTracks[iSet].DataSize();
+    }
     dataSize += fPV.size() * 9;
 
-    for (int iSet = 0; iSet < NInputSets; iSet++)
+    for (int iSet = 0; iSet < NInputSets; iSet++) {
       data[iSet] = fTracks[iSet].Size();
+    }
     data[NInputSets] = fPV.size();
 
     float& field = reinterpret_cast<float&>(data[NInputSets + 1]);
@@ -185,8 +189,9 @@ class KFPInputData
 
     int offset = NInputSets + 2;
 
-    for (int iSet = 0; iSet < NInputSets; iSet++)
+    for (int iSet = 0; iSet < NInputSets; iSet++) {
       fTracks[iSet].SetDataToVector(data, offset);
+    }
 
     for (int iP = 0; iP < 3; iP++) {
       for (unsigned int iPV = 0; iPV < fPV.size(); iPV++) {
@@ -241,28 +246,33 @@ class KFPInputData
   void Print()
   {
     /**Prints all fields of the current object.*/
-    for (int iSet = 0; iSet < NInputSets; iSet++)
+    for (int iSet = 0; iSet < NInputSets; iSet++) {
       fTracks[iSet].Print();
+    }
     std::cout << "N PV: " << fPV.size() << std::endl;
 
     std::cout << "X: ";
-    for (unsigned int iPV = 0; iPV < fPV.size(); iPV++)
+    for (unsigned int iPV = 0; iPV < fPV.size(); iPV++) {
       std::cout << fPV[iPV].X() << " ";
+    }
     std::cout << std::endl;
     std::cout << "Y: ";
-    for (unsigned int iPV = 0; iPV < fPV.size(); iPV++)
+    for (unsigned int iPV = 0; iPV < fPV.size(); iPV++) {
       std::cout << fPV[iPV].Y() << " ";
+    }
     std::cout << std::endl;
     std::cout << "Z: ";
-    for (unsigned int iPV = 0; iPV < fPV.size(); iPV++)
+    for (unsigned int iPV = 0; iPV < fPV.size(); iPV++) {
       std::cout << fPV[iPV].Z() << " ";
+    }
     std::cout << std::endl;
 
     std::cout << "Cov matrix: " << std::endl;
     for (int iC = 0; iC < 6; iC++) {
       std::cout << "  iC " << iC << ":  ";
-      for (unsigned int iPV = 0; iPV < fPV.size(); iPV++)
+      for (unsigned int iPV = 0; iPV < fPV.size(); iPV++) {
         std::cout << fPV[iPV].Covariance(iC) << " ";
+      }
       std::cout << std::endl;
     }
 
@@ -276,8 +286,9 @@ class KFPInputData
   const KFPInputData& operator=(const KFPInputData& data)
   {
     /** Copies input data from object "data" to the current object. Returns the current object. \param[in] data - input data*/
-    for (int i = 0; i < NInputSets; i++)
+    for (int i = 0; i < NInputSets; i++) {
       fTracks[i] = data.fTracks[i];
+    }
     fPV = data.fPV;
     fBz = data.fBz;
 
@@ -286,8 +297,9 @@ class KFPInputData
   KFPInputData(const KFPInputData& data) : fPV(0), fBz(0.f)
   {
     /** Copies input data from object "data" to the current object. \param[in] data - input data */
-    for (int i = 0; i < NInputSets; i++)
+    for (int i = 0; i < NInputSets; i++) {
       fTracks[i] = data.fTracks[i];
+    }
     fPV = data.fPV;
     fBz = data.fBz;
   }
@@ -323,8 +335,9 @@ struct KFPInputDataArray {
   KFPInputDataArray() : fInput(0){};
   virtual ~KFPInputDataArray()
   {
-    if (fInput)
+    if (fInput) {
       delete[] fInput;
+    }
   }
 
   KFPInputData* fInput; ///< Pointer to the array of the input data objects.
