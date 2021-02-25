@@ -32,7 +32,7 @@ KFVertex::KFVertex(const KFPVertex& vertex) : fIsConstrained(0)
   vertex.GetXYZ(fP);
   vertex.GetCovarianceMatrix(fC);
   fChi2 = vertex.GetChi2();
-  fNDF = 2 * vertex.GetNContributors() - 3;
+  fNDF = vertex.GetNDF();
   fQ = 0;
   fAtProductionVertex = 0;
   fSFromDecay = 0;

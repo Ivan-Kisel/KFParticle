@@ -149,7 +149,7 @@ class KFParticleSIMD : public KFParticleBaseSIMD
   float_v GetS() const;    ///< Returns dS=l/p, l - decay length, fP[7], defined if production vertex is set.
   int_v GetQ() const;      ///< Returns charge of the particle.
   float_v GetChi2() const; ///< Returns Chi2 of the fit.
-  int_v GetNDF() const;    ///< Returns number of decrease of freedom.
+  int_v GetNDF() const;    ///< Returns number of degrees of freedom.
 
   Bool_t GetAtProductionVertex() const { return fAtProductionVertex; } ///< Returns a flag which shows if the particle is located at the production point
 

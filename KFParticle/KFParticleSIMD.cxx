@@ -542,7 +542,7 @@ KFParticleSIMD::KFParticleSIMD(const KFPVertex& vertex) : KFParticleBaseSIMD()
     fC[i] = C[i];
   }
   fChi2 = vertex.GetChi2();
-  fNDF = 2 * vertex.GetNContributors() - 3;
+  fNDF = vertex.GetNDF();
   fQ = int_v(Vc::Zero);
   fAtProductionVertex = 0;
   fSFromDecay = 0;

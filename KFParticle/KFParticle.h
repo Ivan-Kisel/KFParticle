@@ -113,7 +113,7 @@ class KFParticle : public KFParticleBase
   float GetS() const;    ///< Returns dS=l/p, l - decay length, fP[7], defined if production vertex is set.
   char GetQ() const;     ///< Returns charge of the particle.
   float GetChi2() const; ///< Returns Chi2 of the fit.
-  Int_t GetNDF() const;  ///< Returns number of decrease of freedom.
+  Int_t GetNDF() const;  ///< Returns number of degrees of freedom.
 
   Bool_t GetAtProductionVertex() const { return fAtProductionVertex; } ///< Returns a flag which shows if the particle is located at the production point
   void SetAtProductionVertex(Bool_t b) { fAtProductionVertex = b; }    ///< Set a flag that particle is at the production point
