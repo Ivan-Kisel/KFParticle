@@ -42,88 +42,84 @@
 class KFPEmcCluster
 {
  public:
-  KFPEmcCluster():fP(), fC(), fId() { }
-  virtual ~KFPEmcCluster() { }
+  KFPEmcCluster() : fP(), fC(), fId() {}
+  virtual ~KFPEmcCluster() {}
 
   /**Returns size of the vectors. All data vectors have the same size. */
   int Size() const { return fP[0].size(); }
-  
+
   void Resize(const int n);
   void Set(KFPEmcCluster& v, int vSize, int offset);
   void SetTracks(const KFPEmcCluster& track, const kfvector_uint& trackIndex, const int nIndexes);
-  
-  const kfvector_float& X()  const { return fP[0]; } ///< Returns constant reference to the vector with X coordinates.
-  const kfvector_float& Y()  const { return fP[1]; } ///< Returns constant reference to the vector with Y coordinates.
-  const kfvector_float& Z()  const { return fP[2]; } ///< Returns constant reference to the vector with Z coordinates.
-  const kfvector_float& E() const { return fP[3]; }  ///< Returns constant reference to the vector with energy of the cluster.
 
-  const kfvector_float& Parameter(const int i)  const { return fP[i]; }  ///< Returns constant reference to the parameter vector with index "i".
-  const kfvector_float& Covariance(const int i)  const { return fC[i]; } ///< Returns constant reference to the vector of the covariance matrix elements with index "i".
-  const kfvector_int& Id()    const { return fId; }                      ///< Returns constant reference to the vector with unique id of the clusters.
+  const kfvector_float& X() const { return fP[0]; } ///< Returns constant reference to the vector with X coordinates.
+  const kfvector_float& Y() const { return fP[1]; } ///< Returns constant reference to the vector with Y coordinates.
+  const kfvector_float& Z() const { return fP[2]; } ///< Returns constant reference to the vector with Z coordinates.
+  const kfvector_float& E() const { return fP[3]; } ///< Returns constant reference to the vector with energy of the cluster.
 
-  //modifiers 
-  void SetParameter (float value, int iP, int iTr) { fP[iP][iTr] = value; } ///< Sets the "value" of the parameter "iP" of the cluster with index "iTr".
+  const kfvector_float& Parameter(const int i) const { return fP[i]; }  ///< Returns constant reference to the parameter vector with index "i".
+  const kfvector_float& Covariance(const int i) const { return fC[i]; } ///< Returns constant reference to the vector of the covariance matrix elements with index "i".
+  const kfvector_int& Id() const { return fId; }                        ///< Returns constant reference to the vector with unique id of the clusters.
+
+  //modifiers
+  void SetParameter(float value, int iP, int iTr) { fP[iP][iTr] = value; }  ///< Sets the "value" of the parameter "iP" of the cluster with index "iTr".
   void SetCovariance(float value, int iC, int iTr) { fC[iC][iTr] = value; } ///< Sets the "value" of the element of covariance matrix "iC" of the cluster with index "iTr".
 
-  void SetParameter (const float_v& value, int iP, int iTr);  
+  void SetParameter(const float_v& value, int iP, int iTr);
   void SetCovariance(const float_v& value, int iC, int iTr);
 
-  void SetId        (int value, int iTr)           { fId[iTr] = value; } ///< Sets the "value" of the id of the cluster with index "iTr".
-  
+  void SetId(int value, int iTr) { fId[iTr] = value; } ///< Sets the "value" of the id of the cluster with index "iTr".
+
   void PrintTrack(int n);
   void PrintTracks();
-  
-  KFPEmcCluster(const KFPEmcCluster& clusters): fId()
+
+  KFPEmcCluster(const KFPEmcCluster& clusters) : fId()
   {
     /** Copy-constructor. Makes one-to-one copy.*/
     const int localSize = clusters.Size();
-    
-    for(int i=0; i<4; i++)
-    {
+
+    for (int i = 0; i < 4; i++) {
       fP[i].resize(localSize);
-      for(int n=0; n<localSize; n++)
+      for (int n = 0; n < localSize; n++)
         fP[i][n] = clusters.fP[i][n];
     }
 
-    for(int i=0; i<10; i++)
-    {
+    for (int i = 0; i < 10; i++) {
       fC[i].resize(localSize);
-      for(int n=0; n<localSize; n++)
+      for (int n = 0; n < localSize; n++)
         fC[i][n] = clusters.fC[i][n];
     }
-    
+
     fId.resize(localSize);
-    for(int n=0; n<localSize; n++)
-      fId[n] = clusters.fId[n];    
+    for (int n = 0; n < localSize; n++)
+      fId[n] = clusters.fId[n];
   }
-  
-  const KFPEmcCluster& operator = (const KFPEmcCluster& clusters)
+
+  const KFPEmcCluster& operator=(const KFPEmcCluster& clusters)
   {
     /** Operator to copy one KFPEmcCluster object to another. Makes one-to-one copy.*/
     const int localSize = clusters.Size();
-    
-    for(int i=0; i<4; i++)
-    {
+
+    for (int i = 0; i < 4; i++) {
       fP[i].resize(localSize);
-      for(int n=0; n<localSize; n++)
+      for (int n = 0; n < localSize; n++)
         fP[i][n] = clusters.fP[i][n];
     }
 
-    for(int i=0; i<10; i++)
-    {
+    for (int i = 0; i < 10; i++) {
       fC[i].resize(localSize);
-      for(int n=0; n<localSize; n++)
+      for (int n = 0; n < localSize; n++)
         fC[i][n] = clusters.fC[i][n];
     }
-    
+
     fId.resize(localSize);
-    for(int n=0; n<localSize; n++)
+    for (int n = 0; n < localSize; n++)
       fId[n] = clusters.fId[n];
-    
+
     return *this;
   }
-  
- private:  
+
+ private:
   kfvector_float fP[4];  ///< Coordinates of the cluster and energy: X, Y, Z, E.
   kfvector_float fC[10]; ///< Covariance matrix of the parameters of the cluster.
 
