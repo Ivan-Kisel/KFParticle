@@ -21,10 +21,10 @@
 
 #include "KFPVertex.h"
 
-KFPVertex::KFPVertex():fChi2(-1.f), fNContributors(0), fNDF(-1)  
-{ 
-  for(int iP=0; iP<3; iP++)
+KFPVertex::KFPVertex() : fChi2(-1.f), fNContributors(0), fNDF(-1)
+{
+  for (int iP = 0; iP < 3; iP++)
     fP[iP] = 0;
-  for(int iC=0; iC<6; iC++)
+  for (int iC = 0; iC < 6; iC++)
     fC[iC] = 0;
 }

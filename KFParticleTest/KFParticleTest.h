@@ -28,26 +28,23 @@ class KFParticleSIMD;
 class KFParticleTest
 {
  public:
-  
   KFParticleTest();
   ~KFParticleTest();
-  
+
   void PrintTutorial();
   void RunTest();
-  
+
  private:
-   
   void RunTestSingle();
   void RunTestSIMD();
   void CompareSingleAndSIMDResults();
-  
+
   KFParticle* fMotherSingle;
   KFParticleSIMD* fMotherSIMD;
-  
+
 #ifndef KFParticleStandalone
-  ClassDef( KFParticleTest, 1 )
+  ClassDef(KFParticleTest, 1)
 #endif
 };
 
 #endif //KFParticleTest_H
-

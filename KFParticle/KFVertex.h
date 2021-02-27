@@ -19,7 +19,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef KFVERTEX_H
 #define KFVERTEX_H
 
@@ -39,35 +38,31 @@
 class KFVertex : public KFParticle
 {
  public:
+  KFVertex() : KFParticle(), fIsConstrained(0) {}
+  KFVertex(const KFParticle& particle) : KFParticle(particle), fIsConstrained(0) {} ///< Vertex is constructed from the current position of a given particle.
+  KFVertex(const KFPVertex& vertex);
+  virtual ~KFVertex() {}
 
-  KFVertex():KFParticle(),fIsConstrained(0){ } 
-  KFVertex( const KFParticle &particle ): KFParticle(particle), fIsConstrained(0) {} ///< Vertex is constructed from the current position of a given particle.
-  KFVertex( const KFPVertex &vertex );
-  virtual ~KFVertex(){}
+  Int_t GetNContributors() const { return fIsConstrained ? fNDF / 2 : (fNDF + 3) / 2; } ///< Returns number of particles used for construction of the vertex.
 
-  Int_t GetNContributors() const { return fIsConstrained ?fNDF/2:(fNDF+3)/2; } ///< Returns number of particles used for construction of the vertex.
+  void operator+=(const KFParticle& Daughter);          ///< Adds particle to a vertex.
+  KFVertex operator-(const KFParticle& Daughter) const; ///< Subtracts particle from a vertex, returns temporary object. Initial vertex stays untouched.
+  void operator-=(const KFParticle& Daughter);          ///< Subtracts particle from a current vertex.
 
-
-  void operator +=( const KFParticle &Daughter );  ///< Adds particle to a vertex.
-  KFVertex operator -( const KFParticle &Daughter ) const; ///< Subtracts particle from a vertex, returns temporary object. Initial vertex stays untouched.
-  void operator -=( const KFParticle &Daughter );  ///< Subtracts particle from a current vertex.
-
-  void SetBeamConstraint( float X, float Y, float Z, 
-                          float ErrX, float ErrY, float ErrZ );
+  void SetBeamConstraint(float X, float Y, float Z,
+                         float ErrX, float ErrY, float ErrZ);
   void SetBeamConstraintOff();
 
-  void ConstructPrimaryVertex( const KFParticle *vDaughters[], int nDaughters,
-                               Bool_t vtxFlag[], float ChiCut=3.5  );
+  void ConstructPrimaryVertex(const KFParticle* vDaughters[], int nDaughters,
+                              Bool_t vtxFlag[], float ChiCut = 3.5);
 
  protected:
-
   Bool_t fIsConstrained; ///< Flag showing if the the beam constraint is set
-  
+
 #ifndef KFParticleStandalone
-  ClassDef( KFVertex, 2 )
+  ClassDef(KFVertex, 2)
 #endif
 };
-
 
 //---------------------------------------------------------------------
 //
@@ -75,24 +70,21 @@ class KFVertex : public KFParticle
 //
 //---------------------------------------------------------------------
 
-
-inline void KFVertex::operator+=( const KFParticle &Daughter )
+inline void KFVertex::operator+=(const KFParticle& Daughter)
 {
-  KFParticle::operator+=( Daughter );
+  KFParticle::operator+=(Daughter);
 }
-  
 
-inline void KFVertex::operator-=( const KFParticle &Daughter )
+inline void KFVertex::operator-=(const KFParticle& Daughter)
 {
-  Daughter.SubtractFromVertex( *this );
+  Daughter.SubtractFromVertex(*this);
 }
-  
-inline KFVertex KFVertex::operator-( const KFParticle &Daughter ) const 
+
+inline KFVertex KFVertex::operator-(const KFParticle& Daughter) const
 {
   KFVertex tmp = *this;
-  Daughter.SubtractFromVertex( tmp );
+  Daughter.SubtractFromVertex(tmp);
   return tmp;
 }
 
-
-#endif 
+#endif
